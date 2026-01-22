@@ -35,7 +35,7 @@ async def geocode(q: str = Query(..., min_length=2), limit: int = Query(5, ge=1,
 
     Parameters:
     - q: city name to search for (2 chars min)
-    - limit: maximum number of results to return (1–10)
+    - limit: maximum number of results to return (1...10)
 
     Returns:
     - query: original search string (what the user typed)
