@@ -1,4 +1,5 @@
 import ServerStatusPill from "./ServerStatusPill";
+import ServerStatus from "./ServerStatus";
 
 export default function Header() {
   return (
@@ -21,7 +22,7 @@ export default function Header() {
         </div>
 
         {/* Right side */}
-        <ServerStatusPill status="online" />
+        <ServerStatus />
       </div>
     </header>
   );

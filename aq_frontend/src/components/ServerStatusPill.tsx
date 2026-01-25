@@ -1,9 +1,9 @@
-type Status = "online" | "degraded" | "offline";
+export type Status = "online" | "degraded" | "offline";
 
 const dot: Record<Status, string> = {
   online: "bg-emerald-400",
   degraded: "bg-amber-400",
-  offline: "bg-rose-400",
+  offline: "bg-rose-400"
 };
 
 const label: Record<Status, string> = {

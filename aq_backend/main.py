@@ -10,6 +10,8 @@ API_KEY = os.getenv("OPENWEATHER_API_KEY")
 if not API_KEY:
     raise RuntimeError("OPENWEATHER_API_KEY missing in .env")
 
+origins = os.getenv("FRONTEND_ORIGINS", "").split(",")
+
 GEOCODE_URL = "https://api.openweathermap.org/geo/1.0/direct"
 AIR_URL = "https://api.openweathermap.org/data/2.5/air_pollution"
 
@@ -17,10 +19,7 @@ app = FastAPI(title="AQ Backend", version="0.0.1")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    ],
+    [o.strip() for o in origins if o.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
