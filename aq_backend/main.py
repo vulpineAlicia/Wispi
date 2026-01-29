@@ -30,7 +30,7 @@ def health():
     """Endpoint to verify that the server is running"""
     return {"status": "ok"}
 
-@app.get("/api/geocode")
+@app.get("/geocode")
 async def geocode(q: str = Query(..., min_length=2), limit: int = Query(5, ge=1, le=10)):
     """
     Get coordinates by location name
@@ -71,7 +71,7 @@ async def geocode(q: str = Query(..., min_length=2), limit: int = Query(5, ge=1,
     ]
     return {"query": q, "results": results}
 
-@app.get("/api/air/current")
+@app.get("/air/current")
 async def air_current(lat: float = Query(...), lon: float = Query(...)):
     """
     Get current air pollution data for location

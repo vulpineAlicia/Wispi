@@ -2,16 +2,15 @@ const year = new Date().getFullYear();
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/10 bg-brand-900 text-brand-50/90">
+    <footer id="contacts" className="border-t border-white/10 bg-brand-900 text-brand-50/90">
       <div className="mx-auto max-w-6xl px-4 py-12">
         <div className="grid gap-10 md:grid-cols-3">
           <div>
             <div className="text-lg font-semibold text-brand-50">
-              Air Quality Monitor
+              Wispi - Air Quality Monitor
             </div>
             <p className="mt-3 max-w-sm text-sm text-brand-200">
-              A simple dashboard to look up air quality, understand key pollutants,
-              and make safer daily decisions.
+              A simple dashboard to look up air quality and make safer daily decisions.
             </p>
           </div>
 
@@ -21,7 +20,6 @@ export default function Footer() {
               <li><a className="text-brand-200 transition hover:text-brand-50" href="#features">Features</a></li>
               <li><a className="text-brand-200 transition hover:text-brand-50" href="#info">Useful info</a></li>
               <li><a className="text-brand-200 transition hover:text-brand-50" href="#map">Map</a></li>
-              <li><a className="text-brand-200 transition hover:text-brand-50" href="#contacts">Contacts</a></li>
             </ul>
           </div>
 
@@ -53,7 +51,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-brand-200 md:flex-row md:items-center md:justify-between">
-          <div>© {year} Air Quality Monitor. All rights reserved.</div>
+          <div>© {year} Wispi - Air Quality Monitor. All rights reserved.</div>
           <div className="flex gap-4">
             <a className="transition hover:text-brand-50" href="#">
               Privacy

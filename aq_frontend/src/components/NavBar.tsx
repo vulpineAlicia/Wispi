@@ -2,8 +2,9 @@ import { useState } from "react";
 
 const links = [
   { label: "Look up your city", href: "#top" },
-  { label: "Map", href: "#map" },
   { label: "Features", href: "#features" },
+  { label: "Map", href: "#map" },
+  { label: "Archive", href: "#archive" },
   { label: "Useful info", href: "#info" },
   { label: "Contacts", href: "#contacts" },
 ];
