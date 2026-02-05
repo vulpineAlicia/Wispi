@@ -4,10 +4,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 const links = [
   { label: "Look up your city", to: "#top" },
   { label: "Features", to: "#features" },
-  { label: "Map", to: "#map" },
+  { label: "Map", to: "/map" },
   { label: "Archive", to: "#archive" },
   { label: "Useful info", to: "/info" },
-  { label: "Contacts", to: "#contacts" },
+  { label: "Contacts", to: "#contacts" }
 ];
 
 function isHashOnly(to: string) {
@@ -73,11 +73,11 @@ export default function NavBar() {
                 >
                   {link.label}
                 </button>
-              ) : link.to === "/info" ? (
+              ) : link.to === "/info" || link.to === "/map" ? (
                 <button
                   key={link.to}
                   type="button"
-                  onClick={() => goToRouteTop("/info")}
+                  onClick={() => goToRouteTop(link.to)}
                   className="text-brand-200 transition hover:text-brand-50"
                 >
                   {link.label}

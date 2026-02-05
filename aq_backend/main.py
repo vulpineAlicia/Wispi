@@ -1,4 +1,6 @@
 import os
+import time
+from datetime import datetime, timedelta
 import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
@@ -14,6 +16,8 @@ origins = os.getenv("FRONTEND_ORIGINS", "").split(",")
 
 GEOCODE_URL = "https://api.openweathermap.org/geo/1.0/direct"
 AIR_URL = "https://api.openweathermap.org/data/2.5/air_pollution"
+HISTORY_URL = "http://api.openweathermap.org/data/2.5/air_pollution/history"
+
 
 app = FastAPI(title="AQ Backend", version="0.0.1")
 
@@ -109,5 +113,56 @@ async def air_current(lat: float = Query(...), lon: float = Query(...)):
         "timestamp_unix": entry.get("dt"),
         "aqi_ow_1_5": (entry.get("main") or {}).get("aqi"),
         "pollutants": entry.get("components") or {},
+        "source": "openweather",
+    }
+
+@app.get("/air/history")
+async def air_history(
+    lat: float = Query(...),
+    lon: float = Query(...),
+    days: int = Query(7, ge=1, le=7),
+):
+    """
+    Get air pollution history (up to 7 days) for location.
+
+    Returns list of entries with:
+    - dt (unix timestamp)
+    - aqi (1–5)
+    - components (pollutants)
+    """
+    end_ts = int(time.time())
+    start_ts = int((datetime.utcnow() - timedelta(days=days)).timestamp())
+
+    params = {
+        "lat": lat,
+        "lon": lon,
+        "start": start_ts,
+        "end": end_ts,
+        "appid": API_KEY,
+    }
+
+    async with httpx.AsyncClient(timeout=10) as client:
+        r = await client.get(HISTORY_URL, params=params)
+
+    if r.status_code != 200:
+        raise HTTPException(status_code=502, detail="Air history provider error")
+
+    payload = r.json()
+    lst = payload.get("list") or []
+    if not lst:
+        raise HTTPException(status_code=404, detail="No air history for these coordinates")
+
+    return {
+        "location": {"lat": lat, "lon": lon},
+        "start_unix": start_ts,
+        "end_unix": end_ts,
+        "items": [
+            {
+                "timestamp_unix": item.get("dt"),
+                "aqi_ow_1_5": (item.get("main") or {}).get("aqi"),
+                "pollutants": item.get("components") or {},
+            }
+            for item in lst
+        ],
         "source": "openweather",
     }

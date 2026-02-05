@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import lookupBg from "../assets/lookup-bg.png";
 import { geocodeCity, getAirCurrent } from "../lib/api";
 import type { AirData, GeoResult } from "../lib/api";
@@ -85,9 +86,11 @@ export default function CityLookup() {
 
   const meta = air ? aqiMeta(air.aqi_ow_1_5) : null;
   
-  // Placeholder link
-  const detailsHref =
-    selected ? `/city/${encodeURIComponent(selected.name)}?lat=${selected.lat}&lon=${selected.lon}` : "/details";
+  // detailed indo -> map
+  const detailsTo = selected
+    ? `/map?lat=${selected.lat}&lon=${selected.lon}&name=${encodeURIComponent(selected.name)}`
+    : "/map";
+
 
   return (
     <section id="lookup" className="mt-2 scroll-mt-35">
@@ -213,13 +216,13 @@ export default function CityLookup() {
                   </p>
                 )}
 
-                <a
-                  href={detailsHref}
+                <Link
+                  to={detailsTo}
                   className="mt-5 inline-flex h-10 items-center rounded-xl bg-brand-900 px-5 text-base font-medium text-brand-50 transition hover:bg-brand-700"
                   title="details"
                 >
-                    Detailed info →
-                </a>
+                  Detailed info →
+                </Link>
               </div>
             )}
           </div>
