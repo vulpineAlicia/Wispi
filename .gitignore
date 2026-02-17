@@ -1,13 +1,43 @@
 # -------------------
-# Logs
+# Environment
 # -------------------
 
+.env
+.env.*
+!.env.example
+
+# Python virtualenv
+.venv/
+venv/
+ENV/
+
+# -------------------
+# Backend
+# -------------------
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+aq_backend/logs/
+
+# type checkers
+.mypy_cache/
+.pyre/
+.pytype/
+
+# packaging
+build/
+dist/
+*.egg-info/
 
 # -------------------
 # Frontend
@@ -16,27 +46,31 @@ lerna-debug.log*
 aq_frontend/node_modules/
 aq_frontend/dist/
 aq_frontend/dist-ssr/
-aq_frontend/*.local/
+aq_frontend/.vite/
 aq_frontend/.env
 aq_frontend/logs/
 
-# -------------------
-# Backend
-# -------------------
-
-.venv/
-aq_backend/.env
-aq_backend/logs/
-__pycache__/
-*.pyc
+# npm / pnpm logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # -------------------
-# Editor directories and files
+# OS
 # -------------------
+
+.DS_Store
+Thumbs.db
+
+# -------------------
+# IDE 
+# -------------------
+
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
