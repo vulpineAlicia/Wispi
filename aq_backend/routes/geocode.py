@@ -30,7 +30,8 @@ async def geocode(
     if len(q_clean) < 2 or not _CITY_RE.fullmatch(q_clean):
         raise HTTPException(status_code=422, detail="Invalid city name")
 
-    data = await ow.geocode(q=q_clean, limit=limit, request=request)
+    data, meta = await ow.geocode(q=q_clean, limit=limit)
+    request.state.upstream = meta
 
     results: list[GeocodeResult] = [
         GeocodeResult(

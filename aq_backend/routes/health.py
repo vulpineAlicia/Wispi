@@ -1,4 +1,4 @@
-"""" Simple health endpoint; returns 200 if the FastAPI app is running """
+""" Simple health endpoint; returns 200 if the FastAPI app is running """
 
 from fastapi import APIRouter
 from pydantic import BaseModel

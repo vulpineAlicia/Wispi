@@ -59,7 +59,8 @@ async def air_current(
     ow: OpenWeatherService = Depends(ow_service),
 ) -> AirCurrentResponse:
     """ Return current air quality for a location """
-    payload = await ow.air_current(lat=lat, lon=lon, request=request)
+    payload, meta = await ow.air_current(lat=lat, lon=lon)
+    request.state.upstream = meta
 
     lst = payload.get("list") or []
     if not lst:
@@ -90,13 +91,13 @@ async def air_history(
     end_ts = int(time.time())
     start_ts = end_ts - days * 86400
 
-    payload = await ow.air_history(
+    payload, meta = await ow.air_history(
         lat=lat,
         lon=lon,
         start_ts=start_ts,
         end_ts=end_ts,
-        request=request,
     )
+    request.state.upstream = meta
 
     lst = payload.get("list") or []
     if not lst:
