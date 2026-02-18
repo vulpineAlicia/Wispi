@@ -29,19 +29,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
         def build_extra(status: int) -> dict[str, object]:
             duration_ms = (time.perf_counter() - start) * 1000.0
-
             meta = getattr(request.state, "upstream", None)
-
-            if meta is not None:
-                upstream_ms = meta.total_ms
-                upstream_tries = meta.attempts
-                upstream_status = meta.last_status
-                upstream_endpoint = meta.endpoint
-            else:
-                upstream_ms = getattr(request.state, "upstream_ms", None)
-                upstream_tries = getattr(request.state, "upstream_tries", None)
-                upstream_status = getattr(request.state, "upstream_status", None)
-                upstream_endpoint = getattr(request.state, "upstream_endpoint", None)
 
             return {
                 "request_id": request_id,
@@ -49,10 +37,10 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 "path": str(request.url),
                 "status": status,
                 "duration_ms": round(duration_ms, 2),
-                "upstream_ms": "-" if upstream_ms is None else int(upstream_ms),
-                "upstream_tries": "-" if upstream_tries is None else int(upstream_tries),
-                "upstream_status": "-" if upstream_status is None else int(upstream_status),
-                "upstream_endpoint": "-" if upstream_endpoint is None else str(upstream_endpoint),
+                "upstream_ms": "-" if meta is None else int(meta.total_ms),
+                "upstream_tries": "-" if meta is None else int(meta.attempts),
+                "upstream_status": "-" if meta is None else int(meta.last_status) if meta.last_status is not None else "-",
+                "upstream_endpoint": "-" if meta is None else str(meta.endpoint),
             }
 
         try:

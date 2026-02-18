@@ -12,8 +12,24 @@ from typing import Any, cast
 import httpx
 
 
+@dataclass(slots=True, frozen=True)
+class UpstreamMeta:
+    """ Metadata about the upstream call (internal) """
+
+    endpoint: str
+    attempts: int
+    total_ms: int
+    last_status: int | None
+    retry_after_s: float | None = None
+    error: str | None = None
+
+
 class OpenWeatherError(Exception):
     """ Base class for all OW related failures """
+
+    def __init__(self, message: str = "", *, meta: UpstreamMeta | None = None):
+        super().__init__(message)
+        self.meta = meta
 
 
 @dataclass(frozen=True)
@@ -24,6 +40,7 @@ class OpenWeatherUpstreamError(OpenWeatherError):
     message: str
     body: str = ""
     retry_after: str | None = None
+    meta: UpstreamMeta | None = None
 
 
 class OpenWeatherTimeout(OpenWeatherError):
@@ -32,18 +49,6 @@ class OpenWeatherTimeout(OpenWeatherError):
 
 class OpenWeatherNetworkError(OpenWeatherError):
     """ Network-level errors """
-
-
-@dataclass(slots=True, frozen=True)
-class UpstreamMeta:
-    """ Metadata about the upstream call (internal)"""
-
-    endpoint: str
-    attempts: int
-    total_ms: int
-    last_status: int | None
-    retry_after_s: float | None = None
-    error: str | None = None
 
 
 class OpenWeatherService:
@@ -137,7 +142,7 @@ class OpenWeatherService:
                     retry_after_s=last_retry_after_s,
                     error="budget_exceeded",
                 )
-                raise OpenWeatherTimeout()
+                raise OpenWeatherTimeout("Upstream budget exceeded", meta=meta)
 
             try:
                 t0 = time.perf_counter()
@@ -148,6 +153,7 @@ class OpenWeatherService:
             except httpx.TimeoutException as exc:
                 last_exc = exc
                 last_error = "timeout"
+
                 if attempt == self._max_attempts:
                     meta = UpstreamMeta(
                         endpoint=endpoint,
@@ -157,7 +163,7 @@ class OpenWeatherService:
                         retry_after_s=last_retry_after_s,
                         error=last_error,
                     )
-                    raise OpenWeatherTimeout() from exc
+                    raise OpenWeatherTimeout("Upstream timeout", meta=meta) from exc
 
                 sleep_s = min(self._compute_backoff_s(attempt), max(0.0, deadline - time.monotonic()))
                 await asyncio.sleep(sleep_s)
@@ -166,6 +172,7 @@ class OpenWeatherService:
             except httpx.RequestError as exc:
                 last_exc = exc
                 last_error = "network"
+
                 if attempt == self._max_attempts:
                     meta = UpstreamMeta(
                         endpoint=endpoint,
@@ -175,7 +182,7 @@ class OpenWeatherService:
                         retry_after_s=last_retry_after_s,
                         error=last_error,
                     )
-                    raise OpenWeatherNetworkError() from exc
+                    raise OpenWeatherNetworkError("Upstream network error", meta=meta) from exc
 
                 sleep_s = min(self._compute_backoff_s(attempt), max(0.0, deadline - time.monotonic()))
                 await asyncio.sleep(sleep_s)
@@ -199,6 +206,7 @@ class OpenWeatherService:
                         status_code=502,
                         message="Upstream returned non-JSON response",
                         body=r.text[:2000],
+                        meta=meta,
                     ) from exc
 
                 meta = UpstreamMeta(
@@ -239,36 +247,47 @@ class OpenWeatherService:
             else:
                 msg = "Upstream request failed"
 
+            last_error = "http_error"
             meta = UpstreamMeta(
                 endpoint=endpoint,
                 attempts=attempts,
                 total_ms=int(upstream_total_ms),
                 last_status=r.status_code,
                 retry_after_s=self._parse_retry_after_s(retry_after_hdr) if retry_after_hdr else None,
-                error="http_error",
+                error=last_error,
             )
             raise OpenWeatherUpstreamError(
                 status_code=r.status_code,
                 message=msg,
                 body=body,
                 retry_after=retry_after_hdr,
+                meta=meta,
             )
 
         # Fallback
+        meta = UpstreamMeta(
+            endpoint=endpoint,
+            attempts=attempts,
+            total_ms=int(upstream_total_ms),
+            last_status=last_status,
+            retry_after_s=last_retry_after_s,
+            error=last_error or "fallback",
+        )
+
         if isinstance(last_exc, httpx.TimeoutException):
-            raise OpenWeatherTimeout() from last_exc
+            raise OpenWeatherTimeout("Upstream timeout", meta=meta) from last_exc
         if last_exc is not None:
-            raise OpenWeatherNetworkError() from last_exc
-        raise OpenWeatherUpstreamError(status_code=502, message="Upstream request failed")
+            raise OpenWeatherNetworkError("Upstream network error", meta=meta) from last_exc
+        raise OpenWeatherUpstreamError(status_code=502, message="Upstream request failed", meta=meta)
 
     async def geocode(self, q: str, limit: int) -> tuple[list[dict[str, Any]], UpstreamMeta]:
-        """ Accepts city name, returns location matches (in format lat, lon) for a city name from OpenWeather geocoding API """
+        """ Accepts city name and returns location matches from OW geocoding API """
         params = {"q": q, "limit": limit, "appid": self._api_key}
         data, meta = await self._get_json(self._geocode_url, params=params, endpoint="geocode")
         return cast(list[dict[str, Any]], data), meta
 
     async def air_current(self, lat: float, lon: float) -> tuple[dict[str, Any], UpstreamMeta]:
-        """" Accepts lat, lon and returns current air quality data for location """
+        """ Accepts lat/lon and returns current air quality data for location """
         params = {"lat": lat, "lon": lon, "appid": self._api_key}
         data, meta = await self._get_json(self._air_url, params=params, endpoint="air_current")
         return cast(dict[str, Any], data), meta

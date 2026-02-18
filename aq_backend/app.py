@@ -73,7 +73,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     """
     Application factory
-    
+
     Creates and configures the FastAPI app (logging, middleware, error handling, routes)
     """
     setup_logging()
@@ -93,26 +93,38 @@ def create_app() -> FastAPI:
     )
 
     @app.exception_handler(OpenWeatherTimeout)
-    async def ow_timeout_handler(request: Request, _exc: OpenWeatherTimeout) -> JSONResponse:
+    async def ow_timeout_handler(request: Request, exc: OpenWeatherTimeout) -> JSONResponse:
+        if getattr(exc, "meta", None) is not None:
+            request.state.upstream = exc.meta
         return error_response(request, 504, "UPSTREAM_TIMEOUT", "OpenWeather timeout")
 
     @app.exception_handler(OpenWeatherNetworkError)
-    async def ow_network_handler(request: Request, _exc: OpenWeatherNetworkError) -> JSONResponse:
+    async def ow_network_handler(request: Request, exc: OpenWeatherNetworkError) -> JSONResponse:
+        if getattr(exc, "meta", None) is not None:
+            request.state.upstream = exc.meta
         return error_response(request, 502, "UPSTREAM_NETWORK", "OpenWeather network error")
 
     @app.exception_handler(OpenWeatherUpstreamError)
     async def ow_upstream_handler(request: Request, exc: OpenWeatherUpstreamError) -> JSONResponse:
+        if getattr(exc, "meta", None) is not None:
+            request.state.upstream = exc.meta
 
         if exc.status_code == 429:
             headers = {"Retry-After": exc.retry_after} if exc.retry_after else None
-            return error_response(request, 429, "RATE_LIMIT", "Rate limit exceeded. Try again later.", headers)
+            return error_response(
+                request,
+                429,
+                "RATE_LIMIT",
+                "Rate limit exceeded. Try again later.",
+                headers,
+            )
 
         if exc.status_code in (401, 403):
             return error_response(request, 500, "UPSTREAM_AUTH", "Server configuration error")
 
         if 500 <= exc.status_code <= 599:
             return error_response(request, 502, "UPSTREAM_5XX", "Upstream service error")
-        
+
         return error_response(request, 502, "UPSTREAM_ERROR", "Upstream request failed")
 
     @app.exception_handler(StarletteHTTPException)
@@ -120,7 +132,10 @@ def create_app() -> FastAPI:
         return error_response(request, exc.status_code, "HTTP_ERROR", str(exc.detail))
 
     @app.exception_handler(Exception)
-    async def unhandled_exception_handler(request: Request, _exc: Exception) -> JSONResponse:
+    async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+        meta = getattr(exc, "meta", None)
+        if meta is not None:
+            request.state.upstream = meta
         return error_response(request, 500, "INTERNAL_ERROR", "Unexpected server error")
 
     app.include_router(health_router)
