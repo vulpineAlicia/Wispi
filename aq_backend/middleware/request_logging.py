@@ -39,7 +39,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 "duration_ms": round(duration_ms, 2),
                 "upstream_ms": "-" if meta is None else int(meta.total_ms),
                 "upstream_tries": "-" if meta is None else int(meta.attempts),
-                "upstream_status": "-" if meta is None else int(meta.last_status) if meta.last_status is not None else "-",
+                "upstream_status": "-" if meta is None or meta.last_status is None else int(meta.last_status),
                 "upstream_endpoint": "-" if meta is None else str(meta.endpoint),
             }
 

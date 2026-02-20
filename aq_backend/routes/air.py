@@ -8,7 +8,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from aq_backend.dependencies import ow_service
-from aq_backend.models.schemas import (
+from aq_backend.schemas import (
     AirCurrentResponse,
     AirHistoryItem,
     AirHistoryResponse,

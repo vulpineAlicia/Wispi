@@ -7,7 +7,7 @@ import re
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from aq_backend.dependencies import ow_service
-from aq_backend.models.schemas import GeocodeResponse, GeocodeResult
+from aq_backend.schemas import GeocodeResponse, GeocodeResult
 from aq_backend.services.openweather import OpenWeatherService
 
 router = APIRouter(tags=["geocode"])

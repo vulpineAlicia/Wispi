@@ -32,15 +32,22 @@ class OpenWeatherError(Exception):
         self.meta = meta
 
 
-@dataclass(frozen=True)
 class OpenWeatherUpstreamError(OpenWeatherError):
     """ Non-200 response from the upstream OpenWeather API """
 
-    status_code: int
-    message: str
-    body: str = ""
-    retry_after: str | None = None
-    meta: UpstreamMeta | None = None
+    def __init__(
+        self,
+        *,
+        status_code: int,
+        message: str,
+        body: str = "",
+        retry_after: str | None = None,
+        meta: UpstreamMeta | None = None,
+    ):
+        super().__init__(message, meta=meta)
+        self.status_code = status_code
+        self.body = body
+        self.retry_after = retry_after
 
 
 class OpenWeatherTimeout(OpenWeatherError):
@@ -122,12 +129,12 @@ class OpenWeatherService:
         """
         deadline = time.monotonic() + self._total_budget_s
 
-        attempts = 0
         upstream_total_ms = 0.0
         last_status: int | None = None
         last_exc: Exception | None = None
         last_retry_after_s: float | None = None
         last_error: str | None = None
+        attempts = 0
 
         for attempt in range(1, self._max_attempts + 1):
             attempts = attempt
@@ -193,14 +200,13 @@ class OpenWeatherService:
                 try:
                     data = r.json()
                 except ValueError as exc:
-                    last_error = "non_json"
                     meta = UpstreamMeta(
                         endpoint=endpoint,
                         attempts=attempts,
                         total_ms=int(upstream_total_ms),
                         last_status=r.status_code,
                         retry_after_s=None,
-                        error=last_error,
+                        error="non_json",
                     )
                     raise OpenWeatherUpstreamError(
                         status_code=502,
@@ -247,15 +253,15 @@ class OpenWeatherService:
             else:
                 msg = "Upstream request failed"
 
-            last_error = "http_error"
             meta = UpstreamMeta(
                 endpoint=endpoint,
                 attempts=attempts,
                 total_ms=int(upstream_total_ms),
                 last_status=r.status_code,
                 retry_after_s=self._parse_retry_after_s(retry_after_hdr) if retry_after_hdr else None,
-                error=last_error,
+                error="http_error",
             )
+
             raise OpenWeatherUpstreamError(
                 status_code=r.status_code,
                 message=msg,
