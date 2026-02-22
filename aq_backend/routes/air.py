@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
@@ -17,6 +17,9 @@ from aq_backend.schemas import (
 from aq_backend.services.openweather import OpenWeatherService
 
 router = APIRouter(tags=["air"])
+
+SECONDS_PER_DAY = 86_400
+MAX_HISTORY_DAYS = 365
 
 
 def _as_float_dict(value: Any) -> dict[str, float]:
@@ -84,12 +87,29 @@ async def air_history(
     request: Request,
     lat: float = Query(..., ge=-90, le=90),
     lon: float = Query(..., ge=-180, le=180),
-    days: int = Query(7, ge=1, le=7),
+    days: int = Query(7, ge=1, le=MAX_HISTORY_DAYS),
+    end_unix: Optional[int] = Query(
+        None,
+        ge=0,
+        description="Optional end timestamp (unix). Default: now. Useful for archive navigation.",
+    ),
     ow: OpenWeatherService = Depends(ow_service),
 ) -> AirHistoryResponse:
-    """ Return air quality history for the last N days """
-    end_ts = int(time.time())
-    start_ts = end_ts - days * 86400
+    """Return air quality history for the last N days
+
+    - client chooses between 7/30/90 days;
+    - server enforces max days to protect itself;
+    - optional end_unix enables browsing past ranges.
+    """
+    now_ts = int(time.time())
+    end_ts = int(end_unix) if end_unix is not None else now_ts
+
+    if end_ts > now_ts + 60:
+        raise HTTPException(status_code=400, detail="end_unix cannot be in the future")
+
+    start_ts = end_ts - days * SECONDS_PER_DAY
+    if start_ts < 0:
+        start_ts = 0
 
     payload, meta = await ow.air_history(
         lat=lat,

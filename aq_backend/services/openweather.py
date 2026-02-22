@@ -7,9 +7,10 @@ import random
 import time
 from dataclasses import dataclass
 from email.utils import parsedate_to_datetime
-from typing import Any, cast
-
+from typing import Any, cast, Literal, TypeAlias
 import httpx
+
+Endpoint: TypeAlias = Literal["geocode", "air_current", "air_history"]
 
 
 @dataclass(slots=True, frozen=True)
@@ -114,7 +115,7 @@ class OpenWeatherService:
         url: str,
         params: dict[str, Any],
         *,
-        endpoint: str,
+        endpoint: Endpoint,
     ) -> tuple[Any, UpstreamMeta]:
         """
         Fetch JSON from OpenWeather.
@@ -153,7 +154,7 @@ class OpenWeatherService:
 
             try:
                 t0 = time.perf_counter()
-                r = await self._client.get(url, params=params)
+                r = await self._client.get(url, params=params, timeout=max(0.1, remaining_s))
                 upstream_total_ms += (time.perf_counter() - t0) * 1000.0
                 last_status = r.status_code
 
@@ -209,7 +210,7 @@ class OpenWeatherService:
                         error="non_json",
                     )
                     raise OpenWeatherUpstreamError(
-                        status_code=502,
+                        status_code=r.status_code,
                         message="Upstream returned non-JSON response",
                         body=r.text[:2000],
                         meta=meta,
@@ -229,17 +230,15 @@ class OpenWeatherService:
 
             retryable = (r.status_code == 429) or (500 <= r.status_code <= 599)
             if retryable and attempt < self._max_attempts:
-                wait_s: float | None = None
-
+                retry_after_s = None
                 if r.status_code == 429 and retry_after_hdr:
-                    wait_s = self._parse_retry_after_s(retry_after_hdr)
-                    if wait_s is not None:
-                        wait_s = min(wait_s, 10.0)
+                    retry_after_s = self._parse_retry_after_s(retry_after_hdr)
+                    if retry_after_s is not None:
+                        retry_after_s = min(retry_after_s, 10.0)
 
-                if wait_s is None:
-                    wait_s = self._compute_backoff_s(attempt)
+                wait_s = retry_after_s if retry_after_s is not None else self._compute_backoff_s(attempt)
 
-                last_retry_after_s = wait_s
+                last_retry_after_s = retry_after_s
                 sleep_s = min(wait_s, max(0.0, deadline - time.monotonic()))
                 await asyncio.sleep(sleep_s)
                 continue
