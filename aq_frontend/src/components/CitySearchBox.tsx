@@ -42,7 +42,7 @@ export default function CitySearchBox({
 
   return (
     <>
-      <div className="w-full rounded-2xl bg-white p-2 ring-1 ring-brand-200">
+      <div className="p-1 rounded-3xl bg-white border border-brand-200">
         <label className="sr-only" htmlFor="city-input">
           City name
         </label>
@@ -55,14 +55,14 @@ export default function CitySearchBox({
             onKeyDown={(e) => e.key === "Enter" && onSearch()}
             placeholder={placeholder}
             disabled={loading}
-            className="h-11 w-full bg-transparent px-3 text-base outline-none placeholder:text-brand-900/50 disabled:opacity-60"
+            className="h-13 w-full bg-transparent px-3 text-base outline-none placeholder:text-brand-900/50"
           />
 
           <button
             type="button"
             onClick={onSearch}
             disabled={loading}
-            className="h-11 shrink-0 rounded-xl bg-brand-900 px-6 text-base font-medium text-brand-50 transition hover:bg-brand-700 disabled:opacity-60"
+            className="h-11 shrink-0 rounded-3xl bg-brand-900 px-6 text-base font-medium text-brand-50 transition hover:bg-brand-700 disabled:opacity-60"
           >
             {loading ? "Loading…" : buttonText}
           </button>
@@ -70,13 +70,13 @@ export default function CitySearchBox({
       </div>
 
       {(err || hint) && (
-        <div className="mt-4 w-full rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-900 ring-1 ring-rose-200">
+        <div className="mt-4 w-full rounded-3xl bg-rose-50 px-4 py-3 text-sm text-rose-900 ring-1 ring-rose-200">
           {err ?? hint}
         </div>
       )}
 
       {results.length > 0 && (
-        <div className="mt-4 w-full rounded-2xl bg-white p-2 ring-1 ring-brand-200 backdrop-blur">
+        <div className="mt-4 w-full rounded-3xl bg-white p-2 ring-1 ring-brand-200 backdrop-blur">
           <div className="px-2 pb-2 text-xs font-medium text-brand-700">Select a city</div>
           <ul className="max-h-56 overflow-auto">
             {results.map((r) => (
@@ -84,7 +84,6 @@ export default function CitySearchBox({
                 <button
                   type="button"
                   onClick={async () => {
-                    // hide results immediately (optional)
                     geo.setData([]);
                     await onSelect(r);
                   }}
