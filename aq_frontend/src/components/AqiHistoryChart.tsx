@@ -14,27 +14,17 @@ type ChartPoint = {
 };
 
 export default function AqiHistoryChart({ data }: { data: ChartPoint[] }) {
-  if (!data.length)
-    return <div className="text-sm text-brand-700">No history data.</div>;
+  if (!data.length) return <div className="text-sm text-brand-700">No history data.</div>;
 
   return (
-    <div className="h-56 w-full">
+    <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 8, right: 12, bottom: 8, left: 0 }}>
+        <LineChart data={data} margin={{ top: 10, right: 12, bottom: 10, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" />
 
-          <XAxis
-            dataKey="date"
-            tick={false}
-            tickLine={false}
-            axisLine={false}
-          />
+          <XAxis dataKey="date" tick={false} tickLine={false} axisLine={false} />
 
-          <YAxis
-            domain={[1, 5]}
-            ticks={[1, 2, 3, 4, 5]}
-            width={28}
-          />
+          <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} width={28} />
 
           <Tooltip />
 

@@ -26,15 +26,10 @@ export default function CitySearchBox({
 
   async function onSearch() {
     setHint(null);
-
     const q = city.trim();
     if (!q) return;
 
-    const r = await geo.run(
-      () => geocodeCity(q),
-      "Could not search cities (backend unavailable?)"
-    );
-
+    const r = await geo.run(() => geocodeCity(q), "Could not search cities (backend unavailable?)");
     if (r && r.length === 0) setHint("No matches found. Try a different spelling.");
   }
 
@@ -42,7 +37,7 @@ export default function CitySearchBox({
 
   return (
     <>
-      <div className="p-1 rounded-3xl bg-white border border-brand-200">
+      <div className="rounded-3xl bg-white border border-brand-200 p-2">
         <label className="sr-only" htmlFor="city-input">
           City name
         </label>
@@ -55,14 +50,14 @@ export default function CitySearchBox({
             onKeyDown={(e) => e.key === "Enter" && onSearch()}
             placeholder={placeholder}
             disabled={loading}
-            className="h-13 w-full bg-transparent px-3 text-base outline-none placeholder:text-brand-900/50"
+            className="h-12 w-full bg-transparent px-4 text-base outline-none placeholder:text-brand-900/50"
           />
 
           <button
             type="button"
             onClick={onSearch}
             disabled={loading}
-            className="h-11 shrink-0 rounded-3xl bg-brand-900 px-6 text-base font-medium text-brand-50 transition hover:bg-brand-700 disabled:opacity-60"
+            className="h-12 shrink-0 rounded-3xl bg-brand-900 px-6 text-base font-medium text-brand-50 transition hover:bg-brand-700 disabled:opacity-60"
           >
             {loading ? "Loading…" : buttonText}
           </button>
@@ -76,8 +71,8 @@ export default function CitySearchBox({
       )}
 
       {results.length > 0 && (
-        <div className="mt-4 w-full rounded-3xl bg-white p-2 ring-1 ring-brand-200 backdrop-blur">
-          <div className="px-2 pb-2 text-xs font-medium text-brand-700">Select a city</div>
+        <div className="mt-4 w-full rounded-3xl bg-white p-3 ring-1 ring-brand-200 backdrop-blur">
+          <div className="px-2 pb-3 text-xs font-medium text-brand-700">Select a city</div>
           <ul className="max-h-56 overflow-auto">
             {results.map((r) => (
               <li key={`${r.lat},${r.lon},${r.name}`}>
@@ -87,13 +82,13 @@ export default function CitySearchBox({
                     geo.setData([]);
                     await onSelect(r);
                   }}
-                  className="w-full rounded-xl px-3 py-2 text-left text-sm text-brand-900 transition hover:bg-brand-50"
+                  className="w-full rounded-2xl px-3 py-3 text-left text-sm text-brand-900 transition hover:bg-brand-50"
                 >
                   <div className="font-medium">
                     {r.name}
                     {r.state ? `, ${r.state}` : ""} — {r.country}
                   </div>
-                  <div className="text-xs text-brand-700/80">
+                  <div className="mt-1 text-xs text-brand-700/80">
                     lat {r.lat}, lon {r.lon}
                   </div>
                 </button>

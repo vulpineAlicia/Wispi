@@ -18,14 +18,8 @@ type OverlayMode = "none" | "temp" | "precip";
 
 const LAYER_LEGEND: Record<OverlayMode, { title: string; gradientClass: string } | null> = {
   none: null,
-  temp: {
-    title: "Temperature",
-    gradientClass: "from-sky-500 via-lime-400 to-red-500",
-  },
-  precip: {
-    title: "Precipitation",
-    gradientClass: "from-cyan-200 via-sky-400 to-indigo-700",
-  },
+  temp: { title: "Temperature", gradientClass: "from-sky-500 via-lime-400 to-red-500" },
+  precip: { title: "Precipitation", gradientClass: "from-cyan-200 via-sky-400 to-indigo-700" },
 };
 
 function toNumberOrNull(v: string | null) {
@@ -50,7 +44,6 @@ export default function MapPage() {
 
   const lat = toNumberOrNull(params.get("lat"));
   const lon = toNumberOrNull(params.get("lon"));
-
   const name = params.get("name") ?? "";
 
   const hasSelection = lat != null && lon != null;
@@ -60,18 +53,15 @@ export default function MapPage() {
 
   const [overlay, setOverlay] = useState<OverlayMode>("none");
 
-  // Air state
   const [air, setAir] = useState<AirData | null>(null);
   const [airLoading, setAirLoading] = useState(false);
   const [airError, setAirError] = useState<string | null>(null);
 
-  // History state
   const [historyDays, setHistoryDays] = useState<HistoryDays>(7);
   const [history, setHistory] = useState<AirHistoryResponse | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
 
-  // Leaflet
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markerRef = useRef<LeafletMarker | null>(null);
@@ -91,7 +81,6 @@ export default function MapPage() {
     return null;
   }, [overlay, OW_KEY]);
 
-  // Current AQI
   useEffect(() => {
     if (lat == null || lon == null) {
       setAir(null);
@@ -100,18 +89,15 @@ export default function MapPage() {
       return;
     }
 
-    const latN = lat;
-    const lonN = lon;
-
     const reqId = ++airReqIdRef.current;
     let alive = true;
 
-    async function loadAir() {
+    (async () => {
       setAirLoading(true);
       setAirError(null);
 
       try {
-        const data = await getAirCurrent(latN, lonN);
+        const data = await getAirCurrent(lat, lon);
         if (!alive) return;
         if (reqId === airReqIdRef.current) setAir(data);
       } catch {
@@ -124,15 +110,13 @@ export default function MapPage() {
         if (!alive) return;
         if (reqId === airReqIdRef.current) setAirLoading(false);
       }
-    }
+    })();
 
-    loadAir();
     return () => {
       alive = false;
     };
   }, [lat, lon]);
 
-  // History 7/30/90 days
   useEffect(() => {
     if (lat == null || lon == null) {
       setHistory(null);
@@ -141,18 +125,15 @@ export default function MapPage() {
       return;
     }
 
-    const latN = lat;
-    const lonN = lon;
-
     const reqId = ++historyReqIdRef.current;
     let alive = true;
 
-    async function loadHistory() {
+    (async () => {
       setHistoryLoading(true);
       setHistoryError(null);
 
       try {
-        const data = await getAirHistory(latN, lonN, historyDays);
+        const data = await getAirHistory(lat, lon, historyDays);
         if (!alive) return;
         if (reqId === historyReqIdRef.current) setHistory(data);
       } catch {
@@ -165,19 +146,15 @@ export default function MapPage() {
         if (!alive) return;
         if (reqId === historyReqIdRef.current) setHistoryLoading(false);
       }
-    }
+    })();
 
-    loadHistory();
     return () => {
       alive = false;
     };
   }, [lat, lon, historyDays]);
 
-  const chartData = useMemo(() => {
-    return history ? toDailyAqiSeries(history.items) : [];
-  }, [history]);
+  const chartData = useMemo(() => (history ? toDailyAqiSeries(history.items) : []), [history]);
 
-  // Map init
   useEffect(() => {
     const el = mapDivRef.current;
     if (!el) return;
@@ -185,13 +162,9 @@ export default function MapPage() {
 
     fixLeafletIcons();
 
-    const map = L.map(el, {
-      zoomControl: false,
-      attributionControl: true,
-      minZoom: 3,
-    });
-
+    const map = L.map(el, { zoomControl: false, attributionControl: true, minZoom: 3 });
     map.attributionControl.setPrefix(false);
+
     L.tileLayer(`https://api.maptiler.com/maps/base-v4/{z}/{x}/{y}.png?key=${MT_KEY}`, {
       tileSize: 512,
       zoomOffset: -1,
@@ -200,10 +173,8 @@ export default function MapPage() {
 
     mapRef.current = map;
 
-    // Restrict (vertical)
     const LAT_LIMIT = 85;
     const HUGE_LNG = 1e9;
-
     const bounds = L.latLngBounds(L.latLng(-LAT_LIMIT, -HUGE_LNG), L.latLng(LAT_LIMIT, HUGE_LNG));
     map.setMaxBounds(bounds);
     map.options.maxBoundsViscosity = 1.0;
@@ -212,7 +183,6 @@ export default function MapPage() {
     else map.setView([20, 0], 2);
 
     const invalidate = () => map.invalidateSize();
-
     map.whenReady(invalidate);
     requestAnimationFrame(invalidate);
     setTimeout(invalidate, 0);
@@ -252,7 +222,6 @@ export default function MapPage() {
       map.removeLayer(overlayRef.current);
       overlayRef.current = null;
     }
-
     if (!overlayUrl) return;
 
     const layer = L.tileLayer(overlayUrl, { opacity: 0.75 });
@@ -272,15 +241,18 @@ export default function MapPage() {
       <section className="absolute inset-0 w-full overflow-hidden">
         <div ref={mapDivRef} className="absolute inset-0 z-0" />
 
-        {/* Left panel wrapper for fade hints */}
+        {/* Left panel */}
         <div className="absolute left-4 top-4 z-10 w-[340px] max-w-[calc(100vw-2rem)]">
           <aside
-            className="relative rounded-3xl bg-brand-50 border border-brand-200 p-4 text-brand-900 shadow-sm
-                       max-h-[calc(100vh-170px)] overflow-y-auto no-scrollbar"
+            className="
+              relative rounded-3xl bg-brand-50 border border-brand-200
+              p-5 text-brand-900 shadow-sm
+              max-h-[calc(100vh-170px)] overflow-y-auto no-scrollbar
+            "
           >
             {/* Title */}
-            <div className="flex">
-              <h1 className="mt-2 text-lg font-semibold leading-tight px-2">Search a city</h1>
+            <div className="px-1">
+              <h1 className="text-lg font-semibold leading-tight px-1">Search a city</h1>
             </div>
 
             {/* Search */}
@@ -292,10 +264,11 @@ export default function MapPage() {
               />
             </div>
 
+            {/* Selected city */}
             {hasSelection && (
-              <div className="mt-4 rounded-3xl bg-white border border-brand-200 px-5 py-3">
+              <div className="mt-4 rounded-3xl bg-white border border-brand-200 px-5 py-4">
                 <div className="text-base font-semibold text-brand-900">{name}</div>
-                <div className="mt-1 text-xs text-brand-700">
+                <div className="mt-1 text-xs text-brand-700/80">
                   {lat!.toFixed(4)}, {lon!.toFixed(4)}
                 </div>
               </div>
@@ -303,46 +276,47 @@ export default function MapPage() {
 
             {/* AQI */}
             {hasSelection && (
-              <div className="mt-4 rounded-3xl bg-white border border-brand-200 px-5 py-4">
+              <div className="mt-4 rounded-3xl bg-white border border-brand-200 px-5 py-5">
                 {airLoading ? (
-                  <div className="mt-1 text-sm text-brand-700">Loading…</div>
+                  <div className="text-sm text-brand-700">Loading…</div>
                 ) : airError ? (
-                  <div className="mt-1 text-sm text-red-700">{airError}</div>
+                  <div className="text-sm text-red-700">{airError}</div>
                 ) : air ? (
                   <div className="text-sm text-brand-800">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-base text-brand-900 font-semibold">AQI:</span>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="text-base font-semibold text-brand-900">AQI</span>
                       <AqiPill aqi={air.aqi_ow_1_5} />
                     </div>
 
-                    <p className="mt-2 text-sm text-brand-700">{aqiAdvice(air.aqi_ow_1_5)}</p>
+                    {/* Advice */}
+                    <p className="mt-2 text-sm leading-snug text-brand-700">{aqiAdvice(air.aqi_ow_1_5)}</p>
 
-                    <div className="text-sm text-brand-700 py-1 mt-3 font-semibold">Pollutants (µg/m³):</div>
+                    {/* Pollutants */}        
+                    <div className="mt-4 text-sm font-semibold text-brand-900">Pollutants (µg/m³)</div>
 
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-1 py-2">
+                    <div className="mt-2 grid grid-cols-2 gap-x-10 gap-y-2">
                       {Object.entries(air.pollutants).map(([k, v]) => (
-                        <div key={k} className="flex justify-between gap-1">
+                        <div key={k} className="flex justify-between gap-3">
                           <span className="text-brand-700">{k}</span>
-                          <span>{v}</span>
+                          <span className="tabular-nums text-brand-900">{v}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-1 text-sm text-brand-700">No data.</div>
+                  <div className="text-sm text-brand-700">No data.</div>
                 )}
               </div>
             )}
 
             {/* History */}
             {hasSelection && (
-              <div className="mt-3 rounded-3xl bg-white border border-brand-200 p-5 text-sm text-brand-700">
-                {/* History */}
+              <div className="mt-4 rounded-3xl bg-white border border-brand-200 px-5 py-5 text-sm text-brand-700">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-5">
                     <div className="text-base font-semibold text-brand-900">History</div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       {HISTORY_RANGES.map((r) => {
                         const active = r.days === historyDays;
                         const short = `${r.days}d`;
@@ -365,8 +339,7 @@ export default function MapPage() {
                   </div>
                 </div>
 
-                {/* Chart */}
-                <div className="mt-3">
+                <div className="mt-4">
                   {historyLoading ? (
                     <div className="text-sm text-brand-700">Loading history…</div>
                   ) : historyError ? (
@@ -378,10 +351,11 @@ export default function MapPage() {
                   )}
                 </div>
 
-                <div className="flex justify-end">
+                {/* Link to Archive */}
+                <div className="mt-1 flex justify-end pb-1">
                   <Link
                     to={`/archive?lat=${lat}&lon=${lon}&name=${encodeURIComponent(name)}&days=${historyDays}`}
-                    className="text-sm text-brand-200 hover:text-brand-700"
+                    className="text-sm text-brand-500 hover:text-brand-700"
                   >
                     Open archive →
                   </Link>
@@ -396,16 +370,17 @@ export default function MapPage() {
         </div>
 
         {/* Right panel */}
-        <aside className="absolute right-4 top-4 z-10 w-[220px] rounded-3xl bg-brand-50 border border-brand-200 p-3 text-brand-900 shadow-sm">
-          <div className="text-sm font-medium px-1">Layers</div>
-          <div className="mt-2 flex flex-col gap-2">
+        <aside className="absolute right-4 top-4 z-10 w-[220px] rounded-3xl bg-brand-50 border border-brand-200 p-4 text-brand-900 shadow-sm">
+          <div className="px-1 text-sm font-medium">Layers</div>
+
+          <div className="mt-3 flex flex-col gap-2.5">
             {(["none", "temp", "precip"] as OverlayMode[]).map((m) => (
               <button
                 key={m}
                 type="button"
                 onClick={() => setOverlay(m)}
                 className={
-                  "rounded-2xl px-3 py-2 text-sm transition text-left " +
+                  "rounded-2xl px-4 py-2.5 text-sm transition text-left " +
                   (overlay === m ? "bg-brand-900 text-white" : "text-brand-900 bg-white border border-brand-200")
                 }
               >
@@ -414,11 +389,10 @@ export default function MapPage() {
             ))}
           </div>
 
-          {/* Scale pill */}
           {LAYER_LEGEND[overlay] && (
-            <div className="mt-3 rounded-3xl bg-white border border-brand-200 p-4 py-3">
+            <div className="mt-4 rounded-2xl bg-white border border-brand-200 px-4 py-4">
               <div className="text-xs font-medium text-brand-900">{LAYER_LEGEND[overlay]!.title} scale</div>
-              <div className={`mt-2 h-2 w-full rounded-full bg-gradient-to-r ${LAYER_LEGEND[overlay]!.gradientClass}`} />
+              <div className={`mt-3 h-2 w-full rounded-full bg-gradient-to-r ${LAYER_LEGEND[overlay]!.gradientClass}`} />
               <div className="mt-2 flex justify-between text-[11px] text-brand-700">
                 <span>Low</span>
                 <span>High</span>
