@@ -1,7 +1,23 @@
 import { Link } from "react-router-dom";
 import type { AirData } from "../lib/api";
-import { aqiAdvice } from "../lib/aqi";
 import AqiPill from "./AqiPill";
+
+export function aqiAdvice(aqi: number) {
+  switch (aqi) {
+    case 1:
+      return "Air quality is excellent — enjoy outdoor activities.";
+    case 2:
+      return "Air quality is fair — outdoor activities are generally OK.";
+    case 3:
+      return "Air quality is moderate — consider reducing long outdoor exertion if you’re sensitive.";
+    case 4:
+      return "Air quality is poor — limit outdoor activity, especially strenuous exercise.";
+    case 5:
+      return "Air quality is very poor — stay indoors when possible and avoid outdoor exercise.";
+    default:
+      return "Air quality info is unavailable right now.";
+  }
+}
 
 type Variant = "home" | "map";
 

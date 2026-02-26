@@ -7,13 +7,13 @@ import Home from "./pages/Home";
 import Map from "./pages/Map";
 import UsefulInfo from "./pages/UsefulInfo";
 
-import ScrollToHash from "./components/ScrollToHash";
+import { useScrollToHash } from "./hooks/useScrollToHash";
 
-export default function App() {
+function AppShell() {
+  useScrollToHash();
+
   return (
-    <BrowserRouter>
-      <ScrollToHash />
-      
+    <>
       {/* Global background */}
       <div className="fixed inset-0 z-[-10] bg-gradient-to-br from-brand-50 via-brand-100 to-brand-200" />
       <div className="fixed -top-24 -right-24 h-72 w-72 rounded-full bg-brand-300/40 blur-3xl z-[-10]" />
@@ -28,16 +28,23 @@ export default function App() {
         </div>
 
         <div className="relative">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/map" element={<Map />} />
-          <Route path="/info" element={<UsefulInfo />} />
-        </Routes>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/map" element={<Map />} />
+            <Route path="/info" element={<UsefulInfo />} />
+          </Routes>
         </div>
 
         <Footer />
-        
       </div>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppShell />
     </BrowserRouter>
   );
 }

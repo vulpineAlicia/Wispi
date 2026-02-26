@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import L, { Map as LeafletMap, Marker as LeafletMarker, TileLayer } from "leaflet";
 
-import { fixLeafletIcons } from "../lib/leafletIcons";
+import iconUrl from "leaflet/dist/images/marker-icon.png";
+import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
+import shadowUrl from "leaflet/dist/images/marker-shadow.png";
 
 type Args = {
   mtKey: string | undefined;
@@ -9,6 +11,22 @@ type Args = {
   lon: number | null;
   overlayUrl: string | null;
 };
+
+function fixLeafletIconsOnce() {
+  const proto = L.Icon.Default.prototype as unknown as { _iconFixApplied?: boolean };
+
+  if (proto._iconFixApplied) return;
+  proto._iconFixApplied = true;
+
+  // @ts-ignore Leaflet internal
+  delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+  L.Icon.Default.mergeOptions({
+    iconUrl,
+    iconRetinaUrl,
+    shadowUrl,
+  });
+}
 
 export function useLeafletMap({ mtKey, lat, lon, overlayUrl }: Args) {
   const mapDivRef = useRef<HTMLDivElement | null>(null);
@@ -23,7 +41,7 @@ export function useLeafletMap({ mtKey, lat, lon, overlayUrl }: Args) {
     if (!el) return;
     if (mapRef.current) return;
 
-    fixLeafletIcons();
+    fixLeafletIconsOnce();
 
     const map = L.map(el, { zoomControl: false, attributionControl: true, minZoom: 3 });
     map.attributionControl.setPrefix(false);
@@ -78,7 +96,7 @@ export function useLeafletMap({ mtKey, lat, lon, overlayUrl }: Args) {
     map.flyTo([lat, lon], 10, { duration: 0.6 });
   }, [lat, lon]);
 
-  // Overlay layer
+  // Overlay
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;

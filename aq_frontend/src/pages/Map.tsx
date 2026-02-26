@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import "leaflet/dist/leaflet.css";
-
-import { getAirCurrent, getAirHistory, type AirData, type AirHistoryResponse } from "../lib/api";
 
 import CitySearchBox from "../components/CitySearchBox";
 import CityResultPanel from "../components/CityResultPanel";
@@ -11,7 +9,11 @@ import HistoryPanel, { type HistoryDays } from "../components/HistoryPanel";
 import MapLayersPanel, { type OverlayMode } from "../components/MapLayersPanel";
 
 import { toDailyAqiSeries } from "../lib/historyChart";
+import { mapUrl } from "../lib/mapUrl";
+
 import { useLeafletMap } from "../hooks/useLeafletMap";
+import { useCurrentAir } from "../hooks/useCurrentAir";
+import { useAirHistory } from "../hooks/useAirHistory";
 
 function toNumberOrNull(v: string | null) {
   if (v == null) return null;
@@ -35,18 +37,7 @@ export default function MapPage() {
   const MT_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
   const [overlay, setOverlay] = useState<OverlayMode>("none");
-
-  const [air, setAir] = useState<AirData | null>(null);
-  const [airLoading, setAirLoading] = useState(false);
-  const [airError, setAirError] = useState<string | null>(null);
-
   const [historyDays, setHistoryDays] = useState<HistoryDays>(7);
-  const [history, setHistory] = useState<AirHistoryResponse | null>(null);
-  const [historyLoading, setHistoryLoading] = useState(false);
-  const [historyError, setHistoryError] = useState<string | null>(null);
-
-  const airReqIdRef = useRef(0);
-  const historyReqIdRef = useRef(0);
 
   const overlayUrl = useMemo(() => {
     if (!OW_KEY) return null;
@@ -62,80 +53,13 @@ export default function MapPage() {
   // Leaflet
   const { mapDivRef } = useLeafletMap({ mtKey: MT_KEY, lat, lon, overlayUrl });
 
-  // Air fetch
-  useEffect(() => {
-    if (lat == null || lon == null) {
-      setAir(null);
-      setAirError(null);
-      setAirLoading(false);
-      return;
-    }
+  const current = useCurrentAir(lat, lon);
+  const history = useAirHistory(lat, lon, historyDays);
 
-    const reqId = ++airReqIdRef.current;
-    let alive = true;
-
-    (async () => {
-      setAirLoading(true);
-      setAirError(null);
-
-      try {
-        const data = await getAirCurrent(lat, lon);
-        if (!alive) return;
-        if (reqId === airReqIdRef.current) setAir(data);
-      } catch {
-        if (!alive) return;
-        if (reqId === airReqIdRef.current) {
-          setAir(null);
-          setAirError("Air data fetch failed");
-        }
-      } finally {
-        if (!alive) return;
-        if (reqId === airReqIdRef.current) setAirLoading(false);
-      }
-    })();
-
-    return () => {
-      alive = false;
-    };
-  }, [lat, lon]);
-
-  useEffect(() => {
-    if (lat == null || lon == null) {
-      setHistory(null);
-      setHistoryError(null);
-      setHistoryLoading(false);
-      return;
-    }
-
-    const reqId = ++historyReqIdRef.current;
-    let alive = true;
-
-    (async () => {
-      setHistoryLoading(true);
-      setHistoryError(null);
-
-      try {
-        const data = await getAirHistory(lat, lon, historyDays);
-        if (!alive) return;
-        if (reqId === historyReqIdRef.current) setHistory(data);
-      } catch {
-        if (!alive) return;
-        if (reqId === historyReqIdRef.current) {
-          setHistory(null);
-          setHistoryError("History fetch failed");
-        }
-      } finally {
-        if (!alive) return;
-        if (reqId === historyReqIdRef.current) setHistoryLoading(false);
-      }
-    })();
-
-    return () => {
-      alive = false;
-    };
-  }, [lat, lon, historyDays]);
-
-  const chartData = useMemo(() => (history ? toDailyAqiSeries(history.items) : []), [history]);
+  const chartData = useMemo(
+    () => (history.data ? toDailyAqiSeries(history.data.items) : []),
+    [history.data]
+  );
 
   return (
     <div className="relative w-full" style={{ height: "calc(100vh - 143px)" }}>
@@ -158,7 +82,7 @@ export default function MapPage() {
             <div className="mt-3">
               <CitySearchBox
                 onSelect={(place) => {
-                  navigate(`/map?lat=${place.lat}&lon=${place.lon}&name=${encodeURIComponent(place.name)}`);
+                  navigate(mapUrl(place.lat, place.lon, place.name));
                 }}
               />
             </div>
@@ -169,9 +93,9 @@ export default function MapPage() {
                 name={name}
                 lat={lat!}
                 lon={lon!}
-                air={air}
-                airLoading={airLoading}
-                airError={airError}
+                air={current.data}
+                airLoading={current.loading}
+                airError={current.error}
               />
             )}
 
@@ -179,8 +103,8 @@ export default function MapPage() {
               hasSelection={hasSelection}
               historyDays={historyDays}
               setHistoryDays={setHistoryDays}
-              historyLoading={historyLoading}
-              historyError={historyError}
+              historyLoading={history.loading}
+              historyError={history.error}
               chartData={chartData}
               lat={lat!}
               lon={lon!}

@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import ServerStatus from "./ServerStatus";
+import ServerStatusPill from "./ServerStatusPill";
 import logo from "../assets/logo.svg";
 
 
@@ -45,7 +45,7 @@ export default function Header() {
 
 
         {/* Right side */}
-        <ServerStatus />
+        <ServerStatusPill />
       </div>
     </header>
   );

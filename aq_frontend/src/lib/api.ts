@@ -13,19 +13,29 @@ export type AirData = {
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "/api";
 
+/* JSON helper */
+async function getJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    cache: "no-store",
+    ...init,
+  });
+
+  if (!res.ok) {
+    throw new Error("Request failed");
+  }
+
+  return (await res.json()) as T;
+}
+
 /* Server status pill */
 export async function checkHealth(): Promise<boolean> {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), 2500);
 
   try {
-    const res = await fetch(`${API_BASE}/health`, {
-      cache: "no-store",
+    const data = await getJson<{ status?: string }>("/health", {
       signal: controller.signal,
     });
-    if (!res.ok) return false;
-
-    const data = (await res.json()) as { status?: string };
     return data.status === "ok";
   } catch {
     return false;
@@ -36,23 +46,15 @@ export async function checkHealth(): Promise<boolean> {
 
 /* City lookup */
 export async function geocodeCity(q: string): Promise<GeoResult[]> {
-  const res = await fetch(`${API_BASE}/geocode?q=${encodeURIComponent(q)}`, {
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error("Geocode failed");
-
-  const data = (await res.json()) as { results?: GeoResult[] };
+  const data = await getJson<{ results?: GeoResult[] }>(
+    `/geocode?q=${encodeURIComponent(q)}`
+  );
   return data.results ?? [];
 }
 
 /* Air quality */
 export async function getAirCurrent(lat: number, lon: number): Promise<AirData> {
-  const res = await fetch(`${API_BASE}/air/current?lat=${lat}&lon=${lon}`, {
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error("Air fetch failed");
-
-  return (await res.json()) as AirData;
+  return await getJson<AirData>(`/air/current?lat=${lat}&lon=${lon}`);
 }
 
 /* Air quality history (last N days) */
@@ -84,10 +86,5 @@ export async function getAirHistory(
 
   if (end_unix != null) qs.set("end_unix", String(end_unix));
 
-  const res = await fetch(`${API_BASE}/air/history?${qs.toString()}`, {
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error("History fetch failed");
-
-  return (await res.json()) as AirHistoryResponse;
+  return await getJson<AirHistoryResponse>(`/air/history?${qs.toString()}`);
 }

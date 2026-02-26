@@ -3,6 +3,7 @@ import lookupBg from "../assets/lookup-bg.png";
 
 import { getAirCurrent } from "../lib/api";
 import type { AirData, GeoResult } from "../lib/api";
+import { mapUrl } from "../lib/mapUrl";
 
 import useAsync from "../hooks/useAsync";
 import CitySearchBox from "../components/CitySearchBox";
@@ -24,7 +25,7 @@ export default function Home() {
   const air = airReq.data ?? null;
 
   const detailsTo = selected
-    ? `/map?lat=${selected.lat}&lon=${selected.lon}&name=${encodeURIComponent(selected.name)}`
+    ? mapUrl(selected.lat, selected.lon, selected.name)
     : "/map";
 
   const selectedLabel = selected
