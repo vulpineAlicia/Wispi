@@ -40,16 +40,25 @@ def _extract_ts_aqi(entry: dict[str, Any], *, err_detail: str) -> tuple[int, int
     aqi = main.get("aqi")
 
     if ts is None or aqi is None:
-        raise HTTPException(status_code=502, detail=err_detail)
+        raise HTTPException(
+            status_code=502,
+            detail={"code": "UPSTREAM_MALFORMED", "message": err_detail},
+        )
 
     try:
         ts_i = int(ts)
         aqi_i = int(aqi)
     except (TypeError, ValueError) as exc:
-        raise HTTPException(status_code=502, detail=err_detail) from exc
+        raise HTTPException(
+            status_code=502,
+            detail={"code": "UPSTREAM_MALFORMED", "message": err_detail},
+        ) from exc
 
     if not (1 <= aqi_i <= 5):
-        raise HTTPException(status_code=502, detail="Upstream returned invalid AQI value")
+        raise HTTPException(
+            status_code=502,
+            detail={"code": "UPSTREAM_MALFORMED", "message": "Upstream returned invalid AQI value"},
+        )
 
     return ts_i, aqi_i
 
@@ -65,11 +74,26 @@ async def air_current(
     payload, meta = await ow.air_current(lat=lat, lon=lon)
     request.state.upstream = meta
 
+    if not isinstance(payload, dict):
+        raise HTTPException(
+            status_code=502,
+            detail={"code": "UPSTREAM_MALFORMED", "message": "Upstream returned malformed air payload"},
+        )
+
     lst = payload.get("list") or []
     if not lst:
-        raise HTTPException(status_code=404, detail="No air data for these coordinates")
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "NO_AIR_DATA", "message": "No air quality data for this location."},
+        )
 
     entry = lst[0]
+    if not isinstance(entry, dict):
+        raise HTTPException(
+            status_code=502,
+            detail={"code": "UPSTREAM_MALFORMED", "message": "Upstream returned malformed air payload"},
+        )
+
     ts_i, aqi_i = _extract_ts_aqi(entry, err_detail="Upstream returned malformed air payload")
     pollutants = _as_float_dict(entry.get("components"))
 
@@ -95,17 +119,15 @@ async def air_history(
     ),
     ow: OpenWeatherService = Depends(ow_service),
 ) -> AirHistoryResponse:
-    """Return air quality history for the last N days
-
-    - client chooses between 7/30/90 days;
-    - server enforces max days to protect itself;
-    - optional end_unix enables browsing past ranges.
-    """
+    """ Return air quality history for the last N days """
     now_ts = int(time.time())
     end_ts = int(end_unix) if end_unix is not None else now_ts
 
     if end_ts > now_ts + 60:
-        raise HTTPException(status_code=400, detail="end_unix cannot be in the future")
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "INVALID_QUERY", "message": "end_unix cannot be in the future."},
+        )
 
     start_ts = end_ts - days * SECONDS_PER_DAY
     if start_ts < 0:
@@ -119,15 +141,28 @@ async def air_history(
     )
     request.state.upstream = meta
 
+    if not isinstance(payload, dict):
+        raise HTTPException(
+            status_code=502,
+            detail={"code": "UPSTREAM_MALFORMED", "message": "Upstream returned malformed history payload"},
+        )
+
     lst = payload.get("list") or []
     if not lst:
-        raise HTTPException(status_code=404, detail="No air history for these coordinates")
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "NO_HISTORY_DATA", "message": "No air quality history for this location."},
+        )
 
     items: list[AirHistoryItem] = []
     for entry in lst:
+        if not isinstance(entry, dict):
+            continue
         ts_i, aqi_i = _extract_ts_aqi(entry, err_detail="Upstream returned malformed history payload")
         pollutants = _as_float_dict(entry.get("components"))
         items.append(AirHistoryItem(timestamp_unix=ts_i, aqi_ow_1_5=aqi_i, pollutants=pollutants))
+
+    items.sort(key=lambda x: x.timestamp_unix)
 
     return AirHistoryResponse(
         location=Location(lat=lat, lon=lon),

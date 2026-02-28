@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -23,6 +25,12 @@ def error_response(
     """ Standard API error shape """
     request_id = getattr(request.state, "request_id", None)
 
+    merged_headers: dict[str, str] = {}
+    if headers:
+        merged_headers.update(headers)
+    if request_id:
+        merged_headers.setdefault("X-Request-Id", str(request_id))
+
     return JSONResponse(
         status_code=status,
         content={
@@ -30,8 +38,33 @@ def error_response(
             "message": message,
             "request_id": request_id,
         },
-        headers=headers,
+        headers=merged_headers or None,
     )
+
+
+def _http_code_from_status(status_code: int) -> str:
+    """ Fallback error code mapping for generic HTTP exceptions """
+    if status_code in (400, 422):
+        return "INVALID_QUERY"
+    if status_code == 404:
+        return "NOT_FOUND"
+    if status_code == 401:
+        return "UNAUTHORIZED"
+    if status_code == 403:
+        return "FORBIDDEN"
+    if status_code == 429:
+        return "RATE_LIMIT"
+    if 500 <= status_code <= 599:
+        return "INTERNAL_ERROR"
+    return f"HTTP_{status_code}"
+
+
+def _extract_code_message_from_detail(detail: Any) -> tuple[str | None, str | None]: 
+    if isinstance(detail, dict):
+        code = detail.get("code")
+        message = detail.get("message")
+        return (code if isinstance(code, str) else None, message if isinstance(message, str) else None)
+    return None, None
 
 
 def register_error_handlers(app: FastAPI) -> None:
@@ -59,7 +92,7 @@ def register_error_handlers(app: FastAPI) -> None:
             return error_response(
                 request,
                 429,
-                "RATE_LIMIT",
+                "UPSTREAM_RATE_LIMIT",
                 "Rate limit exceeded. Try again later.",
                 headers,
             )
@@ -74,7 +107,15 @@ def register_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(request: Request, exc: StarletteHTTPException):
-        return error_response(request, exc.status_code, "HTTP_ERROR", str(exc.detail))
+        code, message = _extract_code_message_from_detail(exc.detail)
+
+        if code is None:
+            code = _http_code_from_status(exc.status_code)
+
+        if message is None:
+            message = exc.detail if isinstance(exc.detail, str) else "Request failed."
+
+        return error_response(request, exc.status_code, code, message)
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(request: Request, exc: Exception):

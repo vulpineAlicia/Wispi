@@ -3,27 +3,21 @@ import { getAirCurrent, type AirData } from "../lib/api";
 import { useLatestRequest } from "./useLatestRequest";
 
 export function useCurrentAir(lat: number | null, lon: number | null) {
-  const req = useLatestRequest<AirData>();
+  const { data, loading, error, run, reset } = useLatestRequest<AirData>();
 
   const canFetch = useMemo(() => lat != null && lon != null, [lat, lon]);
 
   const refresh = useCallback(() => {
     if (!canFetch) {
-      req.reset();
+      reset();
       return;
     }
-    req.run(() => getAirCurrent(lat as number, lon as number));
-  }, [canFetch, lat, lon, req]);
+    run(() => getAirCurrent(lat as number, lon as number));
+  }, [canFetch, lat, lon, run, reset]);
 
   useEffect(() => {
     refresh();
-  }, [lat, lon]);
+  }, [refresh]);
 
-  return {
-    data: req.data,
-    loading: req.loading,
-    error: req.error,
-    refresh,
-    reset: req.reset,
-  };
+  return { data, loading, error, refresh, reset };
 }

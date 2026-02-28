@@ -9,6 +9,8 @@ import {
   CartesianGrid,
 } from "recharts";
 
+import { getUserMessage } from "../lib/api";
+
 const HISTORY_RANGES = [
   { label: "7 days", days: 7 },
   { label: "30 days", days: 30 },
@@ -32,13 +34,9 @@ function AqiHistoryChart({ data }: { data: ChartPoint[] }) {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 10, right: 12, bottom: 10, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" />
-
           <XAxis dataKey="date" tick={false} tickLine={false} axisLine={false} />
-
           <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} width={28} />
-
           <Tooltip />
-
           <Line
             type="monotone"
             dataKey="aqi"
@@ -62,7 +60,7 @@ type Props = {
   setHistoryDays: (days: HistoryDays) => void;
 
   historyLoading: boolean;
-  historyError: string | null;
+  historyError: unknown | null;
 
   chartData: ChartPoint[];
 
@@ -100,8 +98,9 @@ export default function HistoryPanel({
                   key={r.days}
                   type="button"
                   onClick={() => setHistoryDays(r.days)}
+                  disabled={historyLoading}
                   className={[
-                    "text-sm transition-colors",
+                    "text-sm transition-colors disabled:opacity-60",
                     active ? "text-brand-900 font-semibold" : "text-brand-500 hover:text-brand-900",
                   ].join(" ")}
                 >
@@ -117,7 +116,9 @@ export default function HistoryPanel({
         {historyLoading ? (
           <div className="text-sm text-brand-700">Loading history…</div>
         ) : historyError ? (
-          <div className="text-sm text-red-700">{historyError}</div>
+          <div className="rounded-2xl bg-rose-50 px-3 py-2 text-sm text-rose-900 ring-1 ring-rose-200">
+            {getUserMessage(historyError)}
+          </div>
         ) : (
           <AqiHistoryChart data={chartData} />
         )}

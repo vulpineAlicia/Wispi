@@ -18,7 +18,7 @@ function fixLeafletIconsOnce() {
   if (proto._iconFixApplied) return;
   proto._iconFixApplied = true;
 
-  // @ts-ignore Leaflet internal
+  // Leaflet internal
   delete (L.Icon.Default.prototype as any)._getIconUrl;
 
   L.Icon.Default.mergeOptions({
@@ -46,11 +46,14 @@ export function useLeafletMap({ mtKey, lat, lon, overlayUrl }: Args) {
     const map = L.map(el, { zoomControl: false, attributionControl: true, minZoom: 3 });
     map.attributionControl.setPrefix(false);
 
-    L.tileLayer(`https://api.maptiler.com/maps/base-v4/{z}/{x}/{y}.png?key=${mtKey ?? ""}`, {
-      tileSize: 512,
-      zoomOffset: -1,
-      attribution: "© OpenStreetMap contributors © MapTiler",
-    }).addTo(map);
+    // Base layer
+    if (mtKey) {
+      L.tileLayer(`https://api.maptiler.com/maps/base-v4/{z}/{x}/{y}.png?key=${mtKey}`, {
+        tileSize: 512,
+        zoomOffset: -1,
+        attribution: "© OpenStreetMap contributors © MapTiler",
+      }).addTo(map);
+    }
 
     mapRef.current = map;
 
@@ -60,18 +63,17 @@ export function useLeafletMap({ mtKey, lat, lon, overlayUrl }: Args) {
     map.setMaxBounds(bounds);
     map.options.maxBoundsViscosity = 1.0;
 
-    if (lat != null && lon != null) map.setView([lat, lon], 10);
-    else map.setView([20, 0], 2);
+    // Initial view
+    if (lat != null && lon != null) map.setView([lat, lon], 10, { animate: false });
+    else map.setView([20, 0], 2, { animate: false });
 
-    const invalidate = () => map.invalidateSize();
-    map.whenReady(invalidate);
+    // Size
+    const invalidate = () => map.invalidateSize({ animate: false });
+
     requestAnimationFrame(invalidate);
-    setTimeout(invalidate, 0);
-    setTimeout(invalidate, 150);
-    setTimeout(invalidate, 400);
-
-    const ro = new ResizeObserver(invalidate);
+    const ro = new ResizeObserver(() => invalidate());
     ro.observe(el);
+
     window.addEventListener("resize", invalidate);
 
     return () => {
@@ -82,18 +84,34 @@ export function useLeafletMap({ mtKey, lat, lon, overlayUrl }: Args) {
       markerRef.current = null;
       overlayRef.current = null;
     };
+
   }, []);
 
-  // flyTo
+  // zoom to selection
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
     if (lat == null || lon == null) return;
 
-    if (!markerRef.current) markerRef.current = L.marker([lat, lon]).addTo(map);
-    else markerRef.current.setLatLng([lat, lon]);
+    const next = L.latLng(lat, lon);
 
-    map.flyTo([lat, lon], 10, { duration: 0.6 });
+    if (!markerRef.current) {
+      markerRef.current = L.marker(next).addTo(map);
+      map.setView(next, 10, { animate: false });
+      return;
+    }
+
+    const prev = markerRef.current.getLatLng();
+    const same = prev.lat === next.lat && prev.lng === next.lng;
+    if (same) return;
+
+    markerRef.current.setLatLng(next);
+
+    // flyTo
+    const distMeters = map.getCenter().distanceTo(next);
+    if (distMeters < 150) return;
+
+    map.flyTo(next, 10, { duration: 0.6 });
   }, [lat, lon]);
 
   // Overlay

@@ -3,16 +3,17 @@ import { useCallback, useRef, useState } from "react";
 export type LatestRequestState<T> = {
   data: T | null;
   loading: boolean;
-  error: string | null;
+  error: unknown | null;
   run: (fn: () => Promise<T>) => void;
   reset: () => void;
 };
 
 export function useLatestRequest<T>(): LatestRequestState<T> {
   const reqIdRef = useRef(0);
+
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown | null>(null);
 
   const reset = useCallback(() => {
     reqIdRef.current += 1;
@@ -23,6 +24,7 @@ export function useLatestRequest<T>(): LatestRequestState<T> {
 
   const run = useCallback((fn: () => Promise<T>) => {
     const id = ++reqIdRef.current;
+
     setLoading(true);
     setError(null);
 
@@ -33,7 +35,8 @@ export function useLatestRequest<T>(): LatestRequestState<T> {
       })
       .catch((e: unknown) => {
         if (reqIdRef.current !== id) return;
-        setError(e instanceof Error ? e.message : "Request failed");
+
+        setError(e);
         setData(null);
       })
       .finally(() => {

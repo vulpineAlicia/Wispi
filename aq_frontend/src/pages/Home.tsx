@@ -24,9 +24,7 @@ export default function Home() {
   const airReq = useAsync<AirData>();
   const air = airReq.data ?? null;
 
-  const detailsTo = selected
-    ? mapUrl(selected.lat, selected.lon, selected.name)
-    : "/map";
+  const detailsTo = selected ? mapUrl(selected.lat, selected.lon, selected.name) : "/map";
 
   const selectedLabel = selected
     ? `${selected.name}${selected.state ? `, ${selected.state}` : ""} — ${selected.country}`
@@ -39,18 +37,11 @@ export default function Home() {
       <main className="mx-auto max-w-6xl px-4 pt-6 pb-14">
         {/* Hero */}
         <section id="lookup" className="mt-2 scroll-mt-35">
-          <div
-            className="
-              relative flex min-h-[68vh] items-center overflow-hidden rounded-3xl
-              ring-1 ring-brand-300/50
-              shadow-[0_20px_50px_-20px_rgba(15,58,87,0.35)]
-            "
-          >
-            {/* Background */}
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${lookupBg})` }}
-            />
+          <div className="relative flex min-h-[68vh] items-center overflow-hidden rounded-3xl ring-1 ring-brand-300/50 shadow-[0_20px_50px_-20px_rgba(15,58,87,0.35)]">
+          
+          
+          {/* Background */}
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${lookupBg})` }} />
             <div className="absolute inset-0 bg-white/5 backdrop-blur-[3px]" />
             <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-white/40 to-transparent" />
 
@@ -75,20 +66,10 @@ export default function Home() {
                     disabled={airReq.loading}
                     onSelect={async (place) => {
                       setSelected(place);
-                      await airReq.run(
-                        () => getAirCurrent(place.lat, place.lon),
-                        "Could not load air quality data for this city."
-                      );
+                      await airReq.run(() => getAirCurrent(place.lat, place.lon));
                     }}
                   />
                 </div>
-
-                {/* Air fetch error */}
-                {airReq.error && (
-                  <div className="mt-4 w-full max-w-xl rounded-3xl bg-rose-50 px-4 py-3 text-sm text-rose-900 ring-1 ring-rose-200">
-                    {airReq.error}
-                  </div>
-                )}
 
                 {/* Results */}
                 {selected && (
@@ -100,7 +81,7 @@ export default function Home() {
                       lon={selected.lon}
                       air={air}
                       airLoading={airReq.loading}
-                      airError={airReq.error}
+                      airError={airReq.error} 
                       detailsTo={detailsTo}
                     />
                   </div>

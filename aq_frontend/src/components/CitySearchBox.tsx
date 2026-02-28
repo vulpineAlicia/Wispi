@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { geocodeCity } from "../lib/api";
-import type { GeoResult } from "../lib/api";
+import { geocodeCity, getUserMessage, type GeoResult } from "../lib/api";
 import useAsync from "../hooks/useAsync";
 
 type Props = {
@@ -22,22 +21,30 @@ export default function CitySearchBox({
   const geo = useAsync<GeoResult[]>();
 
   const loading = geo.loading || disabled;
-  const err = geo.error;
 
   async function onSearch() {
+    if (loading) return;
     setHint(null);
+
     const q = city.trim();
     if (!q) return;
 
-    const r = await geo.run(() => geocodeCity(q), "Could not search cities (backend unavailable?)");
-    if (r && r.length === 0) setHint("No matches found. Try a different spelling.");
+    geo.setData([]);
+
+    const r = await geo.run(() => geocodeCity(q));
+    if (r && r.length === 0) {
+      setHint("No matches found. Try a different spelling.");
+    }
   }
 
   const results = geo.data ?? [];
 
+  const errorMsg = geo.error ? getUserMessage(geo.error) : null;
+  const hintMsg = !geo.error ? hint : null;
+
   return (
     <>
-      <div className="rounded-3xl bg-white border border-brand-200 p-2">
+      <div className="rounded-3xl border border-brand-200 bg-white p-2">
         <label className="sr-only" htmlFor="city-input">
           City name
         </label>
@@ -64,21 +71,32 @@ export default function CitySearchBox({
         </div>
       </div>
 
-      {(err || hint) && (
+      {errorMsg && (
         <div className="mt-4 w-full rounded-3xl bg-rose-50 px-4 py-3 text-sm text-rose-900 ring-1 ring-rose-200">
-          {err ?? hint}
+          {errorMsg}
+        </div>
+      )}
+
+      {hintMsg && (
+        <div className="mt-4 w-full rounded-3xl bg-brand-50 px-4 py-3 text-sm text-brand-900 ring-1 ring-brand-200">
+          {hintMsg}
         </div>
       )}
 
       {results.length > 0 && (
         <div className="mt-4 w-full rounded-3xl bg-white p-3 ring-1 ring-brand-200 backdrop-blur">
-          <div className="px-2 pb-3 text-xs font-medium text-brand-700">Select a city</div>
+          <div className="px-2 pb-3 text-xs font-medium text-brand-700">
+            Select a city
+          </div>
+
           <ul className="max-h-56 overflow-auto">
             {results.map((r) => (
               <li key={`${r.lat},${r.lon},${r.name}`}>
                 <button
                   type="button"
                   onClick={async () => {
+                    if (loading) return;
+                    setHint(null);
                     geo.setData([]);
                     await onSelect(r);
                   }}
