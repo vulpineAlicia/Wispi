@@ -11,7 +11,7 @@ export function useCurrentAir(lat: number | null, lon: number | null) {
       return;
     }
 
-    void execute(() => getAirCurrent(lat, lon));
+    void execute((signal) => getAirCurrent(lat, lon, signal));
   }, [lat, lon, execute, clear]);
 
   useEffect(() => {

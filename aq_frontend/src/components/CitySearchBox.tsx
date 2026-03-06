@@ -32,7 +32,7 @@ export default function CitySearchBox({
 
     setHint(null);
 
-    const result = await geo.execute(() => geocodeCity(q));
+    const result = await geo.execute((signal) => geocodeCity(q, signal));
     if (result && result.length === 0) {
       setHint("No matches found. Try a different spelling.");
     }

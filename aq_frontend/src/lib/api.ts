@@ -30,34 +30,11 @@ async function safeReadJson(res: Response): Promise<unknown> {
 }
 
 function getHeaderRequestId(res: Response): string | undefined {
-  return res.headers.get("x-request-id") ?? res.headers.get("X-Request-Id") ?? undefined;
-}
-
-// cache
-
-type CacheEntry = { at: number; value: unknown };
-
-const inFlight = new Map<string, Promise<unknown>>();
-const cache = new Map<string, CacheEntry>();
-
-function buildKey(path: string, init?: RequestInit): string {
-  const method = (init?.method ?? "GET").toUpperCase();
-  return `${method} ${API_BASE}${path}`;
-}
-
-function getCached<T>(key: string, ttlMs: number): T | null {
-  if (ttlMs <= 0) return null;
-  const hit = cache.get(key);
-  if (!hit) return null;
-  if (Date.now() - hit.at > ttlMs) {
-    cache.delete(key);
-    return null;
-  }
-  return hit.value as T;
-}
-
-function setCached(key: string, value: unknown) {
-  cache.set(key, { at: Date.now(), value });
+  return (
+    res.headers.get("x-request-id") ??
+    res.headers.get("X-Request-Id") ??
+    undefined
+  );
 }
 
 // JSON helper
@@ -70,8 +47,15 @@ async function getJson<T>(path: string, init?: RequestInit): Promise<T> {
       cache: "no-store",
       ...init,
     });
-  } catch {
-    throw new ApiError("Network error. Please check your connection.", 0, "NETWORK_ERROR");
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error;
+    }
+    throw new ApiError(
+      "Network error. Please check your connection.",
+      0,
+      "NETWORK_ERROR"
+    );
   }
 
   const headerRid = getHeaderRequestId(res);
@@ -95,73 +79,45 @@ async function getJson<T>(path: string, init?: RequestInit): Promise<T> {
   return (await res.json()) as T;
 }
 
-
-// if a same request is already running -> reuse it
-
-async function getJsonDedupe<T>(
-  path: string,
-  init?: RequestInit,
-  opts?: { ttlMs?: number }
-): Promise<T> {
-  const key = buildKey(path, init);
-  const ttlMs = opts?.ttlMs ?? 0;
-
-  const cached = getCached<T>(key, ttlMs);
-  if (cached !== null) return cached;
-
-  const running = inFlight.get(key);
-  if (running) return (await running) as T;
-
-  const p = (async () => {
-    const data = await getJson<T>(path, init);
-    if (ttlMs > 0) setCached(key, data);
-    return data;
-  })();
-
-  inFlight.set(key, p as Promise<unknown>);
-
-  try {
-    return await p;
-  } finally {
-    inFlight.delete(key);
-  }
-}
-
 // api calls
 
 /* Server status pill */
 export async function checkHealth(): Promise<boolean> {
   const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), 2500);
+  const timer = setTimeout(() => controller.abort(), 2500);
 
   try {
-    const data = await getJsonDedupe<{ status?: string }>(
-      "/health",
-      { signal: controller.signal },
-      { ttlMs: 1500 }
-    );
+    const data = await getJson<{ status?: string }>("/health", {
+      signal: controller.signal,
+    });
     return data.status === "ok";
   } catch {
     return false;
   } finally {
-    clearTimeout(t);
+    clearTimeout(timer);
   }
 }
 
 /* City lookup */
-export async function geocodeCity(q: string): Promise<GeoResult[]> {
-  const data = await getJsonDedupe<{ results?: GeoResult[] }>(
+export async function geocodeCity(
+  q: string,
+  signal?: AbortSignal
+): Promise<GeoResult[]> {
+  const data = await getJson<{ results?: GeoResult[] }>(
     `/geocode?q=${encodeURIComponent(q)}`,
-    undefined,
-    { ttlMs: 0 }
+    { signal }
   );
   return data.results ?? [];
 }
 
 /* Air quality */
-export async function getAirCurrent(lat: number, lon: number): Promise<AirData> {
-  return await getJsonDedupe<AirData>(`/air/current?lat=${lat}&lon=${lon}`, undefined, {
-    ttlMs: 1500,
+export async function getAirCurrent(
+  lat: number,
+  lon: number,
+  signal?: AbortSignal
+): Promise<AirData> {
+  return await getJson<AirData>(`/air/current?lat=${lat}&lon=${lon}`, {
+    signal,
   });
 }
 
@@ -184,7 +140,8 @@ export async function getAirHistory(
   lat: number,
   lon: number,
   days: number,
-  end_unix?: number
+  end_unix?: number,
+  signal?: AbortSignal
 ): Promise<AirHistoryResponse> {
   const qs = new URLSearchParams({
     lat: String(lat),
@@ -193,8 +150,8 @@ export async function getAirHistory(
   });
   if (end_unix != null) qs.set("end_unix", String(end_unix));
 
-  return await getJsonDedupe<AirHistoryResponse>(`/air/history?${qs.toString()}`, undefined, {
-    ttlMs: 5000,
+  return await getJson<AirHistoryResponse>(`/air/history?${qs.toString()}`, {
+    signal,
   });
 }
 
@@ -203,7 +160,6 @@ export async function getAirHistory(
 export function getUserMessage(error: unknown): string {
   if (error instanceof ApiError) {
     switch (error.code) {
-      // client
       case "INVALID_QUERY":
       case "HTTP_400":
       case "HTTP_422":
@@ -215,7 +171,6 @@ export function getUserMessage(error: unknown): string {
       case "NO_HISTORY_DATA":
         return "No history data for this location.";
 
-      // upstream
       case "RATE_LIMIT":
       case "HTTP_429":
         return "Too many requests right now. Please try again in a minute.";
@@ -232,10 +187,14 @@ export function getUserMessage(error: unknown): string {
         return "The data provider is temporarily unavailable. Please try again later.";
 
       default:
-        if (error.status === 0) return "Network error. Please check your connection.";
+        if (error.status === 0) {
+          return "Network error. Please check your connection.";
+        }
         if (error.status === 404) return "Not found.";
         if (error.status === 429) return "Too many requests. Try again soon.";
-        if (error.status >= 500) return "Server error. Please try again later.";
+        if (error.status >= 500) {
+          return "Server error. Please try again later.";
+        }
         return error.message || "Something went wrong.";
     }
   }

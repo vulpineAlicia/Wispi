@@ -16,7 +16,7 @@ export function useAirHistory(
       return;
     }
 
-    void execute(() => getAirHistory(lat, lon, days));
+    void execute((signal) => getAirHistory(lat, lon, days, undefined, signal));
   }, [lat, lon, days, execute, clear]);
 
   useEffect(() => {
