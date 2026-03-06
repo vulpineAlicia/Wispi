@@ -4,46 +4,60 @@ export type LatestRequestState<T> = {
   data: T | null;
   loading: boolean;
   error: unknown | null;
-  run: (fn: () => Promise<T>) => void;
-  reset: () => void;
+  execute: (fn: () => Promise<T>) => Promise<T | null>;
+  clear: () => void;
 };
 
 export function useLatestRequest<T>(): LatestRequestState<T> {
-  const reqIdRef = useRef(0);
+  const requestIdRef = useRef(0);
 
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown | null>(null);
 
-  const reset = useCallback(() => {
-    reqIdRef.current += 1;
+  // invalidate in-flight requests and clear local state
+  const clear = useCallback(() => {
+    requestIdRef.current += 1;
     setData(null);
     setError(null);
     setLoading(false);
   }, []);
 
-  const run = useCallback((fn: () => Promise<T>) => {
-    const id = ++reqIdRef.current;
+  const execute = useCallback(
+    async (fn: () => Promise<T>): Promise<T | null> => {
+      const id = ++requestIdRef.current;
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    fn()
-      .then((result) => {
-        if (reqIdRef.current !== id) return;
+      try {
+        const result = await fn();
+
+        // ignore stale results
+        if (requestIdRef.current !== id) return null;
+
         setData(result);
-      })
-      .catch((e: unknown) => {
-        if (reqIdRef.current !== id) return;
+        return result;
+      } catch (e: unknown) {
+        if (requestIdRef.current !== id) return null;
 
         setError(e);
         setData(null);
-      })
-      .finally(() => {
-        if (reqIdRef.current !== id) return;
-        setLoading(false);
-      });
-  }, []);
+        return null;
+      } finally {
+        if (requestIdRef.current === id) {
+          setLoading(false);
+        }
+      }
+    },
+    []
+  );
 
-  return { data, loading, error, run, reset };
+  return {
+    data,
+    loading,
+    error,
+    execute,
+    clear,
+  };
 }

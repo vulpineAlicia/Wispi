@@ -1,23 +1,22 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import { getAirCurrent, type AirData } from "../lib/api";
 import { useLatestRequest } from "./useLatestRequest";
 
 export function useCurrentAir(lat: number | null, lon: number | null) {
-  const { data, loading, error, run, reset } = useLatestRequest<AirData>();
-
-  const canFetch = useMemo(() => lat != null && lon != null, [lat, lon]);
+  const { data, loading, error, execute, clear } = useLatestRequest<AirData>();
 
   const refresh = useCallback(() => {
-    if (!canFetch) {
-      reset();
+    if (lat == null || lon == null) {
+      clear();
       return;
     }
-    run(() => getAirCurrent(lat as number, lon as number));
-  }, [canFetch, lat, lon, run, reset]);
+
+    void execute(() => getAirCurrent(lat, lon));
+  }, [lat, lon, execute, clear]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  return { data, loading, error, refresh, reset };
+  return { data, loading, error, refresh, clear };
 }

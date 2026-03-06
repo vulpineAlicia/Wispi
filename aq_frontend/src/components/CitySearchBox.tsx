@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { geocodeCity, getUserMessage, type GeoResult } from "../lib/api";
-import useAsync from "../hooks/useAsync";
+import { useLatestRequest } from "../hooks/useLatestRequest";
 
 type Props = {
   onSelect: (place: GeoResult) => void | Promise<void>;
@@ -18,26 +18,25 @@ export default function CitySearchBox({
   const [city, setCity] = useState("");
   const [hint, setHint] = useState<string | null>(null);
 
-  const geo = useAsync<GeoResult[]>();
+  const geo = useLatestRequest<GeoResult[]>();
 
-  const loading = geo.loading || disabled;
+  const isBusy = geo.loading;
+  const isDisabled = disabled || isBusy;
+  const results = geo.data ?? [];
 
   async function onSearch() {
-    if (loading) return;
-    setHint(null);
+    if (isDisabled) return;
 
     const q = city.trim();
     if (!q) return;
 
-    geo.setData([]);
+    setHint(null);
 
-    const r = await geo.run(() => geocodeCity(q));
-    if (r && r.length === 0) {
+    const result = await geo.execute(() => geocodeCity(q));
+    if (result && result.length === 0) {
       setHint("No matches found. Try a different spelling.");
     }
   }
-
-  const results = geo.data ?? [];
 
   const errorMsg = geo.error ? getUserMessage(geo.error) : null;
   const hintMsg = !geo.error ? hint : null;
@@ -53,20 +52,29 @@ export default function CitySearchBox({
           <input
             id="city-input"
             value={city}
-            onChange={(e) => setCity(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && onSearch()}
+            onChange={(e) => {
+              setCity(e.target.value);
+              if (hint) setHint(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                void onSearch();
+              }
+            }}
             placeholder={placeholder}
-            disabled={loading}
+            disabled={isDisabled}
             className="h-12 w-full bg-transparent px-4 text-base outline-none placeholder:text-brand-900/50"
           />
 
           <button
             type="button"
-            onClick={onSearch}
-            disabled={loading}
+            onClick={() => {
+              void onSearch();
+            }}
+            disabled={isDisabled}
             className="h-12 shrink-0 rounded-3xl bg-brand-900 px-6 text-base font-medium text-brand-50 transition hover:bg-brand-700 disabled:opacity-60"
           >
-            {loading ? "Loading…" : buttonText}
+            {isBusy ? "Loading…" : buttonText}
           </button>
         </div>
       </div>
@@ -95,9 +103,9 @@ export default function CitySearchBox({
                 <button
                   type="button"
                   onClick={async () => {
-                    if (loading) return;
+                    if (isDisabled) return;
                     setHint(null);
-                    geo.setData([]);
+                    geo.clear();
                     await onSelect(r);
                   }}
                   className="w-full rounded-2xl px-3 py-3 text-left text-sm text-brand-900 transition hover:bg-brand-50"

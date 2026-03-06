@@ -7,21 +7,21 @@ export function useAirHistory(
   lon: number | null,
   days: number
 ) {
-  const { data, loading, error, run, reset } =
+  const { data, loading, error, execute, clear } =
     useLatestRequest<AirHistoryResponse>();
 
   const refresh = useCallback(() => {
     if (lat == null || lon == null) {
-      reset();
+      clear();
       return;
     }
 
-    run(() => getAirHistory(lat, lon, days));
-  }, [lat, lon, days, run, reset]);
+    void execute(() => getAirHistory(lat, lon, days));
+  }, [lat, lon, days, execute, clear]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  return { data, loading, error, refresh, reset };
+  return { data, loading, error, refresh, clear };
 }
