@@ -15,6 +15,9 @@ import { useLeafletMap } from "../hooks/useLeafletMap";
 import { useCurrentAir } from "../hooks/useCurrentAir";
 import { useAirHistory } from "../hooks/useAirHistory";
 
+const MT_KEY = import.meta.env.VITE_MAPTILER_KEY;
+const API_BASE = import.meta.env.VITE_API_BASE ?? "/api";
+
 function toNumberOrNull(v: string | null) {
   if (v == null) return null;
   const s = v.trim();
@@ -33,22 +36,18 @@ export default function MapPage() {
 
   const hasSelection = lat != null && lon != null;
 
-  const OW_KEY = import.meta.env.VITE_OPENWEATHER_KEY;
-  const MT_KEY = import.meta.env.VITE_MAPTILER_KEY;
-
   const [overlay, setOverlay] = useState<OverlayMode>("none");
   const [historyDays, setHistoryDays] = useState<HistoryDays>(7);
 
   const overlayUrl = useMemo(() => {
-    if (!OW_KEY) return null;
     if (overlay === "temp") {
-      return `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${OW_KEY}`;
+      return `${API_BASE}/tiles/ow/temp_new/{z}/{x}/{y}.png`;
     }
     if (overlay === "precip") {
-      return `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${OW_KEY}`;
+      return `${API_BASE}/tiles/ow/precipitation_new/{z}/{x}/{y}.png`;
     }
     return null;
-  }, [overlay, OW_KEY]);
+  }, [overlay, API_BASE]);
 
   // Leaflet
   const { mapDivRef } = useLeafletMap({ mtKey: MT_KEY, lat, lon, overlayUrl });

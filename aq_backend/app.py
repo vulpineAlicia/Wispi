@@ -17,42 +17,45 @@ from aq_backend.middleware.timeout import RequestTimeoutMiddleware
 from aq_backend.routes.air import router as air_router
 from aq_backend.routes.geocode import router as geocode_router
 from aq_backend.routes.health import router as health_router
+from aq_backend.routes.tiles import router as tiles_router
 from aq_backend.services.openweather import OpenWeatherService
 from aq_backend.state import AppState
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """
-    App lifespan handler
-
-    On startup: creates shared HTTP client and OpenWeather service (stores them in app state);
-    On shutdown: closes the HTTP client.
-    """
-    settings = get_settings()
-
-    async with httpx.AsyncClient(timeout=httpx.Timeout(settings.http_timeout_s)) as client:
-        ow = OpenWeatherService(
-            client=client,
-            api_key=settings.openweather_api_key,
-            geocode_url=settings.geocode_url,
-            air_url=settings.air_url,
-            history_url=settings.history_url,
-            total_budget_s=settings.ow_total_budget_s,
-            max_attempts=settings.ow_max_attempts,
-        )
-        app.state.app_state = AppState(http=client, ow=ow)
-        yield
-
-
 def create_app() -> FastAPI:
-    """ 
+    """
     Application factory
 
-    Creates and configures the FastAPI app (logging, middleware, error handling, routes) 
+    Creates and configures the FastAPI app (logging, middleware, error handling, routes)
     """
     setup_logging()
     settings = get_settings()
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        """
+        App lifespan handler
+
+        On startup: creates shared HTTP client and OpenWeather service (stores them in app state);
+        On shutdown: closes the HTTP client.
+        """
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(settings.http_timeout_s)
+        ) as client:
+            ow = OpenWeatherService(
+                client=client,
+                api_key=settings.openweather_api_key,
+                geocode_url=settings.geocode_url,
+                air_url=settings.air_url,
+                history_url=settings.history_url,
+                total_budget_s=settings.ow_total_budget_s,
+                max_attempts=settings.ow_max_attempts,
+            )
+
+            app.state.settings = settings
+            app.state.app_state = AppState(http=client, ow=ow)
+
+            yield
 
     app = FastAPI(title="AQ Backend", version="0.0.1", lifespan=lifespan)
 
@@ -72,5 +75,6 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(geocode_router)
     app.include_router(air_router)
+    app.include_router(tiles_router)
 
     return app
