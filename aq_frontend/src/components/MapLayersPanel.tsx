@@ -1,12 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-
-export type OverlayMode = "none" | "temp" | "precip";
-
-const LAYER_LEGEND: Record<OverlayMode, { title: string; gradientClass: string } | null> = {
-  none: null,
-  temp: { title: "Temperature", gradientClass: "from-sky-500 via-lime-400 to-red-500" },
-  precip: { title: "Precipitation", gradientClass: "from-cyan-200 via-sky-400 to-indigo-700" },
-};
+import { OVERLAY_OPTIONS, type OverlayMode } from "../lib/mapOverlay";
 
 type Props = {
   overlay: OverlayMode;
@@ -14,7 +7,15 @@ type Props = {
   className?: string;
 };
 
-export default function MapLayersPanel({ overlay, setOverlay, className }: Props) {
+const MODES: OverlayMode[] = ["none", "temp", "precip"];
+
+export default function MapLayersPanel({
+  overlay,
+  setOverlay,
+  className,
+}: Props) {
+  const legend = OVERLAY_OPTIONS[overlay];
+
   return (
     <aside
       className={
@@ -25,25 +26,31 @@ export default function MapLayersPanel({ overlay, setOverlay, className }: Props
       <div className="px-1 text-sm font-medium">Layers</div>
 
       <div className="mt-3 flex flex-col gap-2.5">
-        {(["none", "temp", "precip"] as OverlayMode[]).map((m) => (
+        {MODES.map((mode) => (
           <button
-            key={m}
+            key={mode}
             type="button"
-            onClick={() => setOverlay(m)}
+            onClick={() => setOverlay(mode)}
             className={
-              "rounded-2xl px-4 py-2.5 text-sm transition text-left " +
-              (overlay === m ? "bg-brand-900 text-white" : "text-brand-900 bg-white border border-brand-200")
+              "rounded-2xl px-4 py-2.5 text-left text-sm transition " +
+              (overlay === mode
+                ? "bg-brand-900 text-white"
+                : "border border-brand-200 bg-white text-brand-900")
             }
           >
-            {m === "none" ? "None" : m === "temp" ? "Temperature" : "Precipitation"}
+            {mode === "none" ? "None" : OVERLAY_OPTIONS[mode]!.label}
           </button>
         ))}
       </div>
 
-      {LAYER_LEGEND[overlay] && (
-        <div className="mt-4 rounded-2xl bg-white border border-brand-200 px-4 py-4">
-          <div className="text-xs font-medium text-brand-900">{LAYER_LEGEND[overlay]!.title} scale</div>
-          <div className={`mt-3 h-2 w-full rounded-full bg-gradient-to-r ${LAYER_LEGEND[overlay]!.gradientClass}`} />
+      {legend && (
+        <div className="mt-4 rounded-2xl border border-brand-200 bg-white px-4 py-4">
+          <div className="text-xs font-medium text-brand-900">
+            {legend.title} scale
+          </div>
+          <div
+            className={`mt-3 h-2 w-full rounded-full bg-gradient-to-r ${legend.gradientClass}`}
+          />
           <div className="mt-2 flex justify-between text-[11px] text-brand-700">
             <span>Low</span>
             <span>High</span>
