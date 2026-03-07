@@ -1,27 +1,17 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { getAirHistory, type AirHistoryResponse } from "../lib/api";
-import { useLatestRequest } from "./useLatestRequest";
+import { useLatLonRequest } from "./useLatLonRequest";
 
 export function useAirHistory(
   lat: number | null,
   lon: number | null,
   days: number
 ) {
-  const { data, loading, error, execute, clear } =
-    useLatestRequest<AirHistoryResponse>();
+  const request = useCallback(
+    (lat: number, lon: number, signal: AbortSignal) =>
+      getAirHistory(lat, lon, days, undefined, signal),
+    [days]
+  );
 
-  const refresh = useCallback(() => {
-    if (lat == null || lon == null) {
-      clear();
-      return;
-    }
-
-    void execute((signal) => getAirHistory(lat, lon, days, undefined, signal));
-  }, [lat, lon, days, execute, clear]);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  return { data, loading, error, refresh, clear };
+  return useLatLonRequest<AirHistoryResponse>(lat, lon, request);
 }
