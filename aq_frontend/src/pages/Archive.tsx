@@ -6,19 +6,18 @@ import CityResultPanel from "../components/CityResultPanel";
 import HistoryPanel, { type HistoryDays } from "../components/HistoryPanel";
 
 import { useAirHistory } from "../hooks/useAirHistory";
-import { toDailyAqiSeries, type ChartPoint } from "../lib/historyChart";
-import type { AirData } from "../lib/api";
+import {
+  buildPollutantsByDay,
+  toDailyAqiSeries,
+  type ChartPoint,
+} from "../lib/historyChart";
+import { getLocationSelectionFromParams, parseNumberOrNull } from "../lib/locationSelection";
+import type { AirData, GeoResult } from "../lib/api";
 
 import archiveBooks from "../assets/archive-books.svg";
 
 const DEFAULT_DAYS = 30;
 const MAX_DAYS = 365;
-
-function parseNumber(v: string | null) {
-  if (v == null) return null;
-  const n = Number(v.trim());
-  return Number.isFinite(n) ? n : null;
-}
 
 function clampDays(value: number, min: number, max: number, fallback: number) {
   const n = Math.floor(value);
@@ -28,24 +27,13 @@ function clampDays(value: number, min: number, max: number, fallback: number) {
   return n;
 }
 
-function toDayKeyUTC(tsSec: number) {
-  return new Date(tsSec * 1000).toISOString().slice(0, 10);
-}
-
-type Pollutants = Record<string, number>;
-
 export default function ArchivePage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
 
-  const lat = parseNumber(params.get("lat"));
-  const lon = parseNumber(params.get("lon"));
-  const hasSelection = lat != null && lon != null;
+  const selection = getLocationSelectionFromParams(params, "Selected location");
 
-  const nameParam = (params.get("name") ?? "").trim();
-  const name = hasSelection && !nameParam ? "Selected location" : nameParam;
-
-  const rawDays = parseNumber(params.get("days"));
+  const rawDays = parseNumberOrNull(params.get("days"));
   const historyDays = clampDays(
     rawDays ?? DEFAULT_DAYS,
     1,
@@ -63,44 +51,37 @@ export default function ArchivePage() {
   );
 
   useEffect(() => {
-    if (!hasSelection) return;
+    if (!selection) return;
 
-    const parsed = parseNumber(params.get("days"));
+    const parsed = parseNumberOrNull(params.get("days"));
     const clamped = clampDays(parsed ?? DEFAULT_DAYS, 1, MAX_DAYS, DEFAULT_DAYS);
 
     if (params.get("days") == null || parsed == null || clamped !== parsed) {
       updateSearchParams((p) => p.set("days", String(clamped)));
     }
-  }, [hasSelection, params, updateSearchParams]);
+  }, [selection, params, updateSearchParams]);
 
-  const history = useAirHistory(lat, lon, historyDays);
+  const history = useAirHistory(
+    selection?.lat ?? null,
+    selection?.lon ?? null,
+    historyDays
+  );
 
   const baseSeries: ChartPoint[] = useMemo(() => {
     if (!history.data) return [];
     return toDailyAqiSeries(history.data.items);
   }, [history.data]);
 
-  const pollutantsByDay = useMemo(() => {
-    const m = new Map<string, Pollutants>();
-
-    for (const it of history.data?.items ?? []) {
-      const ts = it.timestamp_unix;
-      if (typeof ts !== "number") continue;
-
-      const p = it.pollutants as Pollutants | undefined;
-      if (!p || typeof p !== "object") continue;
-
-      m.set(toDayKeyUTC(ts), p);
-    }
-
-    return m;
-  }, [history.data]);
+  const pollutantsByDay = useMemo(
+    () => buildPollutantsByDay(history.data?.items ?? []),
+    [history.data]
+  );
 
   const chartData: ChartPoint[] = useMemo(() => {
     if (!baseSeries.length) return [];
-    return baseSeries.map((pt) => ({
-      ...pt,
-      pollutants: pollutantsByDay.get(pt.date),
+    return baseSeries.map((point) => ({
+      ...point,
+      pollutants: pollutantsByDay.get(point.date),
     }));
   }, [baseSeries, pollutantsByDay]);
 
@@ -108,23 +89,33 @@ export default function ArchivePage() {
 
   useEffect(() => {
     setPickedDay(null);
-  }, [lat, lon, historyDays]);
+  }, [selection?.lat, selection?.lon, historyDays]);
 
   const setHistoryDays = useCallback(
     (nextDays: HistoryDays) => {
-      const v = clampDays(Number(nextDays), 1, MAX_DAYS, DEFAULT_DAYS);
-      updateSearchParams((p) => p.set("days", String(v)));
+      const value = clampDays(Number(nextDays), 1, MAX_DAYS, DEFAULT_DAYS);
+      updateSearchParams((p) => p.set("days", String(value)));
     },
     [updateSearchParams]
   );
 
   const pickedAir: AirData | null = useMemo(() => {
     if (!pickedDay) return null;
+
     return {
       aqi_ow_1_5: pickedDay.aqi,
       pollutants: pickedDay.pollutants ?? {},
     };
   }, [pickedDay]);
+
+  function handleSelectCity(place: GeoResult) {
+    const next = new URLSearchParams();
+    next.set("lat", String(place.lat));
+    next.set("lon", String(place.lon));
+    next.set("name", place.name);
+    next.set("days", String(DEFAULT_DAYS));
+    navigate({ search: next.toString() });
+  }
 
   return (
     <main className="mx-auto max-w-6xl px-4 pt-6 pb-16 text-brand-900">
@@ -140,16 +131,7 @@ export default function ArchivePage() {
             </p>
 
             <div className="mt-4 w-full max-w-[420px]">
-              <CitySearchBox
-                onSelect={(place) => {
-                  const next = new URLSearchParams();
-                  next.set("lat", String(place.lat));
-                  next.set("lon", String(place.lon));
-                  next.set("name", place.name);
-                  next.set("days", String(DEFAULT_DAYS));
-                  navigate({ search: next.toString() });
-                }}
-              />
+              <CitySearchBox onSelect={handleSelectCity} />
             </div>
           </div>
 
@@ -163,14 +145,14 @@ export default function ArchivePage() {
           </div>
         </div>
 
-        {hasSelection && (
+        {selection && (
           <div className="mt-10 space-y-6">
             <div className="w-full max-w-[420px]">
               <CityResultPanel
                 variant="map"
-                name={name}
-                lat={lat!}
-                lon={lon!}
+                name={selection.name}
+                lat={selection.lat}
+                lon={selection.lon}
                 air={null}
                 showAqi={false}
               />
@@ -184,9 +166,9 @@ export default function ArchivePage() {
 
                   <CityResultPanel
                     variant="map"
-                    name={name}
-                    lat={lat!}
-                    lon={lon!}
+                    name={selection.name}
+                    lat={selection.lat}
+                    lon={selection.lon}
                     air={pickedAir}
                     airLoading={false}
                     airError={null}
@@ -198,15 +180,15 @@ export default function ArchivePage() {
             </div>
 
             <HistoryPanel
-              hasSelection={hasSelection}
+              hasSelection={selection != null}
               historyDays={historyDays}
               setHistoryDays={setHistoryDays}
               historyLoading={history.loading}
               historyError={history.error}
               chartData={chartData}
-              lat={lat!}
-              lon={lon!}
-              name={name}
+              lat={selection.lat}
+              lon={selection.lon}
+              name={selection.name}
               showPresets={false}
               allowCustomDays
               maxDays={MAX_DAYS}

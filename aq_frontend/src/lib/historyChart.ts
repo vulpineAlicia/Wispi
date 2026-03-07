@@ -11,9 +11,14 @@ type HistoryItemLike = {
   aqi_ow_1_5: number;
 };
 
+type HistoryItemWithPollutants = {
+  timestamp_unix: number;
+  pollutants?: Pollutants;
+};
+
 const SEC_TO_MS = 1000;
 
-function dayKeyUTC(tsSec: number): string {
+export function toDayKeyUTC(tsSec: number): string {
   return new Date(tsSec * SEC_TO_MS).toISOString().slice(0, 10);
 }
 
@@ -29,7 +34,7 @@ export function toDailyAqiSeries(items: readonly HistoryItemLike[]): ChartPoint[
       continue;
     }
 
-    const key = dayKeyUTC(item.timestamp_unix);
+    const key = toDayKeyUTC(item.timestamp_unix);
 
     let bucket = buckets.get(key);
     if (!bucket) {
@@ -47,4 +52,22 @@ export function toDailyAqiSeries(items: readonly HistoryItemLike[]): ChartPoint[
       date,
       aqi: Math.round(bucket.sum / bucket.count),
     }));
+}
+
+export function buildPollutantsByDay(
+  items: readonly HistoryItemWithPollutants[]
+): Map<string, Pollutants> {
+  const result = new Map<string, Pollutants>();
+
+  for (const item of items) {
+    const ts = item.timestamp_unix;
+    if (typeof ts !== "number") continue;
+
+    const pollutants = item.pollutants;
+    if (!pollutants || typeof pollutants !== "object") continue;
+
+    result.set(toDayKeyUTC(ts), pollutants);
+  }
+
+  return result;
 }

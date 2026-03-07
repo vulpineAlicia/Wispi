@@ -10,6 +10,7 @@ import MapLayersPanel from "../components/MapLayersPanel";
 
 import type { GeoResult } from "../lib/api";
 import { toDailyAqiSeries } from "../lib/historyChart";
+import { getLocationSelectionFromParams } from "../lib/locationSelection";
 import { getOverlayUrl, type OverlayMode } from "../lib/mapOverlay";
 import { mapUrl } from "../lib/mapUrl";
 
@@ -19,30 +20,11 @@ import { useAirHistory } from "../hooks/useAirHistory";
 
 const MT_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
-function toNumberOrNull(v: string | null) {
-  if (v == null) return null;
-  const s = v.trim();
-  if (!s) return null;
-  const n = Number(s);
-  return Number.isFinite(n) ? n : null;
-}
-
 export default function MapPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
 
-  const lat = toNumberOrNull(params.get("lat"));
-  const lon = toNumberOrNull(params.get("lon"));
-  const name = params.get("name") ?? "";
-
-  const selection =
-    lat != null && lon != null
-      ? {
-          lat,
-          lon,
-          name,
-        }
-      : null;
+  const selection = getLocationSelectionFromParams(params);
 
   const [overlay, setOverlay] = useState<OverlayMode>("none");
   const [historyDays, setHistoryDays] = useState<HistoryDays>(7);
