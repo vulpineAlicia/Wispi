@@ -5,6 +5,7 @@ import { getUserMessage } from "../lib/api";
 import type { ChartPoint } from "../lib/historyChart";
 import AqiHistoryChart from "./AqiHistoryChart";
 import AqiHistoryChartControls from "./AqiHistoryChartControls";
+import Bubble from "./Bubble";
 
 const HISTORY_RANGES = [
   { label: "7 days", days: 7 },
@@ -108,7 +109,7 @@ export default function HistoryPanel({
     showArchiveLink && lat != null && lon != null && name != null;
 
   return (
-    <div className="mt-4 rounded-3xl border border-brand-200 bg-white px-5 py-5 text-sm text-brand-700">
+    <Bubble className="mt-4 px-5 py-5 text-sm text-brand-700">
       <AqiHistoryChartControls
         historyDays={historyDays}
         setHistoryDays={setHistoryDays}
@@ -127,9 +128,9 @@ export default function HistoryPanel({
         {historyLoading ? (
           <div className="text-sm text-brand-700">Loading history…</div>
         ) : historyError ? (
-          <div className="rounded-2xl bg-rose-50 px-3 py-2 text-sm text-rose-900 ring-1 ring-rose-200">
+          <Bubble tone="error" className="px-3 py-2 text-sm">
             {getUserMessage(historyError)}
-          </div>
+          </Bubble>
         ) : (
           <AqiHistoryChart
             data={chartData}
@@ -155,6 +156,6 @@ export default function HistoryPanel({
           </Link>
         </div>
       )}
-    </div>
+    </Bubble>
   );
 }

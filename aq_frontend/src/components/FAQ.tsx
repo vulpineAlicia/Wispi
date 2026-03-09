@@ -1,4 +1,5 @@
 import React, { useId, useLayoutEffect, useRef, useState } from "react";
+import Bubble from "./Bubble";
 
 type FAQProps = {
   q: string;
@@ -27,7 +28,7 @@ export default function FAQ({ q, a }: FAQProps) {
   }, [open, a]);
 
   return (
-    <div className="rounded-3xl bg-white/90 border border-brand-200 p-6">
+    <Bubble className="bg-white/90 p-6">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -57,6 +58,6 @@ export default function FAQ({ q, a }: FAQProps) {
           {a}
         </div>
       </div>
-    </div>
+    </Bubble>
   );
 }

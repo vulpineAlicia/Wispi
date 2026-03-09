@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { geocodeCity, getUserMessage, type GeoResult } from "../lib/api";
 import { useLatestRequest } from "../hooks/useLatestRequest";
+import Bubble from "./Bubble";
 
 type Props = {
   onSelect: (place: GeoResult) => void | Promise<void>;
@@ -43,7 +44,7 @@ export default function CitySearchBox({
 
   return (
     <>
-      <div className="rounded-3xl border border-brand-200 bg-white p-2">
+      <Bubble className="p-2">
         <label className="sr-only" htmlFor="city-input">
           City name
         </label>
@@ -77,22 +78,22 @@ export default function CitySearchBox({
             {isBusy ? "Loading…" : buttonText}
           </button>
         </div>
-      </div>
+      </Bubble>
 
       {errorMsg && (
-        <div className="mt-4 w-full rounded-3xl bg-rose-50 px-4 py-3 text-sm text-rose-900 ring-1 ring-rose-200">
+        <Bubble tone="error" className="mt-4 w-full px-4 py-3 text-sm">
           {errorMsg}
-        </div>
+        </Bubble>
       )}
 
       {hintMsg && (
-        <div className="mt-4 w-full rounded-3xl bg-brand-50 px-4 py-3 text-sm text-brand-900 ring-1 ring-brand-200">
+        <Bubble tone="brand" className="mt-4 w-full px-4 py-3 text-sm text-brand-900">
           {hintMsg}
-        </div>
+        </Bubble>
       )}
 
       {results.length > 0 && (
-        <div className="mt-4 w-full rounded-3xl bg-white p-3 ring-1 ring-brand-200 backdrop-blur">
+        <Bubble className="mt-4 w-full p-3 backdrop-blur">
           <div className="px-2 pb-3 text-xs font-medium text-brand-700">
             Select a city
           </div>
@@ -121,7 +122,7 @@ export default function CitySearchBox({
               </li>
             ))}
           </ul>
-        </div>
+        </Bubble>
       )}
     </>
   );

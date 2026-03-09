@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { getUserMessage } from "../lib/api";
 import type { AirData } from "../lib/api";
 import AqiPill from "./AqiPill";
+import Bubble from "./Bubble";
 
 const AQI_ADVICE: Record<number, string> = {
   1: "Air quality is excellent — enjoy outdoor activities.",
@@ -58,22 +59,22 @@ export default function CityResultPanel({
   return (
     <>
       {showLocation && (
-        <div className="mt-4 rounded-3xl border border-brand-200 bg-white px-5 py-4">
+        <Bubble className="mt-4 px-5 py-4">
           <div className="text-base font-semibold text-brand-900">{name}</div>
           <div className="mt-1 text-xs text-brand-700/80">
             {lat.toFixed(4)}, {lon.toFixed(4)}
           </div>
-        </div>
+        </Bubble>
       )}
 
       {showAqi && (
-        <div className="mt-4 rounded-3xl border border-brand-200 bg-white px-5 py-5">
+        <Bubble className="mt-4 px-5 py-5">
           {airLoading ? (
             <div className="text-sm text-brand-700">Loading…</div>
           ) : airError ? (
-            <div className="rounded-2xl bg-rose-50 px-3 py-2 text-sm text-rose-900 ring-1 ring-rose-200">
+            <Bubble tone="error" className="px-3 py-2 text-sm">
               {getUserMessage(airError)}
-            </div>
+            </Bubble>
           ) : air ? (
             <div className="text-sm text-brand-800">
               <div className="flex flex-wrap items-center gap-3">
@@ -124,7 +125,7 @@ export default function CityResultPanel({
           ) : (
             <div className="text-sm text-brand-700">No data.</div>
           )}
-        </div>
+        </Bubble>
       )}
     </>
   );

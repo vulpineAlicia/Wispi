@@ -34,6 +34,13 @@ export default function AqiHistoryChartControls({
   draftNumber,
   applyDraft,
 }: Props) {
+  const applyDisabled =
+    historyLoading || !canApply || draftNumber === historyDays;
+
+  function resetDraft() {
+    setDaysDraft(String(historyDays));
+  }
+
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-5">
@@ -41,14 +48,14 @@ export default function AqiHistoryChartControls({
 
         {showPresets && (
           <div className="flex items-center gap-4">
-            {ranges.map((r) => {
-              const active = r.days === historyDays;
+            {ranges.map((range) => {
+              const active = range.days === historyDays;
 
               return (
                 <button
-                  key={r.days}
+                  key={range.days}
                   type="button"
-                  onClick={() => setHistoryDays(r.days)}
+                  onClick={() => setHistoryDays(range.days)}
                   disabled={historyLoading}
                   className={[
                     "text-sm transition-colors disabled:opacity-60",
@@ -57,7 +64,7 @@ export default function AqiHistoryChartControls({
                       : "text-brand-500 hover:text-brand-900",
                   ].join(" ")}
                 >
-                  {r.days}d
+                  {range.label}
                 </button>
               );
             })}
@@ -80,15 +87,16 @@ export default function AqiHistoryChartControls({
             }}
             onBlur={() => {
               if (canApply) applyDraft();
-              else setDaysDraft(String(historyDays));
+              else resetDraft();
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 if (canApply) applyDraft();
-                else setDaysDraft(String(historyDays));
+                else resetDraft();
               }
+
               if (e.key === "Escape") {
-                setDaysDraft(String(historyDays));
+                resetDraft();
               }
             }}
             className="w-24 rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm text-brand-900 outline-none focus:ring-2 focus:ring-brand-200 disabled:opacity-60"
@@ -96,7 +104,7 @@ export default function AqiHistoryChartControls({
 
           <button
             type="button"
-            disabled={historyLoading || !canApply || draftNumber === historyDays}
+            disabled={applyDisabled}
             onClick={applyDraft}
             className="rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm text-brand-900 transition hover:bg-brand-100 disabled:opacity-60"
           >

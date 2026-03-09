@@ -15,6 +15,7 @@ import { getLocationSelectionFromParams, parseNumberOrNull } from "../lib/locati
 import type { AirData, GeoResult } from "../lib/api";
 
 import archiveBooks from "../assets/archive-books.svg";
+import Bubble from "../components/Bubble";
 
 const DEFAULT_DAYS = 30;
 const MAX_DAYS = 365;
@@ -119,7 +120,7 @@ export default function ArchivePage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 pt-6 pb-16 text-brand-900">
-      <section className="mt-6 rounded-3xl border border-brand-200 bg-brand-50 p-6 md:p-10">
+      <Bubble tone="brand" className="mt-6 p-6 md:p-10">
         <div className="grid gap-8 md:grid-cols-[420px_1fr] md:items-start">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
@@ -199,7 +200,7 @@ export default function ArchivePage() {
             />
           </div>
         )}
-      </section>
+      </Bubble>
     </main>
   );
 }
