@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
 import { getUserMessage } from "../lib/api";
 import type { AirData } from "../lib/api";
 import AqiPill from "./AqiPill";
 import Bubble from "./Bubble";
+import BaseButton from "../components/BaseButton";
 
 const AQI_ADVICE: Record<number, string> = {
   1: "Air quality is excellent — enjoy outdoor activities.",
@@ -55,6 +55,9 @@ export default function CityResultPanel({
 
   const pollutantsEntries = Object.entries(air?.pollutants ?? {});
   const hasPollutants = pollutantsEntries.length > 0;
+
+  const dest =
+  detailsTo ?? `/map?lat=${lat}&lon=${lon}&name=${encodeURIComponent(name)}`;
 
   return (
     <>
@@ -113,12 +116,12 @@ export default function CityResultPanel({
 
               {showCta && (
                 <div className="mt-4">
-                  <Link
-                    to={detailsTo ?? "/map"}
-                    className="inline-flex h-10 items-center rounded-2xl bg-brand-900 px-5 text-sm font-medium text-brand-50 transition hover:bg-brand-700"
+                  <BaseButton
+                    to={dest}
+                    className="inline-flex h-10 items-center px-5 text-sm"
                   >
                     Detailed info →
-                  </Link>
+                  </BaseButton>
                 </div>
               )}
             </div>

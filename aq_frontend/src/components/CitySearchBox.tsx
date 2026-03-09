@@ -2,6 +2,7 @@ import { useState } from "react";
 import { geocodeCity, getUserMessage, type GeoResult } from "../lib/api";
 import { useLatestRequest } from "../hooks/useLatestRequest";
 import Bubble from "./Bubble";
+import BaseButton from "../components/BaseButton";
 
 type Props = {
   onSelect: (place: GeoResult) => void | Promise<void>;
@@ -67,16 +68,16 @@ export default function CitySearchBox({
             className="h-12 w-full bg-transparent px-4 text-base outline-none placeholder:text-brand-900/50"
           />
 
-          <button
+          <BaseButton
             type="button"
             onClick={() => {
               void onSearch();
             }}
             disabled={isDisabled}
-            className="h-12 shrink-0 rounded-3xl bg-brand-900 px-6 text-base font-medium text-brand-50 transition hover:bg-brand-700 disabled:opacity-60"
+            className="h-12 shrink-0 px-6 text-base"
           >
             {isBusy ? "Loading…" : buttonText}
-          </button>
+          </BaseButton>
         </div>
       </Bubble>
 

@@ -1,3 +1,5 @@
+import BaseButton from "../components/BaseButton";
+
 type HistoryRange = {
   label: string;
   days: number;
@@ -102,14 +104,14 @@ export default function AqiHistoryChartControls({
             className="w-24 rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm text-brand-900 outline-none focus:ring-2 focus:ring-brand-200 disabled:opacity-60"
           />
 
-          <button
+          <BaseButton
             type="button"
             disabled={applyDisabled}
             onClick={applyDraft}
-            className="rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm text-brand-900 transition hover:bg-brand-100 disabled:opacity-60"
+            className="px-3 py-2 text-sm"
           >
             Apply
-          </button>
+          </BaseButton>
         </div>
       )}
     </div>
