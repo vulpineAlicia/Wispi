@@ -11,7 +11,10 @@ import {
   toDailyAqiSeries,
   type ChartPoint,
 } from "../lib/historyChart";
-import { getLocationSelectionFromParams, parseNumberOrNull } from "../lib/locationSelection";
+import {
+  getLocationSelectionFromParams,
+  parseNumberOrNull,
+} from "../lib/locationSelection";
 import type { AirData, GeoResult } from "../lib/api";
 
 import archiveBooks from "../assets/archive-books.svg";
@@ -19,6 +22,7 @@ import Bubble from "../components/Bubble";
 
 const DEFAULT_DAYS = 30;
 const MAX_DAYS = 365;
+const SIDE_PANEL_WIDTH = 260;
 
 function clampDays(value: number, min: number, max: number, fallback: number) {
   const n = Math.floor(value);
@@ -26,6 +30,11 @@ function clampDays(value: number, min: number, max: number, fallback: number) {
   if (n < min) return min;
   if (n > max) return max;
   return n;
+}
+
+function todayIso() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
 }
 
 export default function ArchivePage() {
@@ -100,14 +109,26 @@ export default function ArchivePage() {
     [updateSearchParams]
   );
 
+  const defaultDay = useMemo(() => {
+    if (!chartData.length) return null;
+
+    const today = todayIso();
+    const todayPoint = chartData.find((point) => point.date === today);
+    return todayPoint ?? chartData[chartData.length - 1];
+  }, [chartData]);
+
+  const activeDay = pickedDay ?? defaultDay;
+
   const pickedAir: AirData | null = useMemo(() => {
-    if (!pickedDay) return null;
+    if (!activeDay) return null;
 
     return {
-      aqi_ow_1_5: pickedDay.aqi,
-      pollutants: pickedDay.pollutants ?? {},
+      aqi_ow_1_5: activeDay.aqi,
+      pollutants: activeDay.pollutants ?? {},
     };
-  }, [pickedDay]);
+  }, [activeDay]);
+
+  const selectedDate = activeDay?.date ?? todayIso();
 
   function handleSelectCity(place: GeoResult) {
     const next = new URLSearchParams();
@@ -121,8 +142,8 @@ export default function ArchivePage() {
   return (
     <main className="mx-auto max-w-6xl px-4 pt-6 pb-16 text-brand-900">
       <Bubble tone="brand" className="mt-6 p-6 md:p-10">
-        <div className="grid gap-8 md:grid-cols-[420px_1fr] md:items-start">
-          <div>
+        <div className="grid gap-8 md:grid-cols-[420px_minmax(0,1fr)] md:items-start">
+          <div className="min-w-0">
             <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
               Archive
             </h1>
@@ -134,9 +155,25 @@ export default function ArchivePage() {
             <div className="mt-4 w-full max-w-[420px]">
               <CitySearchBox onSelect={handleSelectCity} />
             </div>
+
+            {selection && (
+              <div
+                className="mt-6"
+                style={{ width: `${SIDE_PANEL_WIDTH}px`, maxWidth: "100%" }}
+              >
+                <CityResultPanel
+                  variant="map"
+                  name={selection.name}
+                  lat={selection.lat}
+                  lon={selection.lon}
+                  air={null}
+                  showAqi={false}
+                />
+              </div>
+            )}
           </div>
 
-          <div className="hidden md:flex md:justify-end md:self-stretch">
+          <div className="hidden md:flex md:justify-end md:items-start mt-2">
             <img
               src={archiveBooks}
               alt=""
@@ -147,36 +184,34 @@ export default function ArchivePage() {
         </div>
 
         {selection && (
-          <div className="mt-10 space-y-6">
-            <div className="w-full max-w-[420px]">
-              <CityResultPanel
-                variant="map"
-                name={selection.name}
-                lat={selection.lat}
-                lon={selection.lon}
-                air={null}
-                showAqi={false}
-              />
+          <div className="mt-3 grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-end">
+            <div className="flex flex-col gap-2 justify-end">
+              <Bubble
+                tone="white"
+                className="mt-1 min-h-[60px] flex items-center justify-center px-4 text-sm font-medium text-brand-800"
+              >
+                Selected day: {selectedDate}
+              </Bubble>
 
-              {pickedDay && (
-                <div className="mt-4">
-                  <div className="mb-2 px-2 text-xs font-medium text-brand-700">
-                    Selected day:{" "}
-                    <span className="text-brand-900">{pickedDay.date}</span>
-                  </div>
-
-                  <CityResultPanel
-                    variant="map"
-                    name={selection.name}
-                    lat={selection.lat}
-                    lon={selection.lon}
-                    air={pickedAir}
-                    airLoading={false}
-                    airError={null}
-                    showLocation={false}
-                    showAqi
-                  />
-                </div>
+              {pickedAir ? (
+                <CityResultPanel
+                  variant="map"
+                  name={selection.name}
+                  lat={selection.lat}
+                  lon={selection.lon}
+                  air={pickedAir}
+                  airLoading={false}
+                  airError={null}
+                  showLocation={false}
+                  showAqi
+                />
+              ) : (
+                <Bubble
+                  tone="white"
+                  className="flex min-h-[220px] items-center justify-center p-4 text-sm text-brand-700"
+                >
+                  No air quality data available for the selected range.
+                </Bubble>
               )}
             </div>
 

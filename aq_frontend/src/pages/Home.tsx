@@ -45,9 +45,9 @@ export default function Home() {
     <>
       <div id="top" />
 
-      <main className="mx-auto max-w-6xl px-4 pt-6 pb-14">
+      <main className="mx-auto max-w-6xl px-4 pt-8 pb-14">
         <section id="lookup" className="mt-2 scroll-mt-35">
-          <div className="relative flex min-h-[68vh] items-center overflow-hidden rounded-3xl ring-1 ring-brand-300/50 shadow-[0_20px_50px_-20px_rgba(15,58,87,0.35)]">
+          <div className="relative flex min-h-[70vh] items-center overflow-hidden rounded-3xl ring-1 ring-brand-300/50 shadow-[0_20px_50px_-20px_rgba(15,58,87,0.35)]">
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${lookupBg})` }}
