@@ -3,14 +3,31 @@ import { ApiError } from "./apiError";
 export type GeoResult = {
   name: string;
   country: string;
-  state?: string;
+  state?: string | null;
   lat: number;
   lon: number;
 };
 
 export type AirData = {
+  location: { lat: number; lon: number };
+  timestamp_unix: number;
   aqi_ow_1_5: number;
   pollutants: Record<string, number>;
+  source: string;
+};
+
+export type AirHistoryItem = {
+  timestamp_unix: number;
+  aqi_ow_1_5: number;
+  pollutants: Record<string, number>;
+};
+
+export type AirHistoryResponse = {
+  location: { lat: number; lon: number };
+  start_unix: number;
+  end_unix: number;
+  items: AirHistoryItem[];
+  source: string;
 };
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "/api";
@@ -19,6 +36,58 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? "/api";
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
+}
+
+function isNumberRecord(v: unknown): v is Record<string, number> {
+  if (!isRecord(v)) return false;
+  return Object.values(v).every((value) => typeof value === "number");
+}
+
+function isLocation(v: unknown): v is { lat: number; lon: number } {
+  return isRecord(v) && typeof v.lat === "number" && typeof v.lon === "number";
+}
+
+function isGeoResult(v: unknown): v is GeoResult {
+  return (
+    isRecord(v) &&
+    typeof v.name === "string" &&
+    typeof v.country === "string" &&
+    typeof v.lat === "number" &&
+    typeof v.lon === "number" &&
+    (v.state === undefined || v.state === null || typeof v.state === "string")
+  );
+}
+
+function isAirData(v: unknown): v is AirData {
+  return (
+    isRecord(v) &&
+    isLocation(v.location) &&
+    typeof v.timestamp_unix === "number" &&
+    typeof v.aqi_ow_1_5 === "number" &&
+    isNumberRecord(v.pollutants) &&
+    typeof v.source === "string"
+  );
+}
+
+function isAirHistoryItem(v: unknown): v is AirHistoryItem {
+  return (
+    isRecord(v) &&
+    typeof v.timestamp_unix === "number" &&
+    typeof v.aqi_ow_1_5 === "number" &&
+    isNumberRecord(v.pollutants)
+  );
+}
+
+function isAirHistoryResponse(v: unknown): v is AirHistoryResponse {
+  return (
+    isRecord(v) &&
+    isLocation(v.location) &&
+    typeof v.start_unix === "number" &&
+    typeof v.end_unix === "number" &&
+    Array.isArray(v.items) &&
+    v.items.every(isAirHistoryItem) &&
+    typeof v.source === "string"
+  );
 }
 
 async function safeReadJson(res: Response): Promise<unknown> {
@@ -37,6 +106,10 @@ function getHeaderRequestId(res: Response): string | undefined {
   );
 }
 
+function invalidResponse(message: string, requestId?: string): ApiError {
+  return new ApiError(message, 200, "INVALID_RESPONSE", requestId);
+}
+
 // JSON helper
 
 async function getJson<T>(path: string, init?: RequestInit): Promise<T> {
@@ -51,6 +124,7 @@ async function getJson<T>(path: string, init?: RequestInit): Promise<T> {
     if (error instanceof DOMException && error.name === "AbortError") {
       throw error;
     }
+
     throw new ApiError(
       "Network error. Please check your connection.",
       0,
@@ -76,21 +150,30 @@ async function getJson<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiError(message, res.status, code, requestId);
   }
 
-  return (await res.json()) as T;
+  try {
+    return (await res.json()) as T;
+  } catch {
+    throw new ApiError(
+      "Server returned an invalid JSON response.",
+      res.status,
+      "INVALID_JSON",
+      headerRid
+    );
+  }
 }
 
 // api calls
 
-/* Server status pill */
 export async function checkHealth(): Promise<boolean> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 2500);
 
   try {
-    const data = await getJson<{ status?: string }>("/health", {
+    const data = await getJson<{ status?: unknown }>("/health", {
       signal: controller.signal,
     });
-    return data.status === "ok";
+
+    return isRecord(data) && data.status === "ok";
   } catch {
     return false;
   } finally {
@@ -98,43 +181,45 @@ export async function checkHealth(): Promise<boolean> {
   }
 }
 
-/* City lookup */
 export async function geocodeCity(
   q: string,
   signal?: AbortSignal
 ): Promise<GeoResult[]> {
-  const data = await getJson<{ results?: GeoResult[] }>(
+  const data = await getJson<{ results?: unknown }>(
     `/geocode?q=${encodeURIComponent(q)}`,
     { signal }
   );
-  return data.results ?? [];
+
+  if (!isRecord(data)) {
+    throw invalidResponse("Server returned an invalid geocoding response.");
+  }
+
+  if (data.results == null) {
+    return [];
+  }
+
+  if (!Array.isArray(data.results)) {
+    throw invalidResponse("Server returned an invalid geocoding response.");
+  }
+
+  return data.results.filter(isGeoResult);
 }
 
-/* Air quality */
 export async function getAirCurrent(
   lat: number,
   lon: number,
   signal?: AbortSignal
 ): Promise<AirData> {
-  return await getJson<AirData>(`/air/current?lat=${lat}&lon=${lon}`, {
+  const data = await getJson<unknown>(`/air/current?lat=${lat}&lon=${lon}`, {
     signal,
   });
+
+  if (!isAirData(data)) {
+    throw invalidResponse("Server returned an invalid air quality response.");
+  }
+
+  return data;
 }
-
-/* Air quality history (last N days) */
-export type AirHistoryItem = {
-  timestamp_unix: number;
-  aqi_ow_1_5: number;
-  pollutants: Record<string, number>;
-};
-
-export type AirHistoryResponse = {
-  location: { lat: number; lon: number };
-  start_unix: number;
-  end_unix: number;
-  items: AirHistoryItem[];
-  source: string;
-};
 
 export async function getAirHistory(
   lat: number,
@@ -148,14 +233,21 @@ export async function getAirHistory(
     lon: String(lon),
     days: String(days),
   });
-  if (end_unix != null) qs.set("end_unix", String(end_unix));
 
-  return await getJson<AirHistoryResponse>(`/air/history?${qs.toString()}`, {
+  if (end_unix != null) {
+    qs.set("end_unix", String(end_unix));
+  }
+
+  const data = await getJson<unknown>(`/air/history?${qs.toString()}`, {
     signal,
   });
-}
 
-// error mapping
+  if (!isAirHistoryResponse(data)) {
+    throw invalidResponse("Server returned an invalid history response.");
+  }
+
+  return data;
+}
 
 export function getUserMessage(error: unknown): string {
   if (error instanceof ApiError) {
@@ -185,6 +277,11 @@ export function getUserMessage(error: unknown): string {
       case "UPSTREAM_5XX":
       case "UPSTREAM_UNAVAILABLE":
         return "The data provider is temporarily unavailable. Please try again later.";
+
+      case "INVALID_JSON":
+      case "INVALID_RESPONSE":
+      case "UPSTREAM_MALFORMED":
+        return "Server returned an invalid response. Please try again later.";
 
       default:
         if (error.status === 0) {
