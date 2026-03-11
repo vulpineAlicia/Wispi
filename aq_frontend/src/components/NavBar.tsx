@@ -1,39 +1,23 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-type SectionId = "top" | "features" | "contacts";
-type RoutePath = "/map" | "/archive" | "/info";
-
-type NavItem =
-  | { kind: "section"; label: string; id: SectionId }
-  | { kind: "route"; label: string; to: RoutePath };
-
-const LINKS: NavItem[] = [
-  { kind: "section", label: "Look up your city", id: "top" },
-  { kind: "section", label: "Features", id: "features" },
-  { kind: "route", label: "Map", to: "/map" },
-  { kind: "route", label: "Archive", to: "/archive" },
-  { kind: "route", label: "Useful info", to: "/info" },
-  { kind: "section", label: "Contacts", id: "contacts" },
-];
-
-function scrollTopSmooth() {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-function scrollToId(id: string) {
-  const el = document.getElementById(id);
-  if (!el) return false;
-  el.scrollIntoView({ behavior: "smooth", block: "start" });
-  return true;
-}
+import {
+  HEADER_LINKS,
+  type NavItem,
+  type RoutePath,
+  type SectionId,
+  scrollToId,
+  scrollTopSmooth,
+} from "../lib/siteNav";
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const closeMenu = () => setOpen(false);
+  function closeMenu() {
+    setOpen(false);
+  }
 
   function handleSection(id: SectionId) {
     if (id === "top") {
@@ -43,23 +27,32 @@ export default function NavBar() {
     }
 
     if (id === "features") {
-      if (location.pathname !== "/") navigate("/", { state: { scrollToId: "features" } });
-      else if (!scrollToId("features")) scrollTopSmooth();
+      if (location.pathname !== "/") {
+        navigate("/", { state: { scrollToId: "features" } });
+      } else if (!scrollToId("features")) {
+        scrollTopSmooth();
+      }
       return;
     }
 
-    // contacts
-    if (!scrollToId("contacts")) navigate("/", { state: { scrollToId: "contacts" } });
+    if (!scrollToId("contacts")) {
+      navigate("/", { state: { scrollToId: "contacts" } });
+    }
   }
 
   function handleRoute(to: RoutePath) {
-    if (location.pathname === to) scrollTopSmooth();
-    else navigate(to);
+    if (location.pathname === to) {
+      scrollTopSmooth();
+      return;
+    }
+
+    navigate(to);
   }
 
   function handleNavClick(item: NavItem) {
     if (item.kind === "section") handleSection(item.id);
     else handleRoute(item.to);
+
     closeMenu();
   }
 
@@ -72,7 +65,7 @@ export default function NavBar() {
       <div className="mx-auto max-w-6xl px-4">
         <div className="flex items-center justify-between py-3">
           <nav className="hidden gap-6 md:flex">
-            {LINKS.map((item) => (
+            {HEADER_LINKS.map((item) => (
               <button
                 key={item.kind === "section" ? `section:${item.id}` : `route:${item.to}`}
                 type="button"
@@ -108,7 +101,7 @@ export default function NavBar() {
         {open && (
           <div id="mobile-nav" className="pb-3 md:hidden">
             <div className="flex flex-col gap-2 rounded-3xl border border-brand-200 bg-white/80 p-3 backdrop-blur">
-              {LINKS.map((item) => (
+              {HEADER_LINKS.map((item) => (
                 <button
                   key={item.kind === "section" ? `m:section:${item.id}` : `m:route:${item.to}`}
                   type="button"
