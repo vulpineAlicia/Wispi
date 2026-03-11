@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -14,6 +14,17 @@ from aq_backend.services.openweather import (
     OpenWeatherUpstreamError,
 )
 
+def api_error(status_code: int, code: str, message: str) -> HTTPException:
+    """
+    Raise a HTTPException that will be normalized by StarletteHTTPException handler
+    """
+    return HTTPException(
+        status_code=status_code,
+        detail={
+            "code": code,
+            "message": message,
+        },
+    )
 
 def error_response(
     request: Request,

@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import re
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Query, Request
 
 from aq_backend.dependencies import ow_service
+from aq_backend.http_errors import api_error
 from aq_backend.schemas import GeocodeResponse, GeocodeResult
 from aq_backend.services.openweather import OpenWeatherService
 
@@ -26,19 +27,13 @@ async def geocode(
     q_clean = " ".join(q.split())
 
     if len(q_clean) < 2 or not _CITY_RE.fullmatch(q_clean):
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "INVALID_QUERY", "message": "Invalid city name."},
-        )
+        raise api_error(422, "INVALID_QUERY", "Invalid city name.")
 
     data, meta = await ow.geocode(q=q_clean, limit=limit)
     request.state.upstream = meta
 
     if not isinstance(data, list):
-        raise HTTPException(
-            status_code=502,
-            detail={"code": "UPSTREAM_MALFORMED", "message": "Upstream returned malformed geocode payload."},
-        )
+        raise api_error(502, "UPSTREAM_MALFORMED", "Upstream returned malformed geocode payload.")
 
     results: list[GeocodeResult] = []
     for item in data:

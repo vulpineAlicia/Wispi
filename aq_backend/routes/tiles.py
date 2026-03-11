@@ -5,7 +5,9 @@ from __future__ import annotations
 from typing import Literal
 
 import httpx
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, Request, Response
+
+from aq_backend.http_errors import api_error
 
 router = APIRouter(prefix="/tiles", tags=["tiles"])
 
@@ -34,15 +36,22 @@ async def openweather_tile(
 
     Returns PNG bytes and cache headers
     """
+
     if z < 0 or z > _MAX_Z:
-        raise HTTPException(status_code=400, detail="Invalid z")
+        raise api_error(400, "INVALID_QUERY", "Invalid zoom level.")
+
     if x < 0 or y < 0:
-        raise HTTPException(status_code=400, detail="Invalid tile coords")
+        raise api_error(400, "INVALID_QUERY", "Invalid tile coordinates.")
 
     settings = request.app.state.settings
     api_key = getattr(settings, "openweather_api_key", None)
+
     if not api_key:
-        raise HTTPException(status_code=500, detail="OPENWEATHER_API_KEY not configured")
+        raise api_error(
+            500,
+            "SERVER_MISCONFIGURED",
+            "OPENWEATHER_API_KEY not configured.",
+        )
 
     upstream_url = f"https://tile.openweathermap.org/map/{layer}/{z}/{x}/{y}.png"
     client: httpx.AsyncClient = request.app.state.app_state.http
@@ -50,6 +59,7 @@ async def openweather_tile(
     upstream_headers: dict[str, str] = {}
     inm = request.headers.get("if-none-match")
     ims = request.headers.get("if-modified-since")
+
     if inm:
         upstream_headers["if-none-match"] = inm
     if ims:
@@ -62,9 +72,9 @@ async def openweather_tile(
             headers=upstream_headers or None,
         )
     except httpx.TimeoutException as exc:
-        raise HTTPException(status_code=504, detail="Upstream timeout") from exc
+        raise api_error(504, "UPSTREAM_TIMEOUT", "Upstream timeout.") from exc
     except httpx.RequestError as exc:
-        raise HTTPException(status_code=502, detail="Upstream request failed") from exc
+        raise api_error(502, "UPSTREAM_NETWORK", "Upstream request failed.") from exc
 
     headers_out: dict[str, str] = {
         "Cache-Control": f"public, max-age={_CACHE_SECONDS}",
@@ -82,7 +92,12 @@ async def openweather_tile(
         return Response(status_code=304, headers=headers_out)
 
     if r.status_code != 200:
-        raise HTTPException(status_code=502, detail=f"Upstream returned {r.status_code}")
+        raise api_error(
+            502,
+            "UPSTREAM_ERROR",
+            f"Upstream returned status {r.status_code}.",
+        )
 
     headers_out["Content-Type"] = "image/png"
+
     return Response(content=r.content, status_code=200, headers=headers_out)

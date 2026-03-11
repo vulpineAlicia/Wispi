@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Query, Request
 
 from aq_backend.dependencies import ow_service
 from aq_backend.schemas import (
@@ -15,6 +15,7 @@ from aq_backend.schemas import (
     Location,
 )
 from aq_backend.services.openweather import OpenWeatherService
+from aq_backend.http_errors import api_error
 
 router = APIRouter(tags=["air"])
 
@@ -25,13 +26,22 @@ MAX_HISTORY_DAYS = 365
 def _as_float_dict(value: Any) -> dict[str, float]:
     if not isinstance(value, dict):
         return {}
+
     out: dict[str, float] = {}
+
     for k, v in value.items():
         try:
             out[str(k)] = float(v)
         except (TypeError, ValueError):
             continue
+
     return out
+
+
+def _ensure_dict(value: Any, message: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise api_error(502, "UPSTREAM_MALFORMED", message)
+    return value
 
 
 def _extract_ts_aqi(entry: dict[str, Any], *, err_detail: str) -> tuple[int, int]:
@@ -40,25 +50,16 @@ def _extract_ts_aqi(entry: dict[str, Any], *, err_detail: str) -> tuple[int, int
     aqi = main.get("aqi")
 
     if ts is None or aqi is None:
-        raise HTTPException(
-            status_code=502,
-            detail={"code": "UPSTREAM_MALFORMED", "message": err_detail},
-        )
+        raise api_error(502, "UPSTREAM_MALFORMED", err_detail)
 
     try:
         ts_i = int(ts)
         aqi_i = int(aqi)
     except (TypeError, ValueError) as exc:
-        raise HTTPException(
-            status_code=502,
-            detail={"code": "UPSTREAM_MALFORMED", "message": err_detail},
-        ) from exc
+        raise api_error(502, "UPSTREAM_MALFORMED", err_detail) from exc
 
     if not (1 <= aqi_i <= 5):
-        raise HTTPException(
-            status_code=502,
-            detail={"code": "UPSTREAM_MALFORMED", "message": "Upstream returned invalid AQI value"},
-        )
+        raise api_error(502, "UPSTREAM_MALFORMED", "Upstream returned invalid AQI value")
 
     return ts_i, aqi_i
 
@@ -71,30 +72,24 @@ async def air_current(
     ow: OpenWeatherService = Depends(ow_service),
 ) -> AirCurrentResponse:
     """ Return current air quality for a location """
+
     payload, meta = await ow.air_current(lat=lat, lon=lon)
     request.state.upstream = meta
 
-    if not isinstance(payload, dict):
-        raise HTTPException(
-            status_code=502,
-            detail={"code": "UPSTREAM_MALFORMED", "message": "Upstream returned malformed air payload"},
-        )
+    payload = _ensure_dict(payload, "Upstream returned malformed air payload")
 
     lst = payload.get("list") or []
+
     if not lst:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "NO_AIR_DATA", "message": "No air quality data for this location."},
-        )
+        raise api_error(404, "NO_AIR_DATA", "No air quality data for this location.")
 
-    entry = lst[0]
-    if not isinstance(entry, dict):
-        raise HTTPException(
-            status_code=502,
-            detail={"code": "UPSTREAM_MALFORMED", "message": "Upstream returned malformed air payload"},
-        )
+    entry = _ensure_dict(lst[0], "Upstream returned malformed air payload")
 
-    ts_i, aqi_i = _extract_ts_aqi(entry, err_detail="Upstream returned malformed air payload")
+    ts_i, aqi_i = _extract_ts_aqi(
+        entry,
+        err_detail="Upstream returned malformed air payload",
+    )
+
     pollutants = _as_float_dict(entry.get("components"))
 
     return AirCurrentResponse(
@@ -120,16 +115,15 @@ async def air_history(
     ow: OpenWeatherService = Depends(ow_service),
 ) -> AirHistoryResponse:
     """ Return air quality history for the last N days """
+
     now_ts = int(time.time())
     end_ts = int(end_unix) if end_unix is not None else now_ts
 
     if end_ts > now_ts + 60:
-        raise HTTPException(
-            status_code=400,
-            detail={"code": "INVALID_QUERY", "message": "end_unix cannot be in the future."},
-        )
+        raise api_error(400, "INVALID_QUERY", "end_unix cannot be in the future.")
 
     start_ts = end_ts - days * SECONDS_PER_DAY
+
     if start_ts < 0:
         start_ts = 0
 
@@ -139,28 +133,36 @@ async def air_history(
         start_ts=start_ts,
         end_ts=end_ts,
     )
+
     request.state.upstream = meta
 
-    if not isinstance(payload, dict):
-        raise HTTPException(
-            status_code=502,
-            detail={"code": "UPSTREAM_MALFORMED", "message": "Upstream returned malformed history payload"},
-        )
+    payload = _ensure_dict(payload, "Upstream returned malformed history payload")
 
     lst = payload.get("list") or []
+
     if not lst:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "NO_HISTORY_DATA", "message": "No air quality history for this location."},
-        )
+        raise api_error(404, "NO_HISTORY_DATA", "No air quality history for this location.")
 
     items: list[AirHistoryItem] = []
+
     for entry in lst:
         if not isinstance(entry, dict):
             continue
-        ts_i, aqi_i = _extract_ts_aqi(entry, err_detail="Upstream returned malformed history payload")
+
+        ts_i, aqi_i = _extract_ts_aqi(
+            entry,
+            err_detail="Upstream returned malformed history payload",
+        )
+
         pollutants = _as_float_dict(entry.get("components"))
-        items.append(AirHistoryItem(timestamp_unix=ts_i, aqi_ow_1_5=aqi_i, pollutants=pollutants))
+
+        items.append(
+            AirHistoryItem(
+                timestamp_unix=ts_i,
+                aqi_ow_1_5=aqi_i,
+                pollutants=pollutants,
+            )
+        )
 
     items.sort(key=lambda x: x.timestamp_unix)
 
