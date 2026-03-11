@@ -2,18 +2,17 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ServerStatusPill from "./ServerStatusPill";
 import logo from "../assets/logo.svg";
 
-
 export default function Header() {
-
   const navigate = useNavigate();
   const location = useLocation();
 
   function goHomeTop() {
     if (location.pathname === "/") {
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      navigate("/#top");
+      return;
     }
+
+    navigate("/", { state: { scrollToTop: true } });
   }
 
   return (
@@ -43,7 +42,7 @@ export default function Header() {
           </div>
         </button>
 
-
+        
         {/* Right side */}
         <ServerStatusPill />
       </div>

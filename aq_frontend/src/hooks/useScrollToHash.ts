@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-type ScrollState = { scrollToId?: string };
+type ScrollState = {
+  scrollToId?: string;
+  scrollToTop?: boolean;
+};
 
 const MAX_TRIES = 20;
 
@@ -61,7 +64,19 @@ export function useScrollToHash() {
 
     requestAnimationFrame(() => {
       // home page sections
+      if (st.scrollToTop) {
+        scrollTopSmooth();
+        clearState();
+        return;
+      }
+
       if (st.scrollToId) {
+        if (st.scrollToId === "top") {
+          scrollTopSmooth();
+          clearState();
+          return;
+        }
+
         tryScrollToIdWithRetry(st.scrollToId);
         return;
       }
