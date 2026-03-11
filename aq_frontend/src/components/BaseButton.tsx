@@ -3,23 +3,30 @@ import type { ButtonHTMLAttributes } from "react";
 import type { LinkProps } from "react-router-dom";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  className?: string;
+  to?: never;
 };
 
 type LinkButtonProps = LinkProps & {
-  className?: string;
   to: string;
 };
+
+type Props = ButtonProps | LinkButtonProps;
 
 const BASE =
   "rounded-3xl bg-brand-900 text-brand-50 font-medium transition hover:bg-brand-700";
 
-export default function BaseButton(props: ButtonProps | LinkButtonProps) {
-  const { className = "", ...rest } = props as any;
+function isLinkProps(props: Props): props is LinkButtonProps {
+  return typeof (props as LinkButtonProps).to === "string";
+}
 
-  if ("to" in props) {
-    return <Link {...(rest as LinkButtonProps)} className={`${BASE} ${className}`} />;
+export default function BaseButton(props: Props) {
+  const className = props.className ?? "";
+
+  if (isLinkProps(props)) {
+    const { className: _className, ...rest } = props;
+    return <Link {...rest} className={`${BASE} ${className}`.trim()} />;
   }
 
-  return <button {...(rest as ButtonProps)} className={`${BASE} ${className}`} />;
+  const { className: _className, ...rest } = props;
+  return <button {...rest} className={`${BASE} ${className}`.trim()} />;
 }
