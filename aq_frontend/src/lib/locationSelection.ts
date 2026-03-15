@@ -2,6 +2,7 @@ export type LocationSelection = {
   lat: number;
   lon: number;
   name: string;
+  country?: string;
 };
 
 export function parseNumberOrNull(value: string | null): number | null {
@@ -21,6 +22,7 @@ export function getLocationSelectionFromParams(
   const lat = parseNumberOrNull(params.get("lat"));
   const lon = parseNumberOrNull(params.get("lon"));
   const rawName = (params.get("name") ?? "").trim();
+  const rawCountry = (params.get("country") ?? "").trim();
 
   if (lat == null || lon == null) return null;
 
@@ -28,5 +30,6 @@ export function getLocationSelectionFromParams(
     lat,
     lon,
     name: rawName || fallbackName,
+    country: rawCountry || undefined,
   };
 }

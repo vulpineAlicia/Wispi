@@ -109,7 +109,7 @@ export default function HistoryPanel({
     showArchiveLink && lat != null && lon != null && name != null;
 
   return (
-    <Bubble className="mt-4 px-5 py-5 text-sm text-brand-700">
+    <Bubble className="px-5 py-5 text-sm text-brand-700">
       <AqiHistoryChartControls
         historyDays={historyDays}
         setHistoryDays={setHistoryDays}
