@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { geocodeCity, getUserMessage, type GeoResult } from "../lib/api";
+import { geocodeCity, type GeoResult } from "../lib/api";
+import { getUserMessage } from "../lib/apiMessages";
 import { useLatestRequest } from "../hooks/useLatestRequest";
 import Bubble from "./Bubble";
 import BaseButton from "../components/BaseButton";

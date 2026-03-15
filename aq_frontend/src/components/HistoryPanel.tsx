@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { getUserMessage } from "../lib/api";
+import { getUserMessage } from "../lib/apiMessages";
 import type { ChartPoint } from "../lib/historyChart";
 import AqiHistoryChart from "./AqiHistoryChart";
 import AqiHistoryChartControls from "./AqiHistoryChartControls";

@@ -1,4 +1,4 @@
-import { getUserMessage } from "../lib/api";
+import { getUserMessage } from "../lib/apiMessages";
 import type { AirData } from "../lib/api";
 import AqiPill from "./AqiPill";
 import Bubble from "./Bubble";
