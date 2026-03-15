@@ -15,11 +15,11 @@ class Location(BaseModel):
 class GeocodeResult(BaseModel):
     """ A geocoding match returned from the provider """
 
-    name: str | None = None
-    country: str | None = None
+    name: str
+    country: str
     state: str | None = None
-    lat: float | None = None
-    lon: float | None = None
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
 
 
 class GeocodeResponse(BaseModel):
@@ -32,7 +32,7 @@ class GeocodeResponse(BaseModel):
 class AirHistoryItem(BaseModel):
     """ One air pollution measurement entry """
 
-    timestamp_unix: int
+    timestamp_unix: int = Field(ge=0)
     aqi_ow_1_5: int = Field(ge=1, le=5)
     pollutants: dict[str, float] = Field(default_factory=dict)
 
@@ -41,7 +41,7 @@ class AirCurrentResponse(BaseModel):
     """ Response for /air/current """
 
     location: Location
-    timestamp_unix: int
+    timestamp_unix: int = Field(ge=0)
     aqi_ow_1_5: int = Field(ge=1, le=5)
     pollutants: dict[str, float] = Field(default_factory=dict)
     source: str = "openweather"
@@ -51,7 +51,7 @@ class AirHistoryResponse(BaseModel):
     """ Response for /air/history """
 
     location: Location
-    start_unix: int
-    end_unix: int
+    start_unix: int = Field(ge=0)
+    end_unix: int = Field(ge=0)
     items: list[AirHistoryItem]
     source: str = "openweather"
