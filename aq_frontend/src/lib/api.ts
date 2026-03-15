@@ -38,13 +38,17 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
 }
 
+function isFiniteNumber(v: unknown): v is number {
+  return typeof v === "number" && Number.isFinite(v);
+}
+
 function isNumberRecord(v: unknown): v is Record<string, number> {
   if (!isRecord(v)) return false;
-  return Object.values(v).every((value) => typeof value === "number");
+  return Object.values(v).every(isFiniteNumber);
 }
 
 function isLocation(v: unknown): v is { lat: number; lon: number } {
-  return isRecord(v) && typeof v.lat === "number" && typeof v.lon === "number";
+  return isRecord(v) && isFiniteNumber(v.lat) && isFiniteNumber(v.lon);
 }
 
 function isGeoResult(v: unknown): v is GeoResult {
@@ -52,8 +56,8 @@ function isGeoResult(v: unknown): v is GeoResult {
     isRecord(v) &&
     typeof v.name === "string" &&
     typeof v.country === "string" &&
-    typeof v.lat === "number" &&
-    typeof v.lon === "number" &&
+    isFiniteNumber(v.lat) &&
+    isFiniteNumber(v.lon) &&
     (v.state === undefined || v.state === null || typeof v.state === "string")
   );
 }
@@ -62,8 +66,8 @@ function isAirData(v: unknown): v is AirData {
   return (
     isRecord(v) &&
     isLocation(v.location) &&
-    typeof v.timestamp_unix === "number" &&
-    typeof v.aqi_ow_1_5 === "number" &&
+    isFiniteNumber(v.timestamp_unix) &&
+    isFiniteNumber(v.aqi_ow_1_5) &&
     isNumberRecord(v.pollutants) &&
     typeof v.source === "string"
   );
@@ -72,8 +76,8 @@ function isAirData(v: unknown): v is AirData {
 function isAirHistoryItem(v: unknown): v is AirHistoryItem {
   return (
     isRecord(v) &&
-    typeof v.timestamp_unix === "number" &&
-    typeof v.aqi_ow_1_5 === "number" &&
+    isFiniteNumber(v.timestamp_unix) &&
+    isFiniteNumber(v.aqi_ow_1_5) &&
     isNumberRecord(v.pollutants)
   );
 }
@@ -82,8 +86,8 @@ function isAirHistoryResponse(v: unknown): v is AirHistoryResponse {
   return (
     isRecord(v) &&
     isLocation(v.location) &&
-    typeof v.start_unix === "number" &&
-    typeof v.end_unix === "number" &&
+    isFiniteNumber(v.start_unix) &&
+    isFiniteNumber(v.end_unix) &&
     Array.isArray(v.items) &&
     v.items.every(isAirHistoryItem) &&
     typeof v.source === "string"
@@ -185,24 +189,20 @@ export async function geocodeCity(
   q: string,
   signal?: AbortSignal
 ): Promise<GeoResult[]> {
-  const data = await getJson<{ results?: unknown }>(
+  const data = await getJson<unknown>(
     `/geocode?q=${encodeURIComponent(q)}`,
     { signal }
   );
 
-  if (!isRecord(data)) {
+  if (!isRecord(data) || !Array.isArray(data.results)) {
     throw invalidResponse("Server returned an invalid geocoding response.");
   }
 
-  if (data.results == null) {
-    return [];
-  }
-
-  if (!Array.isArray(data.results)) {
+  if (!data.results.every(isGeoResult)) {
     throw invalidResponse("Server returned an invalid geocoding response.");
   }
 
-  return data.results.filter(isGeoResult);
+  return data.results;
 }
 
 export async function getAirCurrent(
@@ -265,6 +265,7 @@ export function getUserMessage(error: unknown): string {
 
       case "RATE_LIMIT":
       case "HTTP_429":
+      case "UPSTREAM_RATE_LIMIT":
         return "Too many requests right now. Please try again in a minute.";
 
       case "UPSTREAM_TIMEOUT":
@@ -275,13 +276,21 @@ export function getUserMessage(error: unknown): string {
         return "Network error. Please check your connection and try again.";
 
       case "UPSTREAM_5XX":
+      case "UPSTREAM_ERROR":
       case "UPSTREAM_UNAVAILABLE":
         return "The data provider is temporarily unavailable. Please try again later.";
+
+      case "UPSTREAM_AUTH":
+        return "Server configuration error. Please try again later.";
 
       case "INVALID_JSON":
       case "INVALID_RESPONSE":
       case "UPSTREAM_MALFORMED":
         return "Server returned an invalid response. Please try again later.";
+
+      case "NOT_FOUND":
+      case "HTTP_404":
+        return "Not found.";
 
       default:
         if (error.status === 0) {
