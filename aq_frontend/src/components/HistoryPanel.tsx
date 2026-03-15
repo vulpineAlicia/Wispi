@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { getUserMessage } from "../lib/apiMessages";
 import type { ChartPoint } from "../lib/historyChart";
-import AqiHistoryChart from "./AqiHistoryChart";
 import AqiHistoryChartControls from "./AqiHistoryChartControls";
 import Bubble from "./Bubble";
+
+const AqiHistoryChart = lazy(() => import("./AqiHistoryChart"));
 
 const HISTORY_RANGES = [
   { label: "7 days", days: 7 },
@@ -47,25 +48,18 @@ function buildArchiveUrl(args: {
 
 type Props = {
   hasSelection: boolean;
-
   historyDays: HistoryDays;
   setHistoryDays: (days: HistoryDays) => void;
-
   historyLoading: boolean;
   historyError: unknown | null;
-
   chartData: ChartPoint[];
-
   showPresets?: boolean;
   allowCustomDays?: boolean;
   maxDays?: number;
   showArchiveLink?: boolean;
-
   onPickDay?: PickDayHandler;
-
   lineWidth?: number;
   hitRadius?: number;
-
   lat?: number;
   lon?: number;
   name?: string;
@@ -132,12 +126,14 @@ export default function HistoryPanel({
             {getUserMessage(historyError)}
           </Bubble>
         ) : (
-          <AqiHistoryChart
-            data={chartData}
-            onPickDay={onPickDay}
-            lineWidth={lineWidth}
-            hitRadius={hitRadius}
-          />
+          <Suspense fallback={<div className="text-sm text-brand-700">Loading chart…</div>}>
+            <AqiHistoryChart
+              data={chartData}
+              onPickDay={onPickDay}
+              lineWidth={lineWidth}
+              hitRadius={hitRadius}
+            />
+          </Suspense>
         )}
       </div>
 
