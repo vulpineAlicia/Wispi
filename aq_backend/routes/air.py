@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import time
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query, Request
 
 from aq_backend.dependencies import ow_service
+from aq_backend.http_errors import api_error
 from aq_backend.schemas import (
     AirCurrentResponse,
     AirHistoryItem,
@@ -15,7 +16,6 @@ from aq_backend.schemas import (
     Location,
 )
 from aq_backend.services.openweather import OpenWeatherService
-from aq_backend.http_errors import api_error
 
 router = APIRouter(tags=["air"])
 
@@ -72,14 +72,12 @@ async def air_current(
     ow: OpenWeatherService = Depends(ow_service),
 ) -> AirCurrentResponse:
     """ Return current air quality for a location """
-
     payload, meta = await ow.air_current(lat=lat, lon=lon)
     request.state.upstream = meta
 
     payload = _ensure_dict(payload, "Upstream returned malformed air payload")
 
     lst = payload.get("list") or []
-
     if not lst:
         raise api_error(404, "NO_AIR_DATA", "No air quality data for this location.")
 
@@ -107,7 +105,7 @@ async def air_history(
     lat: float = Query(..., ge=-90, le=90),
     lon: float = Query(..., ge=-180, le=180),
     days: int = Query(7, ge=1, le=MAX_HISTORY_DAYS),
-    end_unix: Optional[int] = Query(
+    end_unix: int | None = Query(
         None,
         ge=0,
         description="Optional end timestamp (unix). Default: now. Useful for archive navigation.",
@@ -115,17 +113,13 @@ async def air_history(
     ow: OpenWeatherService = Depends(ow_service),
 ) -> AirHistoryResponse:
     """ Return air quality history for the last N days """
-
     now_ts = int(time.time())
     end_ts = int(end_unix) if end_unix is not None else now_ts
 
     if end_ts > now_ts + 60:
         raise api_error(400, "INVALID_QUERY", "end_unix cannot be in the future.")
 
-    start_ts = end_ts - days * SECONDS_PER_DAY
-
-    if start_ts < 0:
-        start_ts = 0
+    start_ts = max(0, end_ts - days * SECONDS_PER_DAY)
 
     payload, meta = await ow.air_history(
         lat=lat,
@@ -133,13 +127,11 @@ async def air_history(
         start_ts=start_ts,
         end_ts=end_ts,
     )
-
     request.state.upstream = meta
 
     payload = _ensure_dict(payload, "Upstream returned malformed history payload")
 
     lst = payload.get("list") or []
-
     if not lst:
         raise api_error(404, "NO_HISTORY_DATA", "No air quality history for this location.")
 
@@ -163,6 +155,9 @@ async def air_history(
                 pollutants=pollutants,
             )
         )
+
+    if not items:
+        raise api_error(404, "NO_HISTORY_DATA", "No air quality history for this location.")
 
     items.sort(key=lambda x: x.timestamp_unix)
 
