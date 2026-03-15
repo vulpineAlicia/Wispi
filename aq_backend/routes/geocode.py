@@ -1,39 +1,24 @@
-""" Geocoding endpoint """
+"""Geocoding route."""
 
 from __future__ import annotations
 
-import re
-
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query
 
 from aq_backend.dependencies import ow_service
-from aq_backend.http_errors import api_error
 from aq_backend.schemas import GeocodeResponse, GeocodeResult
 from aq_backend.services.openweather import OpenWeatherService
 
 router = APIRouter(tags=["geocode"])
 
-_CITY_RE = re.compile(r"^[A-Za-zА-Яа-яЁё]+([A-Za-zА-Яа-яЁё\s'.-]*[A-Za-zА-Яа-яЁё]+)?$")
-
 
 @router.get("/geocode", response_model=GeocodeResponse)
 async def geocode(
-    request: Request,
-    q: str = Query(..., min_length=2),
-    limit: int = Query(5, ge=1, le=10),
-    ow: OpenWeatherService = Depends(ow_service),
+    q: str = Query(..., min_length=1, description="City name to search for"),
+    limit: int = Query(5, ge=1, le=10, description="Maximum number of matches"),
+    service: OpenWeatherService = Depends(ow_service),
 ) -> GeocodeResponse:
-    """ Accept city name, return matching coordinates (lat, lon) """
-    q_clean = " ".join(q.split())
-
-    if len(q_clean) < 2 or not _CITY_RE.fullmatch(q_clean):
-        raise api_error(422, "INVALID_QUERY", "Invalid city name.")
-
-    data, meta = await ow.geocode(q=q_clean, limit=limit)
-    request.state.upstream = meta
-
-    if not isinstance(data, list):
-        raise api_error(502, "UPSTREAM_MALFORMED", "Upstream returned malformed geocode payload.")
+    """Return geocoding matches for a city query."""
+    data, _meta = await service.geocode(q=q, limit=limit)
 
     results: list[GeocodeResult] = []
     for item in data:
@@ -44,6 +29,7 @@ async def geocode(
         country = item.get("country")
         lat_v = item.get("lat")
         lon_v = item.get("lon")
+        state_v = item.get("state")
 
         if not isinstance(name, str) or not isinstance(country, str):
             continue
@@ -54,11 +40,13 @@ async def geocode(
         except (TypeError, ValueError):
             continue
 
+        state = state_v if isinstance(state_v, str) else None
+
         results.append(
             GeocodeResult(
                 name=name,
                 country=country,
-                state=item.get("state"),
+                state=state,
                 lat=lat_f,
                 lon=lon_f,
             )
@@ -67,4 +55,4 @@ async def geocode(
         if len(results) >= limit:
             break
 
-    return GeocodeResponse(query=q_clean, results=results)
+    return GeocodeResponse(query=q, results=results)
