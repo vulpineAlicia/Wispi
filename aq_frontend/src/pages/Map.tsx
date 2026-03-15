@@ -94,17 +94,19 @@ export default function MapPage() {
                 />
               )}
 
-              <HistoryPanel
-                hasSelection={selection != null}
-                historyDays={historyDays}
-                setHistoryDays={setHistoryDays}
-                historyLoading={history.loading}
-                historyError={history.error}
-                chartData={chartData}
-                lat={selection?.lat}
-                lon={selection?.lon}
-                name={selection?.name}
-              />
+              <div className="mt-4">
+                <HistoryPanel
+                  hasSelection={selection != null}
+                  historyDays={historyDays}
+                  setHistoryDays={setHistoryDays}
+                  historyLoading={history.loading}
+                  historyError={history.error}
+                  chartData={chartData}
+                  lat={selection?.lat}
+                  lon={selection?.lon}
+                  name={selection?.name}
+                />
+              </div>
             </Bubble>
 
             {/* scroll fade */}

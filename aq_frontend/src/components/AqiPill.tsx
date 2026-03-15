@@ -1,4 +1,4 @@
-export function aqiMeta(aqi: number) {
+function aqiMeta(aqi: number) {
   switch (aqi) {
     case 1:
       return { label: "Good", badge: "bg-emerald-100 text-emerald-900 ring-emerald-200" };
