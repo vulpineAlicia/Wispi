@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from typing import Literal
 
-import httpx
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Depends, Request, Response
 
+from aq_backend.dependencies import ow_service
 from aq_backend.http_errors import api_error
+from aq_backend.services.openweather import OpenWeatherService
 
 router = APIRouter(prefix="/tiles", tags=["tiles"])
 
@@ -30,74 +31,45 @@ async def openweather_tile(
     z: int,
     x: int,
     y: int,
+    service: OpenWeatherService = Depends(ow_service),
 ) -> Response:
-    """
-    Proxy OpenWeather tile overlays
-
-    Returns PNG bytes and cache headers
-    """
-
+    """ Return OpenWeather tile """
     if z < 0 or z > _MAX_Z:
         raise api_error(400, "INVALID_QUERY", "Invalid zoom level.")
 
     if x < 0 or y < 0:
         raise api_error(400, "INVALID_QUERY", "Invalid tile coordinates.")
 
-    settings = request.app.state.settings
-    api_key = getattr(settings, "openweather_api_key", None)
-
-    if not api_key:
-        raise api_error(
-            500,
-            "SERVER_MISCONFIGURED",
-            "OPENWEATHER_API_KEY not configured.",
-        )
-
-    upstream_url = f"https://tile.openweathermap.org/map/{layer}/{z}/{x}/{y}.png"
-    client: httpx.AsyncClient = request.app.state.app_state.http
-
     upstream_headers: dict[str, str] = {}
     inm = request.headers.get("if-none-match")
     ims = request.headers.get("if-modified-since")
 
     if inm:
-        upstream_headers["if-none-match"] = inm
+        upstream_headers["If-None-Match"] = inm
     if ims:
-        upstream_headers["if-modified-since"] = ims
+        upstream_headers["If-Modified-Since"] = ims
 
-    try:
-        r = await client.get(
-            upstream_url,
-            params={"appid": api_key},
-            headers=upstream_headers or None,
-        )
-    except httpx.TimeoutException as exc:
-        raise api_error(504, "UPSTREAM_TIMEOUT", "Upstream timeout.") from exc
-    except httpx.RequestError as exc:
-        raise api_error(502, "UPSTREAM_NETWORK", "Upstream request failed.") from exc
+    content, meta, passthrough_headers, status_code = await service.get_tile(
+        layer=layer,
+        z=z,
+        x=x,
+        y=y,
+        headers=upstream_headers or None,
+    )
+    request.state.upstream = meta
 
     headers_out: dict[str, str] = {
         "Cache-Control": f"public, max-age={_CACHE_SECONDS}",
+        **passthrough_headers,
     }
 
-    etag = r.headers.get("etag")
-    if etag:
-        headers_out["ETag"] = etag
-
-    last_modified = r.headers.get("last-modified")
-    if last_modified:
-        headers_out["Last-Modified"] = last_modified
-
-    if r.status_code == 304:
+    if status_code == 304:
         return Response(status_code=304, headers=headers_out)
 
-    if r.status_code != 200:
-        raise api_error(
-            502,
-            "UPSTREAM_ERROR",
-            f"Upstream returned status {r.status_code}.",
-        )
-
-    headers_out["Content-Type"] = "image/png"
-
-    return Response(content=r.content, status_code=200, headers=headers_out)
+    assert content is not None
+    return Response(
+        content=content,
+        status_code=status_code,
+        headers=headers_out,
+        media_type="image/png",
+    )

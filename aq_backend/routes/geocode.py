@@ -1,8 +1,6 @@
-"""Geocoding route."""
+""" Geocoding route """
 
-from __future__ import annotations
-
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 
 from aq_backend.dependencies import ow_service
 from aq_backend.schemas import GeocodeResponse, GeocodeResult
@@ -13,12 +11,14 @@ router = APIRouter(tags=["geocode"])
 
 @router.get("/geocode", response_model=GeocodeResponse)
 async def geocode(
+    request: Request,
     q: str = Query(..., min_length=1, description="City name to search for"),
     limit: int = Query(5, ge=1, le=10, description="Maximum number of matches"),
     service: OpenWeatherService = Depends(ow_service),
 ) -> GeocodeResponse:
-    """Return geocoding matches for a city query."""
-    data, _meta = await service.geocode(q=q, limit=limit)
+    """ Return geocoding matches for a city query """
+    data, meta = await service.geocode(q=q, limit=limit)
+    request.state.upstream = meta
 
     results: list[GeocodeResult] = []
     for item in data:

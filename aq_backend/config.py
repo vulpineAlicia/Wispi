@@ -2,103 +2,136 @@
 
 from __future__ import annotations
 
-import os
-from dataclasses import dataclass
 from functools import lru_cache
+from typing import Any
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
+from pydantic import Field, field_validator, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 GEOCODE_URL = "https://api.openweathermap.org/geo/1.0/direct"
 AIR_URL = "https://api.openweathermap.org/data/2.5/air_pollution"
 HISTORY_URL = "https://api.openweathermap.org/data/2.5/air_pollution/history"
 
+_DEV_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
-@dataclass(frozen=True)
-class Settings:
+
+class Settings(BaseSettings):
     """ Immutable runtime config for the app """
 
-    openweather_api_key: str
-    frontend_origins: list[str]
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        enable_decoding=False,
+    )
+
+    openweather_api_key: str = Field(..., alias="OPENWEATHER_API_KEY")
+    app_env: str = Field("development", alias="APP_ENV")
+    frontend_origins: list[str] = Field(default_factory=list, alias="FRONTEND_ORIGINS")
 
     # HTTP client timeout (per upstream request)
-    http_timeout_s: float = 6.0
+    http_timeout_s: float = Field(6.0, alias="HTTP_TIMEOUT_S")
 
     # Whole-request timeout (middleware budget)
-    request_timeout_s: float = 12.0
+    request_timeout_s: float = Field(12.0, alias="REQUEST_TIMEOUT_S")
 
     # OpenWeather retry policy
-    ow_total_budget_s: float = 6.0
-    ow_max_attempts: int = 3
+    ow_total_budget_s: float = Field(6.0, alias="OW_TOTAL_BUDGET_S")
+    ow_max_attempts: int = Field(3, alias="OW_MAX_ATTEMPTS")
 
     geocode_url: str = GEOCODE_URL
     air_url: str = AIR_URL
     history_url: str = HISTORY_URL
 
+    @field_validator("openweather_api_key")
+    @classmethod
+    def validate_api_key(cls, value: str) -> str:
+        """ Ensure OpenWeather API key is provided and not empty """
+        value = value.strip()
+        if not value:
+            raise ValueError("OPENWEATHER_API_KEY is required")
+        return value
 
-def _parse_float_env(name: str, default: float) -> float:
-    """ Read a float from env or return the default if invalid """
-    raw = os.getenv(name)
-    if raw is None or not raw.strip():
-        return default
-    try:
-        return float(raw)
-    except ValueError:
-        return default
+    @field_validator("app_env")
+    @classmethod
+    def normalize_app_env(cls, value: str) -> str:
+        """ Normalize environment name: strip whitespace and convert to lowercase """
+        return value.strip().lower()
+
+    @field_validator("frontend_origins", mode="before")
+    @classmethod
+    def parse_frontend_origins(cls, value: Any) -> list[str]:
+        """
+        Normalize FRONTEND_ORIGINS into a list of cleaned URLs
+
+        Accepts comma-separated string or list of strings;
+
+        Trims whitespace, removes trailing slashes, filters out empty values
+
+        """
+        if value is None:
+            return []
+
+        if isinstance(value, str):
+            value = value.strip()
+            if not value:
+                return []
+            return [item.strip().rstrip("/") for item in value.split(",") if item.strip()]
+
+        if isinstance(value, list):
+            result: list[str] = []
+            for item in value:
+                if isinstance(item, str):
+                    cleaned = item.strip().rstrip("/")
+                    if cleaned:
+                        result.append(cleaned)
+            return result
+
+        raise ValueError("FRONTEND_ORIGINS must be a comma-separated string or a list of strings")
+
+    @field_validator("http_timeout_s", "request_timeout_s", "ow_total_budget_s")
+    @classmethod
+    def validate_positive_float(cls, value: float) -> float:
+        """ Ensure timeout values are positive """
+        if value <= 0:
+            raise ValueError("timeout values must be > 0")
+        return value
+
+    @field_validator("ow_max_attempts")
+    @classmethod
+    def validate_attempts(cls, value: int) -> int:
+        """ Ensure retry attempts count is at least 1 """
+        if value < 1:
+            raise ValueError("OW_MAX_ATTEMPTS must be >= 1")
+        return value
+
+    @model_validator(mode="after")
+    def validate_cross_field_rules(self) -> Settings:
+        """ Ensure frontend origins are valid and request timeout exceeds upstream budget """
+        if not self.frontend_origins:
+            if self.app_env in {"dev", "development", "local"}:
+                self.frontend_origins = list(_DEV_ORIGINS)
+            else:
+                raise ValueError(
+                    "FRONTEND_ORIGINS is required in non-development env "
+                    "(comma separated, e.g. https://your-frontend.com)"
+                )
+
+        if "*" in self.frontend_origins:
+            raise ValueError(
+                "FRONTEND_ORIGINS cannot contain '*' because allow_credentials=True"
+            )
+
+        if self.request_timeout_s <= self.ow_total_budget_s:
+            raise ValueError(
+                "REQUEST_TIMEOUT_S should be greater than OW_TOTAL_BUDGET_S "
+                "so upstream retry handling can finish first"
+            )
+
+        return self
 
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    """ Load and validate configuration once and cache it for the app lifetime """
-
-    api_key = os.getenv("OPENWEATHER_API_KEY", "").strip()
-
-    if not api_key:
-        raise RuntimeError("OPENWEATHER_API_KEY is required (set it in .env/.env.example)")
-    app_env = os.getenv("APP_ENV", "development").strip().lower()
-
-    origins_raw = os.getenv("FRONTEND_ORIGINS", "").strip()
-    origins = [o.strip() for o in origins_raw.split(",") if o.strip()]
-    origins = [o.rstrip("/") for o in origins]
-
-    if not origins:
-        if app_env in {"dev", "development", "local"}:
-            origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
-        else:
-            raise RuntimeError(
-                "FRONTEND_ORIGINS is required in non-development env "
-                "(comma separated, e.g. https://your-frontend.com)"
-            )
-
-    if "*" in origins:
-        raise RuntimeError(
-            "FRONTEND_ORIGINS cannot contain '*' (CORS wildcard) because allow_credentials=True"
-        )
-
-    http_timeout_s = _parse_float_env("HTTP_TIMEOUT_S", 6.0)
-    request_timeout_s = _parse_float_env("REQUEST_TIMEOUT_S", 12.0)
-    ow_total_budget_s = _parse_float_env("OW_TOTAL_BUDGET_S", 6.0)
-    try:
-        ow_max_attempts = int(os.getenv("OW_MAX_ATTEMPTS", "3"))
-    except ValueError as exc:
-        raise RuntimeError("OW_MAX_ATTEMPTS must be an integer") from exc
-
-    if request_timeout_s <= 0:
-        raise RuntimeError("REQUEST_TIMEOUT_S must be > 0")
-    if http_timeout_s <= 0:
-        raise RuntimeError("HTTP_TIMEOUT_S must be > 0")
-    if ow_total_budget_s <= 0:
-        raise RuntimeError("OW_TOTAL_BUDGET_S must be > 0")
-    if ow_max_attempts < 1:
-        raise RuntimeError("OW_MAX_ATTEMPTS must be >= 1")
-
-    return Settings(
-        openweather_api_key=api_key,
-        frontend_origins=origins,
-        http_timeout_s=http_timeout_s,
-        request_timeout_s=request_timeout_s,
-        ow_total_budget_s=ow_total_budget_s,
-        ow_max_attempts=ow_max_attempts,
-    )
+    """ Load configuration once and cache it for the app lifetime """
+    return Settings()
