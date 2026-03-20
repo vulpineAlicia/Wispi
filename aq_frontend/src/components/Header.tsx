@@ -1,18 +1,15 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import ServerStatusPill from "./ServerStatusPill";
+
 import logo from "../assets/logo.svg";
+import { navigateHomeTop } from "../lib/siteNav";
+import ServerStatusPill from "./ServerStatusPill";
 
 export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
   function goHomeTop() {
-    if (location.pathname === "/") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    navigate("/", { state: { scrollToTop: true } });
+    navigateHomeTop(location, navigate);
   }
 
   return (
@@ -33,16 +30,13 @@ export default function Header() {
 
           {/* Title */}
           <div className="leading-tight">
-            <div className="text-lg font-semibold text-brand-50">
-              Wispi
-            </div>
+            <div className="text-lg font-semibold text-brand-50">Wispi</div>
             <div className="text-sm text-brand-200">
               Track air quality worldwide
             </div>
           </div>
         </button>
 
-        
         {/* Right side */}
         <ServerStatusPill />
       </div>

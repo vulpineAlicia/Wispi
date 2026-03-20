@@ -4,8 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import NavBar from "./components/NavBar";
-
-import { useScrollToHash } from "./hooks/useScrollToHash";
+import { useNavScroll } from "./lib/siteNav";
 
 const Home = lazy(() => import("./pages/Home"));
 const Map = lazy(() => import("./pages/Map"));
@@ -23,7 +22,7 @@ function Background() {
 }
 
 function AppShell() {
-  useScrollToHash();
+  useNavScroll();
 
   return (
     <>

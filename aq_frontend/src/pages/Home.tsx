@@ -1,13 +1,12 @@
 import { useState } from "react";
-import lookupBg from "../assets/lookup-bg.png";
 
+import lookupBg from "../assets/lookup-bg.png";
+import CityResultPanel from "../components/CityResultPanel";
+import CitySearchBox from "../components/CitySearchBox";
+import FeatureCard from "../components/FeatureCard";
+import { useCurrentAir } from "../hooks/useCurrentAir";
 import type { GeoResult } from "../lib/api";
 import { mapUrl } from "../lib/mapUrl";
-
-import { useCurrentAir } from "../hooks/useCurrentAir";
-import CitySearchBox from "../components/CitySearchBox";
-import CityResultPanel from "../components/CityResultPanel";
-import FeatureCard from "../components/FeatureCard";
 
 const FEATURES = [
   {
@@ -16,15 +15,15 @@ const FEATURES = [
   },
   {
     title: "Health guidance",
-    desc: "Quick recommendations based on pollution level and risk groups.",
+    desc: "Quick recommendations based on the current air quality level.",
   },
   {
     title: "History & trends",
-    desc: "See changes over time and spot spikes in air pollution.",
+    desc: "Explore recent air quality changes for selected locations.",
   },
   {
-    title: "Alerts",
-    desc: "Get notified when your city crosses a chosen threshold.",
+    title: "Interactive map",
+    desc: "Open the map view and inspect conditions by location.",
   },
 ];
 
@@ -42,81 +41,76 @@ export default function Home() {
     : "";
 
   return (
-    <>
-      <div id="top" />
+    <main className="mx-auto max-w-6xl px-4 pb-14 pt-8">
+      <section id="lookup" className="mt-2 scroll-mt-35">
+        <div className="relative flex min-h-[70vh] items-center overflow-hidden rounded-3xl ring-1 ring-brand-300/50 shadow-[0_20px_50px_-20px_rgba(15,58,87,0.35)]">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${lookupBg})` }}
+          />
+          <div className="absolute inset-0 bg-white/5 backdrop-blur-[3px]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-white/40 to-transparent" />
 
-      <main className="mx-auto max-w-6xl px-4 pt-8 pb-14">
-        <section id="lookup" className="mt-2 scroll-mt-35">
-          <div className="relative flex min-h-[70vh] items-center overflow-hidden rounded-3xl ring-1 ring-brand-300/50 shadow-[0_20px_50px_-20px_rgba(15,58,87,0.35)]">
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${lookupBg})` }}
-            />
-            <div className="absolute inset-0 bg-white/5 backdrop-blur-[3px]" />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-white/40 to-transparent" />
+          <div className="relative w-full p-6 md:p-9">
+            <div className="max-w-2xl">
+              <div className="flex flex-col gap-3">
+                <h1 className="text-3xl font-semibold tracking-tight text-brand-900 md:text-4xl">
+                  Look up air quality in your city
+                </h1>
+                <p className="text-base text-brand-700 md:text-lg">
+                  Enter a city name to get real-time air quality data and
+                  recommendations.
+                </p>
+              </div>
 
-            <div className="relative w-full p-6 md:p-9">
-              <div className="max-w-2xl">
-                <div className="flex flex-col gap-3">
-                  <h1 className="text-3xl font-semibold tracking-tight text-brand-900 md:text-4xl">
-                    Look up air quality in your city
-                  </h1>
-                  <p className="text-base text-brand-700 md:text-lg">
-                    Enter a city name to get real-time air quality data and recommendations.
-                  </p>
-                </div>
+              <div className="mt-5 w-full max-w-xl">
+                <CitySearchBox
+                  placeholder="e.g., Tbilisi"
+                  buttonText={current.loading ? "Loading…" : "Search"}
+                  disabled={current.loading}
+                  onSelect={setSelected}
+                />
+              </div>
 
-                <div className="mt-5 w-full max-w-xl">
-                  <CitySearchBox
-                    placeholder="e.g., Tbilisi"
-                    buttonText={current.loading ? "Loading…" : "Search"}
-                    disabled={current.loading}
-                    onSelect={(place) => {
-                      setSelected(place);
-                    }}
+              {selected && (
+                <div className="w-full max-w-xl">
+                  <CityResultPanel
+                    variant="home"
+                    name={selectedLabel}
+                    lat={selected.lat}
+                    lon={selected.lon}
+                    air={current.data}
+                    airLoading={current.loading}
+                    airError={current.error}
+                    detailsTo={detailsTo}
                   />
                 </div>
-
-                {selected && (
-                  <div className="w-full max-w-xl">
-                    <CityResultPanel
-                      variant="home"
-                      name={selectedLabel}
-                      lat={selected.lat}
-                      lon={selected.lon}
-                      air={current.data}
-                      airLoading={current.loading}
-                      airError={current.error}
-                      detailsTo={detailsTo}
-                    />
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="features" className="mt-16 mb-14 scroll-mt-40">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-xl font-semibold text-brand-900 md:text-2xl">
-              Features
-            </h2>
-            <p className="text-sm text-brand-700 md:text-base">
-              Everything you need to track air quality and plan your day.
-            </p>
-          </div>
+      <section id="features" className="mb-14 mt-16 scroll-mt-40">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-xl font-semibold text-brand-900 md:text-2xl">
+            Features
+          </h2>
+          <p className="text-sm text-brand-700 md:text-base">
+            Everything you need to track air quality and plan your day.
+          </p>
+        </div>
 
-          <div className="mt-6 grid gap-5 sm:grid-cols-2">
-            {FEATURES.map((feature) => (
-              <FeatureCard
-                key={feature.title}
-                title={feature.title}
-                desc={feature.desc}
-              />
-            ))}
-          </div>
-        </section>
-      </main>
-    </>
+        <div className="mt-6 grid gap-5 sm:grid-cols-2">
+          {FEATURES.map((feature) => (
+            <FeatureCard
+              key={feature.title}
+              title={feature.title}
+              desc={feature.desc}
+            />
+          ))}
+        </div>
+      </section>
+    </main>
   );
 }

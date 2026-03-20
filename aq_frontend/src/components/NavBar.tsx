@@ -3,12 +3,21 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import {
   HEADER_LINKS,
+  navigateToNavItem,
   type NavItem,
-  type RoutePath,
-  type SectionId,
-  scrollToId,
-  scrollTopSmooth,
 } from "../lib/siteNav";
+
+function navItemKey(item: NavItem, prefix = "") {
+  if (item.kind === "route") {
+    return `${prefix}route:${item.to}`;
+  }
+
+  if (item.kind === "section") {
+    return `${prefix}section:${item.to}:${item.sectionId ?? "top"}`;
+  }
+
+  return `${prefix}bottom:${item.label}`;
+}
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
@@ -19,41 +28,8 @@ export default function NavBar() {
     setOpen(false);
   }
 
-  function handleSection(id: SectionId) {
-    if (id === "top") {
-      if (location.pathname !== "/") navigate("/");
-      else scrollTopSmooth();
-      return;
-    }
-
-    if (id === "features") {
-      if (location.pathname !== "/") {
-        navigate("/", { state: { scrollToId: "features" } });
-      } else if (!scrollToId("features")) {
-        scrollTopSmooth();
-      }
-      return;
-    }
-
-    if (!scrollToId("contacts")) {
-      navigate("/", { state: { scrollToId: "contacts" } });
-    }
-  }
-
-  function handleRoute(to: RoutePath) {
-    if (location.pathname === to) {
-      scrollTopSmooth();
-      return;
-    }
-
-    navigate(to);
-  }
-
   function handleNavClick(item: NavItem) {
-    if (item.kind === "section") handleSection(item.id);
-    else handleRoute(item.to);
-
-    closeMenu();
+    navigateToNavItem(item, location, navigate, closeMenu);
   }
 
   const desktopLinkClass = "text-brand-200 transition hover:text-brand-50";
@@ -67,7 +43,7 @@ export default function NavBar() {
           <nav className="hidden gap-6 md:flex">
             {HEADER_LINKS.map((item) => (
               <button
-                key={item.kind === "section" ? `section:${item.id}` : `route:${item.to}`}
+                key={navItemKey(item)}
                 type="button"
                 onClick={() => handleNavClick(item)}
                 className={desktopLinkClass}
@@ -87,7 +63,7 @@ export default function NavBar() {
 
             <button
               type="button"
-              onClick={() => setOpen((v) => !v)}
+              onClick={() => setOpen((value) => !value)}
               aria-expanded={open}
               aria-controls="mobile-nav"
               aria-label="Toggle menu"
@@ -103,7 +79,7 @@ export default function NavBar() {
             <div className="flex flex-col gap-2 rounded-3xl border border-brand-200 bg-white/80 p-3 backdrop-blur">
               {HEADER_LINKS.map((item) => (
                 <button
-                  key={item.kind === "section" ? `m:section:${item.id}` : `m:route:${item.to}`}
+                  key={navItemKey(item, "m:")}
                   type="button"
                   onClick={() => handleNavClick(item)}
                   className={mobileLinkClass}
