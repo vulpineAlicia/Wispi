@@ -1,6 +1,6 @@
 import BaseButton from "../components/BaseButton";
-import { getUserMessage } from "../lib/apiMessages";
-import type { AirData } from "../lib/api";
+import { getUserMessage } from "../lib/services/apiMessages";
+import type { AirData } from "../lib/services/api";
 import AqiPill from "./AqiPill";
 import Bubble from "./Bubble";
 

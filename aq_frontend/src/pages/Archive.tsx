@@ -6,7 +6,7 @@ import CitySearchBox from "../components/CitySearchBox";
 import HistoryPanel from "../components/HistoryPanel";
 import { useAirHistory } from "../hooks/useAirHistory";
 import { useArchiveParams } from "../hooks/useArchiveParams";
-import type { GeoResult } from "../lib/api";
+import type { GeoResult } from "../lib/services/api";
 
 export default function ArchivePage() {
   const {

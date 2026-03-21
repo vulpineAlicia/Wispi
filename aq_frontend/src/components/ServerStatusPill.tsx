@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { checkHealth } from "../lib/api";
+import { checkHealth } from "../lib/services/api";
 
 export type Status = "online" | "degraded" | "offline";
 

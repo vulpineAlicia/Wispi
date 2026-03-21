@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 
-import { getAirHistory, type AirHistoryResponse } from "../lib/api";
+import { getAirHistory, type AirHistoryResponse } from "../lib/services/api";
 import { buildHistoryModel } from "../lib/historyModel";
 import { useLatLonRequest } from "./useLatLonRequest";
 

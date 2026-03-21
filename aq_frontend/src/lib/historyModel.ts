@@ -1,4 +1,4 @@
-import type { AirHistoryItem } from "./api";
+import type { AirHistoryItem } from "./services/api";
 
 export type PollutantsMap = Record<string, number>;
 

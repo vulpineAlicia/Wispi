@@ -5,7 +5,7 @@ import CityResultPanel from "../components/CityResultPanel";
 import CitySearchBox from "../components/CitySearchBox";
 import FeatureCard from "../components/FeatureCard";
 import { useAirHistory } from "../hooks/useAirHistory";
-import type { GeoResult } from "../lib/api";
+import type { GeoResult } from "../lib/services/api";
 import { buildMapUrl } from "../lib/locationSelection";
 
 const FEATURES = [

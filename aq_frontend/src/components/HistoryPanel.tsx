@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { getUserMessage } from "../lib/apiMessages";
+import { getUserMessage } from "../lib/services/apiMessages";
 import type { HistoryChartPoint } from "../lib/historyModel";
 import AqiHistoryChartControls from "./AqiHistoryChartControls";
 import Bubble from "./Bubble";

@@ -10,7 +10,7 @@ import HistoryPanel, { type HistoryDays } from "../components/HistoryPanel";
 import MapLayersPanel from "../components/MapLayersPanel";
 import { useAirHistory } from "../hooks/useAirHistory";
 import { useLeafletMap } from "../hooks/useLeafletMap";
-import type { GeoResult } from "../lib/api";
+import type { GeoResult } from "../lib/services/api";
 import {
   buildMapUrl,
   getLocationSelectionFromParams,
