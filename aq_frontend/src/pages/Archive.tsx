@@ -1,47 +1,30 @@
-import { useMemo } from "react";
-
+import archiveBooks from "../assets/archive-books.svg";
+import ArchiveHintBubble from "../components/ArchiveHintBubble";
 import Bubble from "../components/Bubble";
 import CityResultPanel from "../components/CityResultPanel";
 import CitySearchBox from "../components/CitySearchBox";
 import HistoryPanel from "../components/HistoryPanel";
-import ArchiveHintBubble from "../components/ArchiveHintBubble";
-
-import archiveBooks from "../assets/archive-books.svg";
 import { useAirHistory } from "../hooks/useAirHistory";
-import { useArchiveChart } from "../hooks/useArchiveChart";
 import { useArchiveParams } from "../hooks/useArchiveParams";
-import { useArchiveSelection } from "../hooks/useArchiveSelection";
-import type { AirData, GeoResult } from "../lib/api";
+import type { GeoResult } from "../lib/api";
 
 export default function ArchivePage() {
-  const { selection, historyDays, setHistoryDays, navigate, DEFAULT_DAYS, MAX_DAYS } =
-    useArchiveParams();
+  const {
+    selection,
+    historyDays,
+    setHistoryDays,
+    navigate,
+    DEFAULT_DAYS,
+    MAX_DAYS,
+    selectedDate,
+  } = useArchiveParams();
 
   const history = useAirHistory(
     selection?.lat ?? null,
     selection?.lon ?? null,
-    historyDays
+    historyDays,
+    selectedDate
   );
-
-  const chartData = useArchiveChart(history.data ?? null);
-  const { activeDay, selectedDate, pickDay } = useArchiveSelection(chartData);
-
-  const pickedAir: AirData | null = useMemo(() => {
-    if (!activeDay || !selection) return null;
-
-    return {
-      location: {
-        lat: selection.lat,
-        lon: selection.lon,
-      },
-      timestamp_unix: Math.floor(
-        new Date(`${activeDay.date}T00:00:00Z`).getTime() / 1000
-      ),
-      aqi_ow_1_5: activeDay.aqi,
-      pollutants: activeDay.pollutants ?? {},
-      source: "openweather",
-    };
-  }, [activeDay, selection]);
 
   function handleSelectCity(place: GeoResult) {
     const next = new URLSearchParams();
@@ -121,12 +104,12 @@ export default function ArchivePage() {
           <section className="mt-5 grid gap-6 xl:grid-cols-[minmax(0,1fr)_17rem]">
             <div className="order-2 min-w-0 xl:order-1">
               <HistoryPanel
-                hasSelection={true}
+                hasSelection
                 historyDays={historyDays}
                 setHistoryDays={setHistoryDays}
                 historyLoading={history.loading}
                 historyError={history.error}
-                chartData={chartData}
+                chartData={history.model.chartData}
                 lat={selection.lat}
                 lon={selection.lon}
                 name={selection.name}
@@ -134,7 +117,21 @@ export default function ArchivePage() {
                 allowCustomDays
                 maxDays={MAX_DAYS}
                 showArchiveLink={false}
-                onPickDay={pickDay}
+                onPickDay={(date) => {
+                  const next = new URLSearchParams();
+                  next.set("lat", String(selection.lat));
+                  next.set("lon", String(selection.lon));
+                  next.set("name", selection.name);
+
+                  if (selection.country) {
+                    next.set("country", selection.country);
+                  }
+
+                  next.set("days", String(historyDays));
+                  next.set("date", date);
+
+                  navigate({ search: next.toString() });
+                }}
                 lineWidth={3}
                 hitRadius={14}
               />
@@ -145,29 +142,20 @@ export default function ArchivePage() {
                 tone="white"
                 className="flex min-h-[60px] items-center justify-center px-4 py-3 text-center text-sm font-medium text-brand-800"
               >
-                Selected day: {selectedDate}
+                Selected day: {history.model.selectedDay?.date ?? "—"}
               </Bubble>
 
-              {pickedAir ? (
-                <CityResultPanel
-                  variant="map"
-                  name={selection.name}
-                  lat={selection.lat}
-                  lon={selection.lon}
-                  air={pickedAir}
-                  airLoading={false}
-                  airError={null}
-                  showLocation={false}
-                  showAqi
-                />
-              ) : (
-                <Bubble
-                  tone="white"
-                  className="flex min-h-[220px] items-center justify-center p-4 text-center text-sm text-brand-700"
-                >
-                  No air quality data available for the selected range.
-                </Bubble>
-              )}
+              <CityResultPanel
+                variant="map"
+                name={selection.name}
+                lat={selection.lat}
+                lon={selection.lon}
+                panel={history.model.selectedPanel}
+                loading={false}
+                error={null}
+                showLocation={false}
+                showAqi
+              />
             </aside>
           </section>
         )}

@@ -1,8 +1,8 @@
+import BaseButton from "../components/BaseButton";
 import { getUserMessage } from "../lib/apiMessages";
 import type { AirData } from "../lib/api";
 import AqiPill from "./AqiPill";
 import Bubble from "./Bubble";
-import BaseButton from "../components/BaseButton";
 
 const AQI_ADVICE: Record<number, string> = {
   1: "Air quality is excellent — enjoy outdoor activities.",
@@ -16,6 +16,49 @@ function aqiAdvice(aqi: number) {
   return AQI_ADVICE[aqi] ?? "Air quality info is unavailable right now.";
 }
 
+export type PollutantsMap = Record<string, number>;
+
+export type AirPanelData = {
+  aqi: number | null;
+  pollutants: PollutantsMap;
+};
+
+export type DailyAqiPoint = {
+  date: string;
+  aqi: number | null;
+  pollutants?: PollutantsMap;
+};
+
+export function buildCurrentAirPanelData(
+  air: AirData | null | undefined
+): AirPanelData | null {
+  if (!air) return null;
+
+  return {
+    aqi: air.aqi_ow_1_5 ?? null,
+    pollutants: air.pollutants ?? {},
+  };
+}
+
+export function buildDailyMaxAirPanelData(
+  day: DailyAqiPoint | null | undefined
+): AirPanelData | null {
+  if (!day) return null;
+
+  return {
+    aqi: day.aqi ?? null,
+    pollutants: day.pollutants ?? {},
+  };
+}
+
+export function pickLatestDailyPoint<T extends DailyAqiPoint>(
+  items: T[] | null | undefined
+): T | null {
+  if (!items || items.length === 0) return null;
+
+  return [...items].sort((a, b) => a.date.localeCompare(b.date)).at(-1) ?? null;
+}
+
 type Variant = "home" | "map";
 
 type Props = {
@@ -25,9 +68,9 @@ type Props = {
   lat: number;
   lon: number;
 
-  air: AirData | null;
-  airLoading?: boolean;
-  airError?: unknown | null;
+  panel: AirPanelData | null;
+  loading?: boolean;
+  error?: unknown | null;
   detailsTo?: string;
 
   showAqi?: boolean;
@@ -43,9 +86,9 @@ export default function CityResultPanel({
   name,
   lat,
   lon,
-  air,
-  airLoading = false,
-  airError = null,
+  panel,
+  loading = false,
+  error = null,
   detailsTo,
   showAqi = true,
   showLocation = true,
@@ -53,11 +96,11 @@ export default function CityResultPanel({
   const showPollutants = variant === "map";
   const showCta = variant === "home";
 
-  const pollutantsEntries = Object.entries(air?.pollutants ?? {});
+  const pollutantsEntries = Object.entries(panel?.pollutants ?? {});
   const hasPollutants = pollutantsEntries.length > 0;
 
   const dest =
-  detailsTo ?? `/map?lat=${lat}&lon=${lon}&name=${encodeURIComponent(name)}`;
+    detailsTo ?? `/map?lat=${lat}&lon=${lon}&name=${encodeURIComponent(name)}`;
 
   return (
     <>
@@ -72,21 +115,23 @@ export default function CityResultPanel({
 
       {showAqi && (
         <Bubble className="mt-4 px-5 py-5">
-          {airLoading ? (
+          {loading ? (
             <div className="text-sm text-brand-700">Loading…</div>
-          ) : airError ? (
+          ) : error ? (
             <Bubble tone="error" className="px-3 py-2 text-sm">
-              {getUserMessage(airError)}
+              {getUserMessage(error)}
             </Bubble>
-          ) : air ? (
+          ) : panel && panel.aqi != null ? (
             <div className="text-sm text-brand-800">
               <div className="flex flex-wrap items-center gap-3">
-                <span className="text-base font-semibold text-brand-900">AQI</span>
-                <AqiPill aqi={air.aqi_ow_1_5} />
+                <span className="text-base font-semibold text-brand-900">
+                  AQI
+                </span>
+                <AqiPill aqi={panel.aqi} />
               </div>
 
               <p className="mt-2 text-sm leading-snug text-brand-700">
-                {aqiAdvice(air.aqi_ow_1_5)}
+                {aqiAdvice(panel.aqi)}
               </p>
 
               {showPollutants && (

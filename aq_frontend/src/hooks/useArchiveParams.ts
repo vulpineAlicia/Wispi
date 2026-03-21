@@ -1,11 +1,11 @@
 import { useCallback, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
+import type { HistoryDays } from "../components/HistoryPanel";
 import {
   getLocationSelectionFromParams,
   parseNumberOrNull,
 } from "../lib/locationSelection";
-import type { HistoryDays } from "../components/HistoryPanel";
 
 const DEFAULT_DAYS = 30;
 const MAX_DAYS = 365;
@@ -23,6 +23,7 @@ export function useArchiveParams() {
   const navigate = useNavigate();
 
   const selection = getLocationSelectionFromParams(params, "Selected location");
+  const selectedDate = params.get("date");
 
   const rawDays = parseNumberOrNull(params.get("days"));
   const historyDays = clampDays(
@@ -67,5 +68,6 @@ export function useArchiveParams() {
     navigate,
     DEFAULT_DAYS,
     MAX_DAYS,
+    selectedDate,
   };
 }

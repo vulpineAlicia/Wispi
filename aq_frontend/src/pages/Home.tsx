@@ -4,7 +4,7 @@ import lookupBg from "../assets/lookup-bg.png";
 import CityResultPanel from "../components/CityResultPanel";
 import CitySearchBox from "../components/CitySearchBox";
 import FeatureCard from "../components/FeatureCard";
-import { useCurrentAir } from "../hooks/useCurrentAir";
+import { useAirHistory } from "../hooks/useAirHistory";
 import type { GeoResult } from "../lib/api";
 import { mapUrl } from "../lib/mapUrl";
 
@@ -30,7 +30,7 @@ const FEATURES = [
 export default function Home() {
   const [selected, setSelected] = useState<GeoResult | null>(null);
 
-  const current = useCurrentAir(selected?.lat ?? null, selected?.lon ?? null);
+  const history = useAirHistory(selected?.lat ?? null, selected?.lon ?? null, 1);
 
   const detailsTo = selected
     ? mapUrl(selected.lat, selected.lon, selected.name)
@@ -66,8 +66,8 @@ export default function Home() {
               <div className="mt-5 w-full max-w-xl">
                 <CitySearchBox
                   placeholder="e.g., Tbilisi"
-                  buttonText={current.loading ? "Loading…" : "Search"}
-                  disabled={current.loading}
+                  buttonText={history.loading ? "Loading…" : "Search"}
+                  disabled={history.loading}
                   onSelect={setSelected}
                 />
               </div>
@@ -79,9 +79,9 @@ export default function Home() {
                     name={selectedLabel}
                     lat={selected.lat}
                     lon={selected.lon}
-                    air={current.data}
-                    airLoading={current.loading}
-                    airError={current.error}
+                    panel={history.model.latestPanel}
+                    loading={history.loading}
+                    error={history.error}
                     detailsTo={detailsTo}
                   />
                 </div>

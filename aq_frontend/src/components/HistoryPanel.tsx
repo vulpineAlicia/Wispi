@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { getUserMessage } from "../lib/apiMessages";
-import type { ChartPoint } from "../lib/historyChart";
+import type { HistoryChartPoint } from "../lib/historyModel";
 import AqiHistoryChartControls from "./AqiHistoryChartControls";
 import Bubble from "./Bubble";
 
@@ -16,7 +16,7 @@ const HISTORY_RANGES = [
 
 export type HistoryDays = number;
 
-type PickDayHandler = (point: ChartPoint) => void;
+type PickDayHandler = (date: string) => void;
 
 function clampDays(value: number, maxDays: number) {
   const n = Math.floor(value);
@@ -52,7 +52,7 @@ type Props = {
   setHistoryDays: (days: HistoryDays) => void;
   historyLoading: boolean;
   historyError: unknown | null;
-  chartData: ChartPoint[];
+  chartData: HistoryChartPoint[];
   showPresets?: boolean;
   allowCustomDays?: boolean;
   maxDays?: number;
@@ -126,7 +126,9 @@ export default function HistoryPanel({
             {getUserMessage(historyError)}
           </Bubble>
         ) : (
-          <Suspense fallback={<div className="text-sm text-brand-700">Loading chart…</div>}>
+          <Suspense
+            fallback={<div className="text-sm text-brand-700">Loading chart…</div>}
+          >
             <AqiHistoryChart
               data={chartData}
               onPickDay={onPickDay}

@@ -8,9 +8,9 @@ import {
   CartesianGrid,
 } from "recharts";
 
-import type { ChartPoint } from "../lib/historyChart";
+import type { HistoryChartPoint } from "../lib/historyModel";
 
-type PickDayHandler = (point: ChartPoint) => void;
+type PickDayHandler = (date: string) => void;
 
 type DotProps = {
   cx?: number;
@@ -19,7 +19,7 @@ type DotProps = {
 };
 
 type Props = {
-  data: ChartPoint[];
+  data: HistoryChartPoint[];
   onPickDay?: PickDayHandler;
   lineWidth?: number;
   hitRadius?: number;
@@ -37,7 +37,7 @@ export default function AqiHistoryChart({
 
   const dot = onPickDay
     ? (p: DotProps) => {
-        const payload = p.payload as ChartPoint | undefined;
+        const payload = p.payload as HistoryChartPoint | undefined;
         if (!payload || p.cx == null || p.cy == null) return null;
 
         return (
@@ -51,7 +51,7 @@ export default function AqiHistoryChart({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              onPickDay(payload);
+              onPickDay(payload.date); 
             }}
           />
         );

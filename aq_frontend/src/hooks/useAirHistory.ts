@@ -1,11 +1,14 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
+
 import { getAirHistory, type AirHistoryResponse } from "../lib/api";
+import { buildHistoryModel } from "../lib/historyModel";
 import { useLatLonRequest } from "./useLatLonRequest";
 
 export function useAirHistory(
   lat: number | null,
   lon: number | null,
-  days: number
+  days: number,
+  selectedDate?: string | null
 ) {
   const request = useCallback(
     (lat: number, lon: number, signal: AbortSignal) =>
@@ -13,5 +16,19 @@ export function useAirHistory(
     [days]
   );
 
-  return useLatLonRequest<AirHistoryResponse>(lat, lon, request);
+  const result = useLatLonRequest<AirHistoryResponse>(lat, lon, request);
+
+  const model = useMemo(
+    () =>
+      buildHistoryModel({
+        items: result.data?.items,
+        selectedDate,
+      }),
+    [result.data, selectedDate]
+  );
+
+  return {
+    ...result,
+    model,
+  };
 }

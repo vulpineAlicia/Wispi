@@ -1,23 +1,19 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import "leaflet/dist/leaflet.css";
 
-import CitySearchBox from "../components/CitySearchBox";
+import Bubble from "../components/Bubble";
 import CityResultPanel from "../components/CityResultPanel";
+import CitySearchBox from "../components/CitySearchBox";
 import HistoryPanel, { type HistoryDays } from "../components/HistoryPanel";
 import MapLayersPanel from "../components/MapLayersPanel";
-import Bubble from "../components/Bubble";
-
-import type { GeoResult } from "../lib/api";
-import { toDailyAqiSeries } from "../lib/historyChart";
-import { getLocationSelectionFromParams } from "../lib/locationSelection";
-import { getOverlayUrl, type OverlayMode } from "../lib/mapOverlay";
-import { mapUrl } from "../lib/mapUrl";
-
-import { useLeafletMap } from "../hooks/useLeafletMap";
-import { useCurrentAir } from "../hooks/useCurrentAir";
 import { useAirHistory } from "../hooks/useAirHistory";
+import { useLeafletMap } from "../hooks/useLeafletMap";
+import type { GeoResult } from "../lib/api";
+import { getLocationSelectionFromParams } from "../lib/locationSelection";
+import { mapUrl } from "../lib/mapUrl";
+import { getOverlayUrl, type OverlayMode } from "../lib/mapOverlay";
 
 const MT_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
@@ -26,6 +22,7 @@ export default function MapPage() {
   const navigate = useNavigate();
 
   const selection = getLocationSelectionFromParams(params);
+  const hasSelection = selection != null;
 
   const [overlay, setOverlay] = useState<OverlayMode>("none");
   const [historyDays, setHistoryDays] = useState<HistoryDays>(7);
@@ -39,16 +36,10 @@ export default function MapPage() {
     overlayUrl,
   });
 
-  const current = useCurrentAir(selection?.lat ?? null, selection?.lon ?? null);
   const history = useAirHistory(
     selection?.lat ?? null,
     selection?.lon ?? null,
     historyDays
-  );
-
-  const chartData = useMemo(
-    () => toDailyAqiSeries(history.data?.items ?? []),
-    [history.data]
   );
 
   function handleSelectCity(place: GeoResult) {
@@ -66,9 +57,10 @@ export default function MapPage() {
             <Bubble
               tone="brand"
               className="
-                p-5 text-brand-900
                 max-h-[calc(100vh-170px)]
                 overflow-y-auto
+                p-5
+                text-brand-900
                 no-scrollbar
               "
             >
@@ -88,20 +80,20 @@ export default function MapPage() {
                   name={selection.name}
                   lat={selection.lat}
                   lon={selection.lon}
-                  air={current.data}
-                  airLoading={current.loading}
-                  airError={current.error}
+                  panel={history.model.latestPanel}
+                  loading={history.loading}
+                  error={history.error}
                 />
               )}
 
               <div className="mt-4">
                 <HistoryPanel
-                  hasSelection={selection != null}
+                  hasSelection={hasSelection}
                   historyDays={historyDays}
                   setHistoryDays={setHistoryDays}
                   historyLoading={history.loading}
                   historyError={history.error}
-                  chartData={chartData}
+                  chartData={history.model.chartData}
                   lat={selection?.lat}
                   lon={selection?.lon}
                   name={selection?.name}
