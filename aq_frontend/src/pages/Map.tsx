@@ -11,8 +11,10 @@ import MapLayersPanel from "../components/MapLayersPanel";
 import { useAirHistory } from "../hooks/useAirHistory";
 import { useLeafletMap } from "../hooks/useLeafletMap";
 import type { GeoResult } from "../lib/api";
-import { getLocationSelectionFromParams } from "../lib/locationSelection";
-import { mapUrl } from "../lib/mapUrl";
+import {
+  buildMapUrl,
+  getLocationSelectionFromParams,
+} from "../lib/locationSelection";
 import { getOverlayUrl, type OverlayMode } from "../lib/mapOverlay";
 
 const MT_KEY = import.meta.env.VITE_MAPTILER_KEY;
@@ -43,7 +45,14 @@ export default function MapPage() {
   );
 
   function handleSelectCity(place: GeoResult) {
-    navigate(mapUrl(place.lat, place.lon, place.name));
+    navigate(
+      buildMapUrl({
+        lat: place.lat,
+        lon: place.lon,
+        name: place.name,
+        country: place.country,
+      })
+    );
   }
 
   return (

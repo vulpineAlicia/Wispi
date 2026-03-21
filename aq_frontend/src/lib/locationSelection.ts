@@ -33,3 +33,25 @@ export function getLocationSelectionFromParams(
     country: rawCountry || undefined,
   };
 }
+
+export function buildMapUrl(selection: {
+  lat: number;
+  lon: number;
+  name?: string;
+  country?: string;
+}) {
+  const params = new URLSearchParams({
+    lat: String(selection.lat),
+    lon: String(selection.lon),
+  });
+
+  if (selection.name) {
+    params.set("name", selection.name);
+  }
+
+  if (selection.country) {
+    params.set("country", selection.country);
+  }
+
+  return `/map?${params.toString()}`;
+}

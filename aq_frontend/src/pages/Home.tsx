@@ -6,7 +6,7 @@ import CitySearchBox from "../components/CitySearchBox";
 import FeatureCard from "../components/FeatureCard";
 import { useAirHistory } from "../hooks/useAirHistory";
 import type { GeoResult } from "../lib/api";
-import { mapUrl } from "../lib/mapUrl";
+import { buildMapUrl } from "../lib/locationSelection";
 
 const FEATURES = [
   {
@@ -33,7 +33,12 @@ export default function Home() {
   const history = useAirHistory(selected?.lat ?? null, selected?.lon ?? null, 1);
 
   const detailsTo = selected
-    ? mapUrl(selected.lat, selected.lon, selected.name)
+    ? buildMapUrl({
+        lat: selected.lat,
+        lon: selected.lon,
+        name: selected.name,
+        country: selected.country,
+      })
     : "/map";
 
   const selectedLabel = selected
