@@ -3,20 +3,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import {
   HEADER_LINKS,
-  navigateToNavItem,
-  type NavItem,
+  scrollToHash,
+  scrollTopSmooth,
+  type NavLinkItem,
 } from "../lib/siteNav";
 
-function navItemKey(item: NavItem, prefix = "") {
-  if (item.kind === "route") {
-    return `${prefix}route:${item.to}`;
-  }
-
-  if (item.kind === "section") {
-    return `${prefix}section:${item.to}:${item.sectionId ?? "top"}`;
-  }
-
-  return `${prefix}bottom:${item.label}`;
+function navItemKey(item: NavLinkItem, prefix = "") {
+  return `${prefix}${item.to}`;
 }
 
 export default function NavBar() {
@@ -28,8 +21,39 @@ export default function NavBar() {
     setOpen(false);
   }
 
-  function handleNavClick(item: NavItem) {
-    navigateToNavItem(item, location, navigate, closeMenu);
+  function handleNavClick(item: NavLinkItem) {
+    const target = item.to;
+
+    if (target.startsWith("#")) {
+      if (!scrollToHash(target)) {
+        scrollTopSmooth();
+      }
+      closeMenu();
+      return;
+    }
+
+    const [pathname, hash = ""] = target.split("#");
+    const nextHash = hash ? `#${hash}` : "";
+
+    if (location.pathname === pathname) {
+      if (nextHash) {
+        if (!scrollToHash(nextHash)) {
+          scrollTopSmooth();
+        }
+      } else {
+        scrollTopSmooth();
+      }
+
+      closeMenu();
+      return;
+    }
+
+    navigate({
+      pathname,
+      hash: nextHash,
+    });
+
+    closeMenu();
   }
 
   const desktopLinkClass = "text-brand-200 transition hover:text-brand-50";
@@ -54,6 +78,7 @@ export default function NavBar() {
           </nav>
 
           <div className="flex items-center gap-3">
+
             <a
               href="#auth"
               className="hidden rounded-2xl bg-brand-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-50 hover:text-brand-900 md:inline-flex"
@@ -87,14 +112,6 @@ export default function NavBar() {
                   {item.label}
                 </button>
               ))}
-
-              <a
-                href="#auth"
-                onClick={closeMenu}
-                className="rounded-2xl bg-brand-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-50 hover:text-brand-900"
-              >
-                Register / Sign in
-              </a>
             </div>
           </div>
         )}
