@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Bubble from "./Bubble";
+import Bubble from "../templates/Bubble";
 
 const ARCHIVE_HINTS = [
   "Search for a city to explore its air quality history.",

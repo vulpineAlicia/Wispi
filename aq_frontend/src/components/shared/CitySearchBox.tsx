@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { geocodeCity, type GeoResult } from "../lib/services/api";
-import { getUserMessage } from "../lib/services/apiMessages";
-import { useLatestRequest } from "../hooks/useLatestRequest";
-import Bubble from "./Bubble";
-import BaseButton from "../components/BaseButton";
+import { geocodeCity, type GeoResult } from "../../lib/services/api";
+import { getUserMessage } from "../../lib/services/apiMessages";
+import { useLatestRequest } from "../../hooks/useLatestRequest";
+import Bubble from "../templates/Bubble";
+import BaseButton from "../templates/BaseButton";
 
 type Props = {
   onSelect: (place: GeoResult) => void | Promise<void>;

@@ -3,11 +3,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import "leaflet/dist/leaflet.css";
 
-import Bubble from "../components/Bubble";
-import CityResultPanel from "../components/CityResultPanel";
-import CitySearchBox from "../components/CitySearchBox";
-import HistoryPanel, { type HistoryDays } from "../components/HistoryPanel";
-import MapLayersPanel from "../components/MapLayersPanel";
+import Bubble from "../components/templates/Bubble";
+import CityResultPanel from "../components/shared/CityResultPanel";
+import CitySearchBox from "../components/shared/CitySearchBox";
+import HistoryPanel, { type HistoryDays } from "../components/shared/HistoryPanel";
+import MapLayersPanel from "../components/map/MapLayersPanel";
 import { useAirHistory } from "../hooks/useAirHistory";
 import { useLeafletMap } from "../hooks/useLeafletMap";
 import type { GeoResult } from "../lib/services/api";

@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import type { HistoryDays } from "../components/HistoryPanel";
+import type { HistoryDays } from "../components/shared/HistoryPanel";
 import {
   getLocationSelectionFromParams,
   parseNumberOrNull,

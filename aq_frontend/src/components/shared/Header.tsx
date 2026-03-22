@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 
-import logo from "../assets/logo.svg";
-import { scrollTopSmooth } from "../lib/siteNav";
+import logo from "../../assets/logo.svg";
+import { scrollTopSmooth } from "../../lib/siteNav";
 import ServerStatusPill from "./ServerStatusPill";
 
 export default function Header() {

@@ -1,9 +1,9 @@
 import archiveBooks from "../assets/archive-books.svg";
-import ArchiveHintBubble from "../components/ArchiveHintBubble";
-import Bubble from "../components/Bubble";
-import CityResultPanel from "../components/CityResultPanel";
-import CitySearchBox from "../components/CitySearchBox";
-import HistoryPanel from "../components/HistoryPanel";
+import ArchiveHintBubble from "../components/archive/ArchiveHintBubble";
+import Bubble from "../components/templates/Bubble";
+import CityResultPanel from "../components/shared/CityResultPanel";
+import CitySearchBox from "../components/shared/CitySearchBox";
+import HistoryPanel from "../components/shared/HistoryPanel";
 import { useAirHistory } from "../hooks/useAirHistory";
 import { useArchiveParams } from "../hooks/useArchiveParams";
 import type { GeoResult } from "../lib/services/api";

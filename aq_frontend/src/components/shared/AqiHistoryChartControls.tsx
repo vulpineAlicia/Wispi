@@ -1,4 +1,4 @@
-import BaseButton from "../components/BaseButton";
+import BaseButton from "../templates/BaseButton";
 
 type HistoryRange = {
   label: string;

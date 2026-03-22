@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
-import { OVERLAY_OPTIONS, type OverlayMode } from "../lib/mapOverlay";
-import Bubble from "./Bubble";
+import { OVERLAY_OPTIONS, type OverlayMode } from "../../lib/mapOverlay";
+import Bubble from "../templates/Bubble";
 
 type Props = {
   overlay: OverlayMode;

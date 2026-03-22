@@ -1,9 +1,9 @@
 import { useState } from "react";
 
 import lookupBg from "../assets/lookup-bg.png";
-import CityResultPanel from "../components/CityResultPanel";
-import CitySearchBox from "../components/CitySearchBox";
-import FeatureCard from "../components/FeatureCard";
+import CityResultPanel from "../components/shared/CityResultPanel";
+import CitySearchBox from "../components/shared/CitySearchBox";
+import FeatureCard from "../components/home/FeatureCard";
 import { useAirHistory } from "../hooks/useAirHistory";
 import type { GeoResult } from "../lib/services/api";
 import { buildMapUrl } from "../lib/locationSelection";

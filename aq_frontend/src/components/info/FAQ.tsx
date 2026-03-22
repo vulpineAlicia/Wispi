@@ -1,5 +1,5 @@
 import React, { useId, useLayoutEffect, useRef, useState } from "react";
-import Bubble from "./Bubble";
+import Bubble from "../templates/Bubble";
 
 type FAQProps = {
   q: string;

@@ -1,9 +1,9 @@
 import { Suspense, lazy } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
-import Footer from "./components/Footer";
-import Header from "./components/Header";
-import NavBar from "./components/NavBar";
+import Footer from "./components/shared/Footer";
+import Header from "./components/shared/Header";
+import NavBar from "./components/shared/NavBar";
 import { useNavScroll } from "./lib/siteNav";
 
 const Home = lazy(() => import("./pages/Home"));

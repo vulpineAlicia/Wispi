@@ -6,7 +6,7 @@ import {
   scrollToHash,
   scrollTopSmooth,
   type NavLinkItem,
-} from "../lib/siteNav";
+} from "../../lib/siteNav";
 
 function navItemKey(item: NavLinkItem, prefix = "") {
   return `${prefix}${item.to}`;

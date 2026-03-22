@@ -1,8 +1,8 @@
-import BaseButton from "../components/BaseButton";
-import { getUserMessage } from "../lib/services/apiMessages";
-import type { AirData } from "../lib/services/api";
+import BaseButton from "../templates/BaseButton";
+import { getUserMessage } from "../../lib/services/apiMessages";
+import type { AirData } from "../../lib/services/api";
 import AqiPill from "./AqiPill";
-import Bubble from "./Bubble";
+import Bubble from "../templates/Bubble";
 
 const AQI_ADVICE: Record<number, string> = {
   1: "Air quality is excellent — enjoy outdoor activities.",

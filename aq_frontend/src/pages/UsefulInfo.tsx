@@ -1,5 +1,5 @@
-import Bubble from "../components/Bubble";
-import FAQ from "../components/FAQ";
+import Bubble from "../components/templates/Bubble";
+import FAQ from "../components/info/FAQ";
 
 export default function UsefulInfo() {
   return (

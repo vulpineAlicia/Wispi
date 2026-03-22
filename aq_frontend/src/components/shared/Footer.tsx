@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, Github } from "lucide-react";
 
-import { FOOTER_LINKS, type RoutePath, scrollTopSmooth } from "../lib/siteNav";
+import { FOOTER_LINKS, type RoutePath, scrollTopSmooth } from "../../lib/siteNav";
 
 const year = new Date().getFullYear();
 

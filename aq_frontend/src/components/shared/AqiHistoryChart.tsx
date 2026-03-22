@@ -8,7 +8,7 @@ import {
   CartesianGrid,
 } from "recharts";
 
-import type { HistoryChartPoint } from "../lib/historyModel";
+import type { HistoryChartPoint } from "../../lib/historyModel";
 
 type PickDayHandler = (date: string) => void;
 
