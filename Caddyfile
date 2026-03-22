@@ -1,0 +1,12 @@
+wispi.monster, www.wispi.monster {
+    encode zstd gzip
+
+    root * /srv
+
+    handle /api/* {
+        reverse_proxy backend:8000
+    }
+
+    try_files {path} /index.html
+    file_server
+}
