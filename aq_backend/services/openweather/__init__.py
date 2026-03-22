@@ -7,7 +7,7 @@ from .errors import (
     OpenWeatherUpstreamError,
     UpstreamMeta,
 )
-from .service import OpenWeatherService
+from .ow_service import OpenWeatherService
 
 __all__ = [
     "OpenWeatherError",
