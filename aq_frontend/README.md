@@ -16,7 +16,7 @@ A web app for tracking and visualizing air quality worldwide.
 ## Getting Started
 
 ### Requirements
-- Node.js (LTS recommended)
+- Node.js 22
 - A [MapTiler](https://www.maptiler.com/) account for map tiles
 - The Wispi backend running (see `../aq_backend/readme`)
 
@@ -28,7 +28,7 @@ A web app for tracking and visualizing air quality worldwide.
 Execute next commands from ../aq_frontend: 
 ```bash
 cp .env.example .env
-npm install
+npm ci
 npm run dev
 ```
 

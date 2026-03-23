@@ -12,7 +12,7 @@ A FastAPI service that proxies OpenWeather API data to the Wispi frontend — ai
 
 ### Requirements
 
-- Python 3.13+
+- Python 3.12.13
 - An [OpenWeather](https://openweathermap.org/api) API key
 
 ### Setup
