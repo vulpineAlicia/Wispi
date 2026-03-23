@@ -14,11 +14,11 @@ const FEATURES = [
     desc: "Search any city and get clear, readable air quality metrics.",
   },
   {
-    title: "Health guidance",
+    title: "Health impact",
     desc: "Quick recommendations based on the current air quality level.",
   },
   {
-    title: "History & trends",
+    title: "Archive",
     desc: "Explore recent air quality changes for selected locations.",
   },
   {

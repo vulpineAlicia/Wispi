@@ -1,73 +1,62 @@
-# React + TypeScript + Vite
+# Wispi — Frontend
+A web app for tracking and visualizing air quality worldwide.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Features
+- City AQI lookup: search any city and get clear air quality metrics
+- Health impact: recommendations based on current air quality level
+- Interactive map: inspect conditions by location with map overlays
+- Archive: access historical air quality data
+- FAQ: educational content about air quality
 
-Currently, two official plugins are available:
+## Tech Stack
+- React 19, TypeScript, Vite
+- Tailwind CSS
+- Leaflet (maps), Recharts (charts)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Getting Started
 
-## React Compiler
+### Requirements
+- Node.js (LTS recommended)
+- A [MapTiler](https://www.maptiler.com/) account for map tiles
+- The Wispi backend running (see `../aq_backend/readme`)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Setup
+1. Copy `.env.example` to `.env` and fill in the required variables
+2. Install dependencies
+3. Start the server
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Execute next commands from ../aq_frontend: 
+```bash
+cp .env.example .env
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Environment Variables
+All `VITE_` variables are bundled into the client at build time and are **not secret**.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Variable             | Description                                           | Required |
+|----------------------|-------------------------------------------------------|----------|
+| `VITE_MAPTILER_KEY`  | MapTiler API key — restrict by domain in your account | Yes      |
+| `VITE_API_BASE`      | Backend base URL                                      | Yes      |
+| `VITE_CONTACT_EMAIL` | Contact email displayed in the UI                     | No       |
+| `VITE_REPO_URL`      | GitHub repo link displayed in the UI                  | No       |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Project Structure
+```
+src/
+├── pages/          # Top-level route pages (Home, Map, Archive, UsefulInfo)
+├── components/     # UI components grouped by feature
+│   ├── shared/     # NavBar, Footer, Header, search, shared panels
+│   ├── templates/  # Base primitives (BaseButton, Bubble)
+│   ├── home/       # Home page components
+│   ├── map/        # Map page components
+│   ├── archive/    # Archive page components
+│   └── info/       # Info/FAQ components
+├── hooks/          # Custom React hooks (data fetching, map, routing)
+├── lib/            # Utilities and services
+│   └── services/   # API client, types, error handling, type guards
+├── assets/         # Static assets
+├── App.tsx         # App shell with routing
+└── main.tsx        # Entry point
 ```
