@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 import uuid
 from typing import Awaitable, Callable
+
+_REQUEST_ID_RE = re.compile(r"^[a-zA-Z0-9\-_]{1,64}$")
 
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -22,7 +25,8 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
-        request_id = request.headers.get("x-request-id") or uuid.uuid4().hex
+        raw_id = request.headers.get("x-request-id", "")
+        request_id = raw_id if _REQUEST_ID_RE.match(raw_id) else uuid.uuid4().hex
         request.state.request_id = request_id
 
         start = time.perf_counter()
