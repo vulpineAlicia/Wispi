@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Depends, Query, Request
 
 from aq_backend.dependencies import ow_service
+from aq_backend.ratelimit import GEOCODE_LIMIT, limiter
 from aq_backend.schemas import GeocodeResponse, GeocodeResult
 from aq_backend.services.openweather import OpenWeatherService
 
@@ -10,6 +11,7 @@ router = APIRouter(tags=["geocode"])
 
 
 @router.get("/geocode", response_model=GeocodeResponse)
+@limiter.limit(GEOCODE_LIMIT)
 async def geocode(
     request: Request,
     q: str = Query(..., min_length=1, description="City name to search for"),

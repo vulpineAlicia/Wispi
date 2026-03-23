@@ -6,14 +6,16 @@ from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
 import httpx
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi.errors import RateLimitExceeded
 
 from aq_backend.config import get_settings
-from aq_backend.http_errors import register_error_handlers
+from aq_backend.http_errors import error_response, register_error_handlers
 from aq_backend.log_config import setup_logging
 from aq_backend.middleware.request_logging import RequestLoggingMiddleware
 from aq_backend.middleware.timeout import RequestTimeoutMiddleware
+from aq_backend.ratelimit import limiter
 from aq_backend.routes.air import router as air_router
 from aq_backend.routes.geocode import router as geocode_router
 from aq_backend.routes.health import router as health_router
@@ -58,6 +60,12 @@ def create_app() -> FastAPI:
             yield
 
     app = FastAPI(title="AQ Backend", version="0.0.1", lifespan=lifespan)
+
+    app.state.limiter = limiter
+    app.add_exception_handler(
+        RateLimitExceeded,
+        lambda req, exc: error_response(req, 429, "RATE_LIMIT", "Too many requests. Slow down."),
+    )
 
     app.add_middleware(RequestTimeoutMiddleware, timeout_s=settings.request_timeout_s)
     app.add_middleware(RequestLoggingMiddleware)

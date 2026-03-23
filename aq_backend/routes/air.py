@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Query, Request
 
 from aq_backend.dependencies import ow_service
 from aq_backend.http_errors import api_error
+from aq_backend.ratelimit import AIR_CURRENT_LIMIT, AIR_HISTORY_LIMIT, limiter
 from aq_backend.schemas import (
     AirCurrentResponse,
     AirHistoryItem,
@@ -65,6 +66,7 @@ def _extract_ts_aqi(entry: dict[str, Any], *, err_detail: str) -> tuple[int, int
 
 
 @router.get("/air/current", response_model=AirCurrentResponse)
+@limiter.limit(AIR_CURRENT_LIMIT)
 async def air_current(
     request: Request,
     lat: float = Query(..., ge=-90, le=90),
@@ -100,6 +102,7 @@ async def air_current(
 
 
 @router.get("/air/history", response_model=AirHistoryResponse)
+@limiter.limit(AIR_HISTORY_LIMIT)
 async def air_history(
     request: Request,
     lat: float = Query(..., ge=-90, le=90),

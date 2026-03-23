@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, Request, Response
 
 from aq_backend.dependencies import ow_service
 from aq_backend.http_errors import api_error
+from aq_backend.ratelimit import TILE_LIMIT, limiter
 from aq_backend.services.openweather import OpenWeatherService
 
 router = APIRouter(prefix="/tiles", tags=["tiles"])
@@ -25,6 +26,7 @@ _CACHE_SECONDS = 3600
 
 
 @router.get("/ow/{layer}/{z}/{x}/{y}.png")
+@limiter.limit(TILE_LIMIT)
 async def openweather_tile(
     request: Request,
     layer: Layer,
