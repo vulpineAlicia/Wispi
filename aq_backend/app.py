@@ -59,7 +59,15 @@ def create_app() -> FastAPI:
 
             yield
 
-    app = FastAPI(title="AQ Backend", version="0.0.1", lifespan=lifespan)
+    is_prod = settings.app_env == "production"
+    app = FastAPI(
+        title="AQ Backend",
+        version="0.0.1",
+        lifespan=lifespan,
+        docs_url=None if is_prod else "/docs",
+        redoc_url=None,
+        openapi_url=None if is_prod else "/openapi.json",
+    )
 
     app.state.limiter = limiter
     app.add_exception_handler(
