@@ -61,8 +61,23 @@ export default function ArchivePage() {
               <div className="w-full sm:max-w-sm">
                 <CitySearchBox onSelect={handleSelectCity} />
               </div>
+            </div>
+          </div>
 
-              {selection && (
+          <div className="min-w-0 lg:self-start">
+            <div className="mx-auto w-full max-w-[42rem] lg:mx-0 lg:ml-auto">
+              <img
+                src={archiveBooks}
+                alt=""
+                draggable={false}
+                className="mt-7 block h-auto w-full select-none"
+              />
+            </div>
+          </div>
+
+          {selection && (
+            <>
+              <div className="min-w-0">
                 <Bubble
                   tone="white"
                   className="flex min-h-[64px] w-full items-center justify-center px-5 py-3 text-center sm:max-w-sm"
@@ -78,26 +93,15 @@ export default function ArchivePage() {
                     {selection.lat.toFixed(3)}, {selection.lon.toFixed(3)}
                   </span>
                 </Bubble>
-              )}
-            </div>
-          </div>
+              </div>
 
-          <div className="min-w-0 lg:self-start">
-            <div className="mx-auto w-full max-w-[42rem] lg:mx-0 lg:ml-auto">
-              <img
-                src={archiveBooks}
-                alt=""
-                draggable={false}
-                className="mt-7 block h-auto w-full select-none"
-              />
-
-              {selection && (
-                <div className="mt-3.5 px-1">
+              <div className="min-w-0 lg:self-start">
+                <div className="mx-auto w-full max-w-[42rem] lg:mx-0 lg:ml-auto px-1">
                   <ArchiveHintBubble />
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+            </>
+          )}
         </section>
 
         {selection && (
