@@ -14,9 +14,9 @@ const Archive = lazy(() => import("./pages/Archive"));
 function Background() {
   return (
     <>
-      <div className="fixed inset-0 z-[-10] bg-gradient-to-br from-brand-50 via-brand-100 to-brand-200" />
-      <div className="fixed -top-24 -right-24 z-[-10] h-72 w-72 rounded-full bg-brand-300/40 blur-3xl" />
-      <div className="fixed -bottom-28 -left-20 z-[-10] h-80 w-80 rounded-full bg-brand-400/25 blur-3xl" />
+      <div className="fixed inset-0 -z-10 bg-linear-to-br from-brand-50 via-brand-100 to-brand-200" />
+      <div className="fixed -top-24 -right-24 -z-10 h-72 w-72 rounded-full bg-brand-300/40 blur-3xl" />
+      <div className="fixed -bottom-28 -left-20 -z-10 h-80 w-80 rounded-full bg-brand-400/25 blur-3xl" />
     </>
   );
 }

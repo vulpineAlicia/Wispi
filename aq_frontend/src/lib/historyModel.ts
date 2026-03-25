@@ -1,4 +1,5 @@
 import type { AirHistoryItem } from "./services/api";
+import { isFiniteNumber } from "./services/apiGuards";
 
 export type PollutantsMap = Record<string, number>;
 
@@ -43,9 +44,6 @@ function todayIsoUtc(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function isFiniteNumber(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value);
-}
 
 function normalizePollutants(value: unknown): PollutantsMap {
   if (!value || typeof value !== "object") {

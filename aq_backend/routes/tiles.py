@@ -39,7 +39,8 @@ async def openweather_tile(
     if z < 0 or z > _MAX_Z:
         raise api_error(400, "INVALID_QUERY", "Invalid zoom level.")
 
-    if x < 0 or y < 0:
+    max_tile = (1 << z) - 1
+    if x < 0 or y < 0 or x > max_tile or y > max_tile:
         raise api_error(400, "INVALID_QUERY", "Invalid tile coordinates.")
 
     upstream_headers: dict[str, str] = {}
@@ -68,7 +69,8 @@ async def openweather_tile(
     if status_code == 304:
         return Response(status_code=304, headers=headers_out)
 
-    assert content is not None
+    if content is None:
+        raise api_error(502, "UPSTREAM_ERROR", "Upstream returned empty tile content.")
     return Response(
         content=content,
         status_code=status_code,
