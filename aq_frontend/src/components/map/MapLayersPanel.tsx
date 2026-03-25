@@ -18,7 +18,7 @@ export default function MapLayersPanel({
   const legend = OVERLAY_OPTIONS[overlay];
 
   return (
-    <aside className={className ?? "absolute right-4 top-4 z-10 w-[220px]"}>
+    <aside className={className ?? "absolute right-4 top-4 z-10 w-55"}>
       <Bubble tone="brand" className="p-4">
         <div className="px-1 text-sm font-medium">Layers</div>
 
@@ -46,7 +46,7 @@ export default function MapLayersPanel({
               {legend.title} scale
             </div>
             <div
-              className={`mt-3 h-2 w-full rounded-full bg-gradient-to-r ${legend.gradientClass}`}
+              className={`mt-3 h-2 w-full rounded-full bg-linear-to-r ${legend.gradientClass}`}
             />
             <div className="mt-2 flex justify-between text-[11px] text-brand-700">
               <span>Low</span>

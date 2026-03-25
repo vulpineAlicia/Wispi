@@ -54,7 +54,7 @@ export default function Home() {
             style={{ backgroundImage: `url(${lookupBg})` }}
           />
           <div className="absolute inset-0 bg-white/5 backdrop-blur-[3px]" />
-          <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-white/40 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-white/70 via-white/40 to-transparent" />
 
           <div className="relative w-full p-6 md:p-9">
             <div className="max-w-2xl">

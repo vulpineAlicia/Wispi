@@ -69,7 +69,7 @@ export default function ArchiveHintBubble() {
   return (
     <Bubble
       tone="brand"
-      className="flex min-h-[64px] w-full items-center gap-3 px-5 py-2 text-sm leading-6 text-brand-700"
+      className="flex min-h-16 w-full items-center gap-3 px-5 py-2 text-sm leading-6 text-brand-700"
     >
       <button
         type="button"

@@ -65,7 +65,7 @@ export default function ArchivePage() {
           </div>
 
           <div className="min-w-0 lg:self-start">
-            <div className="mx-auto w-full max-w-[42rem] lg:mx-0 lg:ml-auto">
+            <div className="mx-auto w-full max-w-2xl lg:mx-0 lg:ml-auto">
               <img
                 src={archiveBooks}
                 alt=""
@@ -80,7 +80,7 @@ export default function ArchivePage() {
               <div className="min-w-0">
                 <Bubble
                   tone="white"
-                  className="flex min-h-[64px] w-full items-center justify-center px-5 py-3 text-center sm:max-w-sm"
+                  className="flex min-h-16 w-full items-center justify-center px-5 py-3 text-center sm:max-w-sm"
                 >
                   <span className="text-base font-semibold text-brand-900">
                     {selection.name}
@@ -96,7 +96,7 @@ export default function ArchivePage() {
               </div>
 
               <div className="min-w-0 lg:self-start">
-                <div className="mx-auto w-full max-w-[42rem] lg:mx-0 lg:ml-auto px-1">
+                <div className="mx-auto w-full max-w-2xl lg:mx-0 lg:ml-auto px-1">
                   <ArchiveHintBubble />
                 </div>
               </div>
@@ -144,7 +144,7 @@ export default function ArchivePage() {
             <aside className="order-1 flex flex-col gap-1 xl:order-2">
               <Bubble
                 tone="white"
-                className="flex min-h-[60px] items-center justify-center px-4 py-3 text-center text-sm font-medium text-brand-800"
+                className="flex min-h-15 items-center justify-center px-4 py-3 text-center text-sm font-medium text-brand-800"
               >
                 Selected day: {history.model.selectedDay?.date ?? "—"}
               </Bubble>

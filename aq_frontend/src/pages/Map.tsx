@@ -61,7 +61,7 @@ export default function MapPage() {
         <div ref={mapDivRef} className="absolute inset-0 z-0" />
 
         {/* Left panel */}
-        <div className="absolute left-4 top-4 z-10 w-[340px] max-w-[calc(100vw-2rem)]">
+        <div className="absolute left-4 top-4 z-10 w-85 max-w-[calc(100vw-2rem)]">
           <aside className="relative">
             <Bubble
               tone="brand"
@@ -111,8 +111,8 @@ export default function MapPage() {
             </Bubble>
 
             {/* scroll fade */}
-            <div className="pointer-events-none absolute left-0 right-0 top-0 h-6 rounded-t-3xl bg-gradient-to-b from-brand-50 to-transparent" />
-            <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 rounded-b-3xl bg-gradient-to-t from-brand-50 to-transparent" />
+            <div className="pointer-events-none absolute left-0 right-0 top-0 h-6 rounded-t-3xl bg-linear-to-b from-brand-50 to-transparent" />
+            <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 rounded-b-3xl bg-linear-to-t from-brand-50 to-transparent" />
           </aside>
         </div>
 

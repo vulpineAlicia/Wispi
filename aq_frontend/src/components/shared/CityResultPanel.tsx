@@ -7,9 +7,9 @@ import Bubble from "../templates/Bubble";
 const AQI_ADVICE: Record<number, string> = {
   1: "Air quality is excellent — enjoy outdoor activities.",
   2: "Air quality is fair — outdoor activities are generally OK.",
-  3: "Air quality is moderate — consider reducing long outdoor exertion if you’re sensitive.",
-  4: "Air quality is poor — limit outdoor activity, especially strenuous exercise.",
-  5: "Air quality is very poor — stay indoors when possible and avoid outdoor exercise.",
+  3: "Air quality is moderate — consider reducing long outdoor exertion.",
+  4: "Air quality is poor — limit outdoor activity.",
+  5: "Air quality is very poor — stay indoors, if possible.",
 };
 
 function aqiAdvice(aqi: number) {
