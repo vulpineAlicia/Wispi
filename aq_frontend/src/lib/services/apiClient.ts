@@ -23,12 +23,31 @@ export function invalidResponse(message: string, requestId?: string): ApiError {
   return new ApiError(message, 200, "INVALID_RESPONSE", requestId);
 }
 
+export async function postJson<T>(path: string, body: unknown, init?: RequestInit): Promise<T> {
+  return getJson<T>(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    credentials: "include",
+    ...init,
+  });
+}
+
+export async function deleteJson<T>(path: string, init?: RequestInit): Promise<T> {
+  return getJson<T>(path, {
+    method: "DELETE",
+    credentials: "include",
+    ...init,
+  });
+}
+
 export async function getJson<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
 
   try {
     res = await fetch(`${API_BASE}${path}`, {
       cache: "no-store",
+      credentials: "include",
       ...init,
     });
   } catch (error) {
