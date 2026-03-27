@@ -1,4 +1,17 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: wispi-db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-wispi}
+      POSTGRES_USER: ${POSTGRES_USER:-wispi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
   backend:
     build:
       context: .
@@ -6,6 +19,8 @@ services:
     container_name: wispi-backend
     env_file:
       - .env
+    depends_on:
+      - db
     restart: unless-stopped
 
   web:
@@ -26,3 +41,4 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  pg_data:
