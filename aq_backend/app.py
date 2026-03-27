@@ -11,12 +11,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 
 from aq_backend.config import get_settings
+from aq_backend.database import get_engine
 from aq_backend.http_errors import error_response, register_error_handlers
 from aq_backend.log_config import setup_logging
 from aq_backend.middleware.request_logging import RequestLoggingMiddleware
 from aq_backend.middleware.timeout import RequestTimeoutMiddleware
+from aq_backend.models import Base
 from aq_backend.ratelimit import limiter
 from aq_backend.routes.air import router as air_router
+from aq_backend.routes.auth import router as auth_router
 from aq_backend.routes.geocode import router as geocode_router
 from aq_backend.routes.health import router as health_router
 from aq_backend.routes.tiles import router as tiles_router
@@ -41,6 +44,10 @@ def create_app() -> FastAPI:
         On startup: creates shared HTTP client and OpenWeather service (stores them in app state);
         On shutdown: closes the HTTP client.
         """
+        engine = get_engine()
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
         async with httpx.AsyncClient(
             timeout=httpx.Timeout(settings.http_timeout_s)
         ) as client:
@@ -82,8 +89,8 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.frontend_origins,
         allow_credentials=True,
-        allow_methods=["GET"],
-        allow_headers=["Cache-Control"],
+        allow_methods=["GET", "POST", "DELETE"],
+        allow_headers=["Cache-Control", "Authorization", "Content-Type"],
     )
 
     register_error_handlers(app)
@@ -92,5 +99,6 @@ def create_app() -> FastAPI:
     app.include_router(geocode_router)
     app.include_router(air_router)
     app.include_router(tiles_router)
+    app.include_router(auth_router)
 
     return app

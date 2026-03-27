@@ -29,6 +29,15 @@ class Settings(BaseSettings):
     app_env: str = Field("development", alias="APP_ENV")
     frontend_origins: list[str] = Field(default_factory=list, alias="FRONTEND_ORIGINS")
 
+    # Database
+    database_url: str = Field(..., alias="DATABASE_URL")
+
+    # Auth / JWT
+    jwt_secret: str = Field(..., alias="JWT_SECRET")
+    jwt_algorithm: str = Field("HS256", alias="JWT_ALGORITHM")
+    access_token_expire_minutes: int = Field(15, alias="ACCESS_TOKEN_EXPIRE_MINUTES")
+    refresh_token_expire_days: int = Field(30, alias="REFRESH_TOKEN_EXPIRE_DAYS")
+
     # HTTP client timeout (per upstream request)
     http_timeout_s: float = Field(6.0, alias="HTTP_TIMEOUT_S")
 
@@ -42,6 +51,15 @@ class Settings(BaseSettings):
     geocode_url: str = GEOCODE_URL
     air_url: str = AIR_URL
     history_url: str = HISTORY_URL
+
+    @field_validator("jwt_secret")
+    @classmethod
+    def validate_jwt_secret(cls, value: str) -> str:
+        """ Ensure JWT secret is set and long enough """
+        value = value.strip()
+        if len(value) < 32:
+            raise ValueError("JWT_SECRET must be at least 32 characters")
+        return value
 
     @field_validator("openweather_api_key")
     @classmethod

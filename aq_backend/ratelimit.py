@@ -9,8 +9,10 @@ from slowapi import Limiter
 GEOCODE_LIMIT = "30/minute"
 AIR_CURRENT_LIMIT = "60/minute"
 AIR_HISTORY_LIMIT = "30/minute"
-# Tiles are fetched in batches during map panning — allow higher burst
+# Tiles fetched in batches
 TILE_LIMIT = "120/minute"
+# Auth endpoints limit
+AUTH_LIMIT = "10/minute"
 
 
 def _get_client_ip(request: Request) -> str:
