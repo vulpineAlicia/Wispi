@@ -101,7 +101,7 @@ export default function AqiHistoryChartControls({
                 resetDraft();
               }
             }}
-            className="w-24 rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm text-brand-900 outline-none focus:ring-2 focus:ring-brand-200 disabled:opacity-60"
+            className="w-24 rounded-2xl border border-brand-200 bg-white px-3 py-2 text-sm text-brand-900 outline-none focus:ring-2 focus:ring-brand-200 disabled:opacity-60"
           />
 
           <BaseButton

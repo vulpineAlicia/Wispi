@@ -26,10 +26,10 @@ export function invalidResponse(message: string, requestId?: string): ApiError {
 export async function postJson<T>(path: string, body: unknown, init?: RequestInit): Promise<T> {
   return getJson<T>(path, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
     credentials: "include",
     ...init,
+    headers: { "Content-Type": "application/json", ...init?.headers },
   });
 }
 

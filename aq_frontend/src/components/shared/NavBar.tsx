@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Settings2 } from "lucide-react";
 
+import { useAuth } from "../../contexts/AuthContext";
+import { getAvatar } from "../../lib/avatars";
 import {
   HEADER_LINKS,
   scrollToHash,
@@ -12,10 +15,77 @@ function navItemKey(item: NavLinkItem, prefix = "") {
   return `${prefix}${item.to}`;
 }
 
+function UserMenu() {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
+  if (!user) {
+    return (
+      <button
+        type="button"
+        onClick={() => navigate("/auth")}
+        className="hidden rounded-2xl bg-brand-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-50 hover:text-brand-900 md:inline-flex"
+      >
+        Register / Sign in
+      </button>
+    );
+  }
+
+  const avatar = getAvatar(user.avatar_id);
+
+  return (
+    <div ref={ref} className="relative hidden md:block">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 text-sm text-brand-100 transition hover:text-brand-50"
+      >
+        <span className={`flex h-7 w-7 items-center justify-center rounded-full text-base ${avatar.bg} ${avatar.ring}`}>
+          {avatar.emoji}
+        </span>
+        <span className="max-w-32 truncate font-medium">{user.nickname}</span>
+        <Settings2 size={16} className="text-brand-200" />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-4 w-44 overflow-hidden rounded-3xl border border-brand-200 bg-white shadow-lg">
+          <button
+            type="button"
+            onClick={() => { navigate("/profile"); setOpen(false); }}
+            className="w-full px-4 py-2.5 text-left text-sm text-brand-700 transition hover:bg-brand-50"
+          >
+            Profile
+          </button>
+          <button
+            type="button"
+            onClick={async () => { await signOut(); setOpen(false); navigate("/"); }}
+            className="w-full px-4 py-2.5 text-left text-sm text-brand-700 transition hover:bg-brand-50"
+          >
+            Sign out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   function closeMenu() {
     setOpen(false);
@@ -78,13 +148,7 @@ export default function NavBar() {
           </nav>
 
           <div className="flex items-center gap-3">
-
-            <a
-              href="#auth"
-              className="hidden rounded-2xl bg-brand-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-50 hover:text-brand-900 md:inline-flex"
-            >
-              Register / Sign in
-            </a>
+            <UserMenu />
 
             <button
               type="button"
@@ -112,6 +176,33 @@ export default function NavBar() {
                   {item.label}
                 </button>
               ))}
+              <hr className="border-brand-200" />
+              {user ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => { navigate("/profile"); closeMenu(); }}
+                    className={mobileLinkClass}
+                  >
+                    Profile
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => { await signOut(); closeMenu(); navigate("/"); }}
+                    className={mobileLinkClass}
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => { navigate("/auth"); closeMenu(); }}
+                  className={mobileLinkClass}
+                >
+                  Register / Sign in
+                </button>
+              )}
             </div>
           </div>
         )}

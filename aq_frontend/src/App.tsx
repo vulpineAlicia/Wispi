@@ -4,12 +4,15 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Footer from "./components/shared/Footer";
 import Header from "./components/shared/Header";
 import NavBar from "./components/shared/NavBar";
+import { AuthProvider } from "./contexts/AuthContext";
 import { useNavScroll } from "./lib/siteNav";
 
 const Home = lazy(() => import("./pages/Home"));
 const Map = lazy(() => import("./pages/Map"));
 const UsefulInfo = lazy(() => import("./pages/UsefulInfo"));
 const Archive = lazy(() => import("./pages/Archive"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Profile = lazy(() => import("./pages/Profile"));
 
 function Background() {
   return (
@@ -47,6 +50,8 @@ function AppShell() {
               <Route path="/map" element={<Map />} />
               <Route path="/info" element={<UsefulInfo />} />
               <Route path="/archive" element={<Archive />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/profile" element={<Profile />} />
             </Routes>
           </Suspense>
         </div>
@@ -60,7 +65,9 @@ function AppShell() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppShell />
+      <AuthProvider>
+        <AppShell />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

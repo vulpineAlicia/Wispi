@@ -17,7 +17,7 @@ export default function Bubble({
     tone === "brand"
       ? "border border-brand-200 bg-brand-50 shadow-sm"
       : tone === "error"
-        ? "border border-rose-200 bg-rose-50 text-rose-900 shadow-sm"
+        ? "border border-rose-300 bg-rose-50 text-rose-900 shadow-sm"
         : "border border-brand-200 bg-white shadow-sm";
 
   return (
