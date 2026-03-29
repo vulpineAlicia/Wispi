@@ -21,7 +21,7 @@ def _get_client_ip(request: Request) -> str:
     if xff:
         ips = [ip.strip() for ip in xff.split(",")]
         return ips[-1]
-    return request.client.host if request.client else "unknown"
+    return request.client.host if request.client else request.headers.get("x-real-ip", "unknown")
 
 
 limiter = Limiter(key_func=_get_client_ip)
