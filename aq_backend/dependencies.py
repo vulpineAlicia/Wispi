@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hmac
+
 from fastapi import Depends, Header, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,7 +22,7 @@ _bearer = HTTPBearer(auto_error=False)
 def require_admin(x_admin_key: str | None = Header(default=None)) -> None:
     """ Reject requests that don't carry the correct admin key """
     settings = get_settings()
-    if not x_admin_key or x_admin_key != settings.admin_key:
+    if not x_admin_key or not hmac.compare_digest(x_admin_key, settings.admin_key):
         raise api_error(403, "FORBIDDEN", "Invalid or missing admin key.")
 
 

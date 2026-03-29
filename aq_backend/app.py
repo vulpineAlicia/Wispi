@@ -11,12 +11,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 
 from aq_backend.config import get_settings
-from aq_backend.database import get_engine
 from aq_backend.http_errors import error_response, register_error_handlers
 from aq_backend.log_config import setup_logging
 from aq_backend.middleware.request_logging import RequestLoggingMiddleware
 from aq_backend.middleware.timeout import RequestTimeoutMiddleware
-from aq_backend.models import Base
 from aq_backend.ratelimit import limiter
 from aq_backend.routes.admin import router as admin_router
 from aq_backend.routes.air import router as air_router
@@ -45,10 +43,6 @@ def create_app() -> FastAPI:
         On startup: creates shared HTTP client and OpenWeather service (stores them in app state);
         On shutdown: closes the HTTP client.
         """
-        engine = get_engine()
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
         async with httpx.AsyncClient(
             timeout=httpx.Timeout(settings.http_timeout_s)
         ) as client:
