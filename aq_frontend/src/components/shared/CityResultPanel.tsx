@@ -1,6 +1,6 @@
 import BaseButton from "../templates/BaseButton";
 import { getUserMessage } from "../../lib/services/apiMessages";
-import type { AirData } from "../../lib/services/api";
+import type { HistoryPanelData } from "../../lib/historyModel";
 import AqiPill from "./AqiPill";
 import Bubble from "../templates/Bubble";
 
@@ -16,49 +16,6 @@ function aqiAdvice(aqi: number) {
   return AQI_ADVICE[aqi] ?? "Air quality info is unavailable right now.";
 }
 
-export type PollutantsMap = Record<string, number>;
-
-export type AirPanelData = {
-  aqi: number | null;
-  pollutants: PollutantsMap;
-};
-
-export type DailyAqiPoint = {
-  date: string;
-  aqi: number | null;
-  pollutants?: PollutantsMap;
-};
-
-export function buildCurrentAirPanelData(
-  air: AirData | null | undefined
-): AirPanelData | null {
-  if (!air) return null;
-
-  return {
-    aqi: air.aqi_ow_1_5 ?? null,
-    pollutants: air.pollutants ?? {},
-  };
-}
-
-export function buildDailyMaxAirPanelData(
-  day: DailyAqiPoint | null | undefined
-): AirPanelData | null {
-  if (!day) return null;
-
-  return {
-    aqi: day.aqi ?? null,
-    pollutants: day.pollutants ?? {},
-  };
-}
-
-export function pickLatestDailyPoint<T extends DailyAqiPoint>(
-  items: T[] | null | undefined
-): T | null {
-  if (!items || items.length === 0) return null;
-
-  return [...items].sort((a, b) => a.date.localeCompare(b.date)).at(-1) ?? null;
-}
-
 type Variant = "home" | "map";
 
 type Props = {
@@ -68,7 +25,7 @@ type Props = {
   lat: number;
   lon: number;
 
-  panel: AirPanelData | null;
+  panel: HistoryPanelData | null;
   loading?: boolean;
   error?: unknown | null;
   detailsTo?: string;
