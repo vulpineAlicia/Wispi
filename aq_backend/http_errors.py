@@ -84,13 +84,18 @@ def _extract_code_message_from_detail(detail: Any) -> tuple[str | None, str | No
     )
 
 
+def _attach_meta(request: Request, exc: BaseException) -> None:
+    meta = getattr(exc, "meta", None)
+    if meta is not None:
+        request.state.upstream = meta
+
+
 def register_error_handlers(app: FastAPI) -> None:
     """ Attach exception handlers to the FastAPI app """
 
     @app.exception_handler(OpenWeatherTimeout)
     async def ow_timeout_handler(request: Request, exc: OpenWeatherTimeout):
-        if getattr(exc, "meta", None) is not None:
-            request.state.upstream = exc.meta
+        _attach_meta(request, exc)
         return error_response(
             request,
             504,
@@ -100,8 +105,7 @@ def register_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(OpenWeatherNetworkError)
     async def ow_network_handler(request: Request, exc: OpenWeatherNetworkError):
-        if getattr(exc, "meta", None) is not None:
-            request.state.upstream = exc.meta
+        _attach_meta(request, exc)
         return error_response(
             request,
             502,
@@ -111,8 +115,7 @@ def register_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(OpenWeatherUpstreamError)
     async def ow_upstream_handler(request: Request, exc: OpenWeatherUpstreamError):
-        if getattr(exc, "meta", None) is not None:
-            request.state.upstream = exc.meta
+        _attach_meta(request, exc)
 
         if exc.status_code == 429:
             headers = {"Retry-After": exc.retry_after} if exc.retry_after else None
@@ -161,9 +164,7 @@ def register_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(request: Request, exc: Exception):
-        meta = getattr(exc, "meta", None)
-        if meta is not None:
-            request.state.upstream = meta
+        _attach_meta(request, exc)
 
         return error_response(
             request,
