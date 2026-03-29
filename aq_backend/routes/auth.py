@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from aq_backend import auth
+from aq_backend.config import get_settings
 from aq_backend.database import get_db
 from aq_backend.dependencies import get_current_user
 from aq_backend.http_errors import api_error
@@ -22,13 +23,17 @@ _COOKIE_NAME = "wispi_refresh"
 _COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
 
 
+def _is_secure() -> bool:
+    return get_settings().app_env == "production"
+
+
 def _set_refresh_cookie(response: Response, token: str) -> None:
     response.set_cookie(
         key=_COOKIE_NAME,
         value=token,
         max_age=_COOKIE_MAX_AGE,
         httponly=True,
-        secure=True,
+        secure=_is_secure(),
         samesite="lax",
         path="/",
     )
@@ -38,7 +43,7 @@ def _clear_refresh_cookie(response: Response) -> None:
     response.delete_cookie(
         key=_COOKIE_NAME,
         httponly=True,
-        secure=True,
+        secure=_is_secure(),
         samesite="lax",
         path="/",
     )
