@@ -5,16 +5,21 @@ from __future__ import annotations
 from datetime import datetime
 
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from aq_backend import auth
 from aq_backend.database import get_db
 from aq_backend.dependencies import require_admin
 from aq_backend.http_errors import api_error
 from aq_backend.models import User
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin)])
+
+
+class SetPasswordRequest(BaseModel):
+    new_password: str = Field(min_length=8, max_length=128)
 
 
 class UserAdminOut(BaseModel):
@@ -38,6 +43,21 @@ async def list_users(
         UserAdminOut(id=u.id, nickname=u.nickname, avatar_id=u.avatar_id, created_at=u.created_at)
         for u in users
     ]
+
+
+@router.patch("/users/{user_id}/password")
+async def set_user_password(
+    user_id: str,
+    body: SetPasswordRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """ Set a new password for a user without requiring the current one """
+    user = await db.get(User, user_id)
+    if not user:
+        raise api_error(404, "NOT_FOUND", "User not found.")
+    user.password_hash = auth.hash_password(body.new_password)
+    await db.commit()
+    return {"ok": True}
 
 
 @router.delete("/users/{user_id}")
