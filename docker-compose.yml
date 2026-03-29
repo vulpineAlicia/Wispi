@@ -11,6 +11,12 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-wispi} -d ${POSTGRES_DB:-wispi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   backend:
     build:
@@ -20,8 +26,15 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
   web:
     build:
@@ -32,7 +45,8 @@ services:
       - "80:80"
       - "443:443"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
     volumes:
       - caddy_data:/data
