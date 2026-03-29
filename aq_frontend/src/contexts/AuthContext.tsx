@@ -1,30 +1,16 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 import * as authApi from "../lib/services/authApi";
 import type { AuthUser } from "../lib/services/authApi";
+import { AuthContext } from "./authContextDef";
+import type { AuthContextValue } from "./authContextDef";
 
 type AuthState = {
   user: AuthUser | null;
   accessToken: string | null;
   isLoading: boolean;
 };
-
-type AuthContextValue = AuthState & {
-  signIn: (nickname: string, password: string) => Promise<void>;
-  register: (password: string) => Promise<AuthUser>;
-  signOut: () => Promise<void>;
-  getToken: () => string | null;
-};
-
-const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
@@ -87,15 +73,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const getToken = useCallback(() => tokenRef.current, []);
 
+  const value: AuthContextValue = {
+    ...state,
+    signIn,
+    register,
+    signOut,
+    getToken,
+  };
+
   return (
-    <AuthContext.Provider value={{ ...state, signIn, register, signOut, getToken }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
-  return ctx;
 }

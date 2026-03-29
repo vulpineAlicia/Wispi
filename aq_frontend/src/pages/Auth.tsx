@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { getAvatar } from "../lib/avatars";
 import { ApiError } from "../lib/services/apiError";
 import BaseButton from "../components/templates/BaseButton";

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Settings2 } from "lucide-react";
 
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 import { getAvatar } from "../../lib/avatars";
 import {
   HEADER_LINKS,
