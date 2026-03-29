@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from fastapi import Depends, Request
+from fastapi import Depends, Header, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from aq_backend import auth as auth_module
+from aq_backend.config import get_settings
 from aq_backend.database import get_db
 from aq_backend.http_errors import api_error
 from aq_backend.models import User
@@ -14,6 +15,13 @@ from aq_backend.services.openweather import OpenWeatherService
 from aq_backend.state import AppState
 
 _bearer = HTTPBearer(auto_error=False)
+
+
+def require_admin(x_admin_key: str | None = Header(default=None)) -> None:
+    """ Reject requests that don't carry the correct admin key """
+    settings = get_settings()
+    if not x_admin_key or x_admin_key != settings.admin_key:
+        raise api_error(403, "FORBIDDEN", "Invalid or missing admin key.")
 
 
 def get_app_state(request: Request) -> AppState:

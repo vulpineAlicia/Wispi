@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     # Database
     database_url: str = Field(..., alias="DATABASE_URL")
 
+    # Admin
+    admin_key: str = Field(..., alias="ADMIN_KEY")
+
     # Auth / JWT
     jwt_secret: str = Field(..., alias="JWT_SECRET")
     jwt_algorithm: str = Field("HS256", alias="JWT_ALGORITHM")
@@ -51,6 +54,15 @@ class Settings(BaseSettings):
     geocode_url: str = GEOCODE_URL
     air_url: str = AIR_URL
     history_url: str = HISTORY_URL
+
+    @field_validator("admin_key")
+    @classmethod
+    def validate_admin_key(cls, value: str) -> str:
+        """ Ensure admin key is set and long enough """
+        value = value.strip()
+        if len(value) < 32:
+            raise ValueError("ADMIN_KEY must be at least 32 characters")
+        return value
 
     @field_validator("jwt_secret")
     @classmethod
