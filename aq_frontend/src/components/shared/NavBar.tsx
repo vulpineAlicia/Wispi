@@ -118,10 +118,11 @@ export default function NavBar() {
       return;
     }
 
-    navigate({
-      pathname,
-      hash: nextHash,
-    });
+    if (nextHash) {
+      navigate(pathname, { state: { scrollTo: nextHash } });
+    } else {
+      navigate(pathname);
+    }
 
     closeMenu();
   }

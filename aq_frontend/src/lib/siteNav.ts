@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export type RoutePath = "/" | "/map" | "/archive" | "/info";
 export type NavTarget = RoutePath | `/${string}` | `#${string}`;
@@ -41,12 +41,27 @@ export function scrollToHash(hash: string) {
 
 export function useNavScroll() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const skipRef = useRef(false);
 
   useEffect(() => {
-    if (location.hash) {
-      if (scrollToHash(location.hash)) return;
+    if (skipRef.current) {
+      skipRef.current = false;
+      return;
+    }
+
+    const scrollTarget = location.hash || location.state?.scrollTo;
+
+    if (scrollTarget) {
+      if (scrollToHash(scrollTarget)) {
+        if (location.state?.scrollTo) {
+          skipRef.current = true;
+          navigate(location.pathname, { replace: true, state: null });
+        }
+        return;
+      }
     }
 
     scrollTopSmooth();
-  }, [location.pathname, location.hash]);
+  }, [location.pathname, location.hash, location.state?.scrollTo]);
 }
