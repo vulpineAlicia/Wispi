@@ -55,3 +55,22 @@ class AirHistoryResponse(BaseModel):
     end_unix: int = Field(ge=0)
     items: list[AirHistoryItem]
     source: str = "openweather"
+
+
+class FavoriteCityOut(BaseModel):
+    """ A saved favourite city """
+
+    id: str
+    name: str
+    country: str | None
+    lat: float
+    lon: float
+
+
+class AddFavoriteCityRequest(BaseModel):
+    """ Request body for POST /favorites """
+
+    name: str = Field(min_length=1, max_length=128)
+    country: str | None = Field(default=None, max_length=64)
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)

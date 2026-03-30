@@ -18,6 +18,7 @@ from aq_backend.middleware.timeout import RequestTimeoutMiddleware
 from aq_backend.ratelimit import limiter
 from aq_backend.routes.admin import router as admin_router
 from aq_backend.routes.air import router as air_router
+from aq_backend.routes.favorites import router as favorites_router
 from aq_backend.routes.auth import router as auth_router
 from aq_backend.routes.geocode import router as geocode_router
 from aq_backend.routes.health import router as health_router
@@ -96,5 +97,6 @@ def create_app() -> FastAPI:
     app.include_router(air_router)
     app.include_router(tiles_router)
     app.include_router(auth_router)
+    app.include_router(favorites_router)
 
     return app
