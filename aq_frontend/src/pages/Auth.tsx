@@ -88,13 +88,13 @@ export default function Auth() {
     <main className="mx-auto max-w-md px-4 py-16">
       <Bubble className="p-8">
         {/* Tab switcher */}
-        <div className="mb-6 flex rounded-3xl bg-brand-100 p-3">
+        <div className="mb-6 flex rounded-3xl bg-brand-100 p-1.5">
           {(["login", "register"] as Mode[]).map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => switchMode(m)}
-              className={`flex-1 rounded-full p-3 text-sm font-medium transition ${
+              className={`flex-1 rounded-3xl p-3 text-sm font-medium transition ${
                 mode === m
                   ? "bg-white text-brand-900 shadow-sm"
                   : "text-brand-600 hover:text-brand-900"

@@ -130,7 +130,7 @@ export default function UsefulInfo() {
             frequency can also affect values."
           />
           <FAQ
-            q="Are these recommendations medical advice?"
+            q="Are the health tips shown for different air quality levels medical advice?"
             a= 
             {
               <>

@@ -64,13 +64,13 @@ export default function ArchivePage() {
             </div>
           </div>
 
-          <div className="min-w-0 lg:self-start">
+          <div className="min-w-0 lg:self-end">
             <div className="mx-auto w-full max-w-2xl lg:mx-0 lg:ml-auto">
               <img
                 src={archiveBooks}
                 alt=""
                 draggable={false}
-                className="mt-7 block h-auto w-full select-none"
+                className="block h-auto w-full select-none"
               />
             </div>
           </div>
@@ -80,14 +80,12 @@ export default function ArchivePage() {
               <div className="min-w-0">
                 <Bubble
                   tone="white"
-                  className="flex min-h-16 w-full items-center justify-center px-5 py-3 text-center sm:max-w-sm"
+                  className="flex w-full flex-col gap-0.5 px-5 py-3 sm:max-w-sm"
                 >
                   <span className="text-base font-semibold text-brand-900">
                     {selection.name}
                     {selection.country ? `, ${selection.country}` : ""}
                   </span>
-
-                  <span className="mx-3 text-brand-300">/</span>
 
                   <span className="text-xs tabular-nums text-brand-500">
                     {selection.lat.toFixed(3)}, {selection.lon.toFixed(3)}
@@ -96,7 +94,7 @@ export default function ArchivePage() {
               </div>
 
               <div className="min-w-0 lg:self-start">
-                <div className="mx-auto w-full max-w-2xl lg:mx-0 lg:ml-auto px-1">
+                <div className="mx-auto w-full max-w-2xl lg:mx-0 lg:ml-auto">
                   <ArchiveHintBubble />
                 </div>
               </div>

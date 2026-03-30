@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, Github } from "lucide-react";
 
+import { useAuth } from "../../hooks/useAuth";
 import { FOOTER_LINKS, type RoutePath, scrollTopSmooth } from "../../lib/siteNav";
 
 const year = new Date().getFullYear();
@@ -17,6 +18,7 @@ const repoLabel =
 export default function Footer() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   function goToRoute(path: RoutePath) {
     if (location.pathname === path) {
@@ -61,6 +63,15 @@ export default function Footer() {
                   </button>
                 </li>
               ))}
+              <li>
+                <button
+                  type="button"
+                  onClick={() => navigate(user ? "/profile" : "/auth")}
+                  className={linkClass}
+                >
+                  Profile
+                </button>
+              </li>
             </ul>
           </div>
 

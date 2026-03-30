@@ -36,7 +36,7 @@ function UserMenu() {
       <button
         type="button"
         onClick={() => navigate("/auth")}
-        className="hidden rounded-2xl bg-brand-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-50 hover:text-brand-900 md:inline-flex"
+        className="hidden rounded-3xl bg-brand-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-50 hover:text-brand-900 md:inline-flex"
       >
         Register / Sign in
       </button>
