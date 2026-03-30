@@ -5,6 +5,7 @@ import Footer from "./components/shared/Footer";
 import Header from "./components/shared/Header";
 import NavBar from "./components/shared/NavBar";
 import { AuthProvider } from "./contexts/AuthContext";
+import { FavoritesProvider } from "./contexts/FavoritesContext";
 import { useNavScroll } from "./lib/siteNav";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -13,6 +14,7 @@ const UsefulInfo = lazy(() => import("./pages/UsefulInfo"));
 const Archive = lazy(() => import("./pages/Archive"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Profile = lazy(() => import("./pages/Profile"));
+const Favorites = lazy(() => import("./pages/Favorites"));
 
 function Background() {
   return (
@@ -52,6 +54,7 @@ function AppShell() {
               <Route path="/archive" element={<Archive />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/favorites" element={<Favorites />} />
             </Routes>
           </Suspense>
         </div>
@@ -66,7 +69,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppShell />
+        <FavoritesProvider>
+          <AppShell />
+        </FavoritesProvider>
       </AuthProvider>
     </BrowserRouter>
   );

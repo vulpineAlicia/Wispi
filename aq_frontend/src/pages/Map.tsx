@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 
 import Bubble from "../components/templates/Bubble";
 import CityResultPanel from "../components/shared/CityResultPanel";
+import FavoriteButton from "../components/shared/FavoriteButton";
 import CitySearchBox from "../components/shared/CitySearchBox";
 import HistoryPanel, { type HistoryDays } from "../components/shared/HistoryPanel";
 import MapLayersPanel from "../components/map/MapLayersPanel";
@@ -84,15 +85,26 @@ export default function MapPage() {
               </div>
 
               {selection && (
-                <CityResultPanel
-                  variant="map"
-                  name={selection.name}
-                  lat={selection.lat}
-                  lon={selection.lon}
-                  panel={history.model.latestPanel}
-                  loading={history.loading}
-                  error={history.error}
-                />
+                <>
+                  <div className="mt-3 flex justify-end">
+                    <FavoriteButton
+                      name={selection.name}
+                      country={selection.country}
+                      lat={selection.lat}
+                      lon={selection.lon}
+                      className="text-rose-400 hover:text-rose-600"
+                    />
+                  </div>
+                  <CityResultPanel
+                    variant="map"
+                    name={selection.name}
+                    lat={selection.lat}
+                    lon={selection.lon}
+                    panel={history.model.latestPanel}
+                    loading={history.loading}
+                    error={history.error}
+                  />
+                </>
               )}
 
               <div className="mt-4">

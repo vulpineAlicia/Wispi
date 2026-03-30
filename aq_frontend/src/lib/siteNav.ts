@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-export type RoutePath = "/" | "/map" | "/archive" | "/info";
+export type RoutePath = "/" | "/map" | "/archive" | "/info" | "/favorites";
 export type NavTarget = RoutePath | `/${string}` | `#${string}`;
 
 export type NavLinkItem = {
@@ -15,6 +15,7 @@ export const HEADER_LINKS: NavLinkItem[] = [
   { label: "Map", to: "/map" },
   { label: "Archive", to: "/archive" },
   { label: "Useful info", to: "/info" },
+  { label: "Favourites", to: "/favorites" },
   { label: "Contacts", to: "#contacts" },
 ];
 
@@ -23,6 +24,7 @@ export const FOOTER_LINKS: Array<{ label: string; to: RoutePath }> = [
   { label: "Map", to: "/map" },
   { label: "Archive", to: "/archive" },
   { label: "Useful info", to: "/info" },
+  { label: "Favourites", to: "/favorites" },
 ];
 
 export function scrollTopSmooth() {

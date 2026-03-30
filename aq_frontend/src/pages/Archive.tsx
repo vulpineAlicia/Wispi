@@ -2,6 +2,7 @@ import archiveBooks from "../assets/archive-books.svg";
 import ArchiveHintBubble from "../components/archive/ArchiveHintBubble";
 import Bubble from "../components/templates/Bubble";
 import CityResultPanel from "../components/shared/CityResultPanel";
+import FavoriteButton from "../components/shared/FavoriteButton";
 import CitySearchBox from "../components/shared/CitySearchBox";
 import HistoryPanel from "../components/shared/HistoryPanel";
 import { useAirHistory } from "../hooks/useAirHistory";
@@ -80,16 +81,24 @@ export default function ArchivePage() {
               <div className="min-w-0">
                 <Bubble
                   tone="white"
-                  className="flex w-full flex-col gap-0.5 px-5 py-3 sm:max-w-sm"
+                  className="flex w-full items-center justify-between gap-3 px-5 py-3 sm:max-w-sm"
                 >
-                  <span className="text-base font-semibold text-brand-900">
-                    {selection.name}
-                    {selection.country ? `, ${selection.country}` : ""}
-                  </span>
-
-                  <span className="text-xs tabular-nums text-brand-500">
-                    {selection.lat.toFixed(3)}, {selection.lon.toFixed(3)}
-                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-base font-semibold text-brand-900">
+                      {selection.name}
+                      {selection.country ? `, ${selection.country}` : ""}
+                    </span>
+                    <span className="text-xs tabular-nums text-brand-500">
+                      {selection.lat.toFixed(3)}, {selection.lon.toFixed(3)}
+                    </span>
+                  </div>
+                  <FavoriteButton
+                    name={selection.name}
+                    country={selection.country}
+                    lat={selection.lat}
+                    lon={selection.lon}
+                    className="shrink-0 text-rose-400 hover:text-rose-600"
+                  />
                 </Bubble>
               </div>
 

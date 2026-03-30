@@ -3,6 +3,7 @@ import { useState } from "react";
 import lookupBg from "../assets/lookup-bg.png";
 import CityResultPanel from "../components/shared/CityResultPanel";
 import CitySearchBox from "../components/shared/CitySearchBox";
+import FavoriteButton from "../components/shared/FavoriteButton";
 import FeatureCard from "../components/home/FeatureCard";
 import { useAirHistory } from "../hooks/useAirHistory";
 import type { GeoResult } from "../lib/services/api";
@@ -79,6 +80,15 @@ export default function Home() {
 
               {selected && (
                 <div className="w-full max-w-xl">
+                  <div className="mb-1 flex justify-end">
+                    <FavoriteButton
+                      name={selected.name}
+                      country={selected.country}
+                      lat={selected.lat}
+                      lon={selected.lon}
+                      className="text-rose-400 hover:text-rose-600"
+                    />
+                  </div>
                   <CityResultPanel
                     variant="home"
                     name={selectedLabel}
