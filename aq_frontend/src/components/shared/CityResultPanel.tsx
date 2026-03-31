@@ -85,7 +85,7 @@ export default function CityResultPanel({
       )}
 
       {showAqi && (
-        <Bubble className="mt-4 px-5 py-5">
+        <Bubble className={`${showLocation ? "mt-4" : ""} px-5 py-5`}>
           {loading ? (
             <div className="text-sm text-brand-700">Loading…</div>
           ) : error ? (

@@ -44,8 +44,9 @@ export default function ArchivePage() {
   return (
     <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 text-brand-900">
       <Bubble tone="brand" className="mt-6 p-6 md:p-10">
-        <section className="grid gap-8 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:items-start">
-          <div className="min-w-0">
+        <section className="flex flex-col gap-8 lg:flex-row">
+          {/* Left column */}
+          <div className="flex min-w-0 flex-col justify-between gap-5 lg:flex-3">
             <div className="space-y-5">
               <div className="max-w-prose">
                 <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
@@ -63,10 +64,35 @@ export default function ArchivePage() {
                 <CitySearchBox onSelect={handleSelectCity} />
               </div>
             </div>
+
+            {selection && (
+              <Bubble
+                tone="white"
+                className="flex w-full h-16 items-center justify-between gap-3 px-5 py-3"
+              >
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-base font-semibold text-brand-900">
+                    {selection.name}
+                    {selection.country ? `, ${selection.country}` : ""}
+                  </span>
+                  <span className="text-xs tabular-nums text-brand-500">
+                    {selection.lat.toFixed(3)}, {selection.lon.toFixed(3)}
+                  </span>
+                </div>
+                <FavoriteButton
+                  name={selection.name}
+                  country={selection.country}
+                  lat={selection.lat}
+                  lon={selection.lon}
+                  className="shrink-0 text-rose-400 hover:text-rose-600"
+                />
+              </Bubble>
+            )}
           </div>
 
-          <div className="min-w-0 lg:self-end">
-            <div className="mx-auto w-full max-w-2xl lg:mx-0 lg:ml-auto">
+          {/* Right column */}
+          <div className="flex min-w-0 flex-col justify-between gap-5 lg:flex-5">
+            <div className="mx-auto mt-7 w-full max-w-2xl lg:mx-0 lg:ml-auto">
               <img
                 src={archiveBooks}
                 alt=""
@@ -74,45 +100,13 @@ export default function ArchivePage() {
                 className="block h-auto w-full select-none"
               />
             </div>
+
+            {selection && <ArchiveHintBubble />}
           </div>
-
-          {selection && (
-            <>
-              <div className="min-w-0">
-                <Bubble
-                  tone="white"
-                  className="flex w-full items-center justify-between gap-3 px-5 py-3 sm:max-w-sm"
-                >
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-base font-semibold text-brand-900">
-                      {selection.name}
-                      {selection.country ? `, ${selection.country}` : ""}
-                    </span>
-                    <span className="text-xs tabular-nums text-brand-500">
-                      {selection.lat.toFixed(3)}, {selection.lon.toFixed(3)}
-                    </span>
-                  </div>
-                  <FavoriteButton
-                    name={selection.name}
-                    country={selection.country}
-                    lat={selection.lat}
-                    lon={selection.lon}
-                    className="shrink-0 text-rose-400 hover:text-rose-600"
-                  />
-                </Bubble>
-              </div>
-
-              <div className="min-w-0 lg:self-start">
-                <div className="mx-auto w-full max-w-2xl lg:mx-0 lg:ml-auto">
-                  <ArchiveHintBubble />
-                </div>
-              </div>
-            </>
-          )}
         </section>
 
         {selection && (
-          <section className="mt-5 grid gap-6 xl:grid-cols-[minmax(0,1fr)_17rem]">
+          <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_17rem]">
             <div className="order-2 min-w-0 xl:order-1">
               <HistoryPanel
                 hasSelection
@@ -148,10 +142,10 @@ export default function ArchivePage() {
               />
             </div>
 
-            <aside className="order-1 flex flex-col gap-1 xl:order-2">
+            <aside className="order-1 flex flex-col gap-2 xl:order-2">
               <Bubble
                 tone="white"
-                className="flex min-h-15 items-center justify-center px-4 py-3 text-center text-sm font-medium text-brand-800"
+                className="h-16 mb-3 flex items-center justify-center px-4 py-3 text-center text-sm font-medium text-brand-800"
               >
                 Selected day: {history.model.selectedDay?.date ?? "—"}
               </Bubble>
