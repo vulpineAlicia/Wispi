@@ -21,6 +21,11 @@ export default function Footer() {
   const { user } = useAuth();
 
   function goToRoute(path: RoutePath) {
+    if (path === "/favorites" && !user) {
+      navigate("/auth");
+      return;
+    }
+
     if (location.pathname === path) {
       scrollTopSmooth();
       return;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
 import { useFavorites } from "../hooks/useFavorites";
@@ -66,15 +66,11 @@ function FavoriteCityCard({ city }: { city: FavoriteCity }) {
 
 export default function FavoritesPage() {
   const { user, isLoading: authLoading } = useAuth();
-  const navigate = useNavigate();
   const { favorites, loading } = useFavorites();
 
   if (authLoading) return null;
 
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
+  if (!user) return <Navigate to="/auth" replace />;
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 text-brand-900">

@@ -94,6 +94,12 @@ export default function NavBar() {
   function handleNavClick(item: NavLinkItem) {
     const target = item.to;
 
+    if (target === "/favorites" && !user) {
+      navigate("/auth");
+      closeMenu();
+      return;
+    }
+
     if (target.startsWith("#")) {
       if (!scrollToHash(target)) {
         scrollTopSmooth();
