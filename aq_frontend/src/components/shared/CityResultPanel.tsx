@@ -3,6 +3,7 @@ import { getUserMessage } from "../../lib/services/apiMessages";
 import type { HistoryPanelData } from "../../lib/historyModel";
 import AqiPill from "./AqiPill";
 import Bubble from "../templates/Bubble";
+import FavoriteButton from "./FavoriteButton";
 
 const AQI_ADVICE: Record<number, string> = {
   1: "Air quality is excellent — enjoy outdoor activities.",
@@ -22,6 +23,7 @@ type Props = {
   variant: Variant;
 
   name: string;
+  country?: string | null;
   lat: number;
   lon: number;
 
@@ -41,6 +43,7 @@ function formatPollutantValue(v: number) {
 export default function CityResultPanel({
   variant,
   name,
+  country,
   lat,
   lon,
   panel,
@@ -63,9 +66,20 @@ export default function CityResultPanel({
     <>
       {showLocation && (
         <Bubble className="mt-4 px-5 py-4">
-          <div className="text-base font-semibold text-brand-900">{name}</div>
-          <div className="mt-1 text-xs text-brand-700/80">
-            {lat.toFixed(4)}, {lon.toFixed(4)}
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="text-base font-semibold text-brand-900">{name}</div>
+              <div className="mt-1 text-xs text-brand-700/80">
+                {lat.toFixed(4)}, {lon.toFixed(4)}
+              </div>
+            </div>
+            <FavoriteButton
+              name={name}
+              country={country}
+              lat={lat}
+              lon={lon}
+              className="shrink-0 text-rose-400 hover:text-rose-600"
+            />
           </div>
         </Bubble>
       )}
