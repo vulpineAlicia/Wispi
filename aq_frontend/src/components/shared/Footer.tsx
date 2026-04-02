@@ -22,7 +22,11 @@ export default function Footer() {
 
   function goToRoute(path: RoutePath) {
     if (path === "/favorites" && !user) {
-      navigate("/auth");
+      if (location.pathname === "/auth") {
+        scrollTopSmooth();
+      } else {
+        navigate("/auth");
+      }
       return;
     }
 
@@ -32,6 +36,15 @@ export default function Footer() {
     }
 
     navigate(path);
+  }
+
+  function goToProfile() {
+    const target = user ? "/profile" : "/auth";
+    if (location.pathname === target) {
+      scrollTopSmooth();
+      return;
+    }
+    navigate(target);
   }
 
   const linkClass = "text-brand-200 transition hover:text-brand-50";
@@ -71,7 +84,7 @@ export default function Footer() {
               <li>
                 <button
                   type="button"
-                  onClick={() => navigate(user ? "/profile" : "/auth")}
+                  onClick={goToProfile}
                   className={linkClass}
                 >
                   Profile
