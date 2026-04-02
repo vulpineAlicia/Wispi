@@ -43,7 +43,7 @@ export default function ArchivePage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 text-brand-900">
-      <Bubble tone="brand" className="mt-6 p-6 md:p-10">
+      <div className="mt-6 p-0 md:rounded-3xl md:border md:border-brand-200 md:bg-brand-50 md:p-10 md:shadow-sm">
         <section className="flex flex-col gap-8 lg:flex-row">
           {/* Left column */}
           <div className="flex min-w-0 flex-col justify-between gap-5 lg:flex-3">
@@ -164,7 +164,7 @@ export default function ArchivePage() {
             </aside>
           </section>
         )}
-      </Bubble>
+      </div>
     </main>
   );
 }

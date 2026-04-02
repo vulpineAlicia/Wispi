@@ -1,10 +1,9 @@
-import Bubble from "../components/templates/Bubble";
 import FAQ from "../components/info/FAQ";
 
 export default function UsefulInfo() {
   return (
     <main className="mx-auto max-w-6xl px-4 pt-6 pb-16 text-brand-900">
-      <Bubble tone="brand" className="mt-6 md:p-10">
+      <div className="mt-6 md:rounded-3xl md:border md:border-brand-200 md:bg-brand-50 md:p-10 md:shadow-sm">
         <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
           Useful info
         </h1>
@@ -165,7 +164,7 @@ export default function UsefulInfo() {
             }
           />
         </div>
-      </Bubble>
+      </div>
     </main>
   );
 }

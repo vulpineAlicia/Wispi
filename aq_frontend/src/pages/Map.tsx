@@ -56,70 +56,105 @@ export default function MapPage() {
   }
 
   return (
-    <div className="relative w-full" style={{ height: "calc(100vh - 143px)" }}>
-      <section className="absolute inset-0 w-full overflow-hidden">
+    <div className="flex flex-col md:relative md:h-[calc(100vh-143px)] md:w-full md:overflow-hidden">
+      {/* Map — 45vh on mobile, fills container on desktop */}
+      <div className="relative h-[45vh] md:absolute md:inset-0 md:h-auto">
         <div ref={mapDivRef} className="absolute inset-0 z-0" />
+        <MapLayersPanel overlay={overlay} setOverlay={setOverlay} />
+      </div>
 
-        {/* Left panel */}
-        <div className="absolute left-4 top-4 z-10 w-85 max-w-[calc(100vw-2rem)]">
-          <aside className="relative">
-            <Bubble
-              tone="brand"
-              className="
-                max-h-[calc(100vh-170px)]
-                overflow-y-auto
-                p-5
-                text-brand-900
-                no-scrollbar
-              "
-            >
-              <div className="px-1">
-                <h1 className="px-1 text-lg font-semibold leading-tight">
-                  Search a city
-                </h1>
-              </div>
+      {/* Mobile search panel — normal flow below map, no bubble */}
+      <div className="px-4 py-5 text-brand-900 md:hidden">
+        <h1 className="text-lg font-semibold leading-tight">Search a city</h1>
 
-              <div className="mt-3">
-                <CitySearchBox onSelect={handleSelectCity} />
-              </div>
-
-              {selection && (
-                <CityResultPanel
-                  variant="map"
-                  name={selection.name}
-                  country={selection.country}
-                  lat={selection.lat}
-                  lon={selection.lon}
-                  panel={history.model.latestPanel}
-                  loading={history.loading}
-                  error={history.error}
-                />
-              )}
-
-              <div className="mt-4">
-                <HistoryPanel
-                  hasSelection={hasSelection}
-                  historyDays={historyDays}
-                  setHistoryDays={setHistoryDays}
-                  historyLoading={history.loading}
-                  historyError={history.error}
-                  chartData={history.model.chartData}
-                  lat={selection?.lat}
-                  lon={selection?.lon}
-                  name={selection?.name}
-                />
-              </div>
-            </Bubble>
-
-            {/* scroll fade */}
-            <div className="pointer-events-none absolute left-0 right-0 top-0 h-6 rounded-t-3xl bg-linear-to-b from-brand-50 to-transparent" />
-            <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 rounded-b-3xl bg-linear-to-t from-brand-50 to-transparent" />
-          </aside>
+        <div className="mt-3">
+          <CitySearchBox onSelect={handleSelectCity} />
         </div>
 
-        {/* Right panel */}
-        <MapLayersPanel overlay={overlay} setOverlay={setOverlay} />
-      </section>
+        {selection && (
+          <CityResultPanel
+            variant="map"
+            name={selection.name}
+            country={selection.country}
+            lat={selection.lat}
+            lon={selection.lon}
+            panel={history.model.latestPanel}
+            loading={history.loading}
+            error={history.error}
+          />
+        )}
+
+        <div className="mt-4">
+          <HistoryPanel
+            hasSelection={hasSelection}
+            historyDays={historyDays}
+            setHistoryDays={setHistoryDays}
+            historyLoading={history.loading}
+            historyError={history.error}
+            chartData={history.model.chartData}
+            lat={selection?.lat}
+            lon={selection?.lon}
+            name={selection?.name}
+          />
+        </div>
+      </div>
+
+      {/* Desktop search panel — absolute overlay with bubble */}
+      <div className="absolute left-4 top-4 z-10 hidden w-85 max-w-[calc(100vw-2rem)] md:block">
+        <aside className="relative">
+          <Bubble
+            tone="brand"
+            className="
+              max-h-[calc(100vh-170px)]
+              overflow-y-auto
+              p-5
+              text-brand-900
+              no-scrollbar
+            "
+          >
+            <div className="px-1">
+              <h1 className="px-1 text-lg font-semibold leading-tight">
+                Search a city
+              </h1>
+            </div>
+
+            <div className="mt-3">
+              <CitySearchBox onSelect={handleSelectCity} />
+            </div>
+
+            {selection && (
+              <CityResultPanel
+                variant="map"
+                name={selection.name}
+                country={selection.country}
+                lat={selection.lat}
+                lon={selection.lon}
+                panel={history.model.latestPanel}
+                loading={history.loading}
+                error={history.error}
+              />
+            )}
+
+            <div className="mt-4">
+              <HistoryPanel
+                hasSelection={hasSelection}
+                historyDays={historyDays}
+                setHistoryDays={setHistoryDays}
+                historyLoading={history.loading}
+                historyError={history.error}
+                chartData={history.model.chartData}
+                lat={selection?.lat}
+                lon={selection?.lon}
+                name={selection?.name}
+              />
+            </div>
+          </Bubble>
+
+          {/* scroll fade */}
+          <div className="pointer-events-none absolute left-0 right-0 top-0 h-6 rounded-t-3xl bg-linear-to-b from-brand-50 to-transparent" />
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 rounded-b-3xl bg-linear-to-t from-brand-50 to-transparent" />
+        </aside>
+      </div>
     </div>
   );
 }
