@@ -34,6 +34,16 @@ export function getLocationSelectionFromParams(
   };
 }
 
+// returns true if two lat/lon pairs refer to the same location
+export function coordsMatch(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): boolean {
+  return Math.abs(lat1 - lat2) < 0.001 && Math.abs(lon1 - lon2) < 0.001;
+}
+
 export function buildMapUrl(selection: {
   lat: number;
   lon: number;
