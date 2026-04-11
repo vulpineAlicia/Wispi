@@ -11,7 +11,7 @@ from aq_backend.dependencies import get_current_user
 from aq_backend.http_errors import api_error
 from aq_backend.models import FavoriteCity, User
 from aq_backend.ratelimit import limiter
-from aq_backend.schemas import AddFavoriteCityRequest, FavoriteCityOut
+from aq_backend.schemas import AddFavoriteCityRequest, FavoriteCityOut, OkResponse
 
 router = APIRouter(prefix="/favorites", tags=["favorites"])
 
@@ -65,14 +65,14 @@ async def add_favorite(
     return FavoriteCityOut(id=city.id, name=city.name, country=city.country, lat=city.lat, lon=city.lon)
 
 
-@router.delete("/{city_id}", status_code=200)
+@router.delete("/{city_id}", response_model=OkResponse, status_code=200)
 @limiter.limit(FAVORITES_LIMIT)
 async def remove_favorite(
     request: Request,
     city_id: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> dict:
+) -> OkResponse:
     """ Remove a saved city (must belong to the authenticated user) """
     city = await db.scalar(
         select(FavoriteCity).where(
@@ -85,4 +85,4 @@ async def remove_favorite(
 
     await db.delete(city)
     await db.commit()
-    return {"ok": True}
+    return OkResponse()
