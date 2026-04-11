@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 
 from fastapi import APIRouter, Cookie, Depends, Request, Response
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from aq_backend import auth
@@ -16,15 +16,13 @@ from aq_backend.dependencies import get_current_user
 from aq_backend.http_errors import api_error
 from aq_backend.models import RefreshToken, User
 from aq_backend.ratelimit import AUTH_LIMIT, limiter
+from aq_backend.schemas import OkResponse, UserOut
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 _COOKIE_NAME = "wispi_refresh"
 _COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
-
-
-def _is_secure() -> bool:
-    return get_settings().app_env == "production"
+_SECURE_COOKIE = get_settings().app_env == "production"
 
 
 def _set_refresh_cookie(response: Response, token: str) -> None:
@@ -33,7 +31,7 @@ def _set_refresh_cookie(response: Response, token: str) -> None:
         value=token,
         max_age=_COOKIE_MAX_AGE,
         httponly=True,
-        secure=_is_secure(),
+        secure=_SECURE_COOKIE,
         samesite="lax",
         path="/",
     )
@@ -43,16 +41,10 @@ def _clear_refresh_cookie(response: Response) -> None:
     response.delete_cookie(
         key=_COOKIE_NAME,
         httponly=True,
-        secure=_is_secure(),
+        secure=_SECURE_COOKIE,
         samesite="lax",
         path="/",
     )
-
-
-class UserOut(BaseModel):
-    id: str
-    nickname: str
-    avatar_id: int
 
 
 class TokenResponse(BaseModel):
@@ -129,6 +121,14 @@ async def login(
     if not user or not auth.verify_password(body.password, user.password_hash):
         raise api_error(401, "INVALID_CREDENTIALS", "Invalid nickname or password.")
 
+    # Prune expired tokens for this user so sessions don't accumulate indefinitely.
+    await db.execute(
+        delete(RefreshToken).where(
+            RefreshToken.user_id == user.id,
+            RefreshToken.expires_at <= datetime.now(UTC),
+        )
+    )
+
     raw_token, expires_at = auth.create_refresh_token()
     db.add(RefreshToken(
         user_id=user.id,
@@ -187,24 +187,25 @@ async def refresh_token(
     )
 
 
-@router.post("/logout")
+@router.post("/logout", response_model=OkResponse)
 @limiter.limit(AUTH_LIMIT)
 async def logout(
     request: Request,
     response: Response,
     db: AsyncSession = Depends(get_db),
     wispi_refresh: str | None = Cookie(default=None),
-) -> dict:
+) -> OkResponse:
     """ Invalidate the refresh token and clear the cookie """
-    if wispi_refresh:
-        token_hash = auth.hash_token(wispi_refresh)
-        rt = await db.scalar(select(RefreshToken).where(RefreshToken.token_hash == token_hash))
-        if rt:
-            await db.delete(rt)
-            await db.commit()
-
-    _clear_refresh_cookie(response)
-    return {"ok": True}
+    try:
+        if wispi_refresh:
+            token_hash = auth.hash_token(wispi_refresh)
+            rt = await db.scalar(select(RefreshToken).where(RefreshToken.token_hash == token_hash))
+            if rt:
+                await db.delete(rt)
+                await db.commit()
+    finally:
+        _clear_refresh_cookie(response)
+    return OkResponse()
 
 
 @router.get("/me", response_model=UserOut)
@@ -213,24 +214,32 @@ async def me(current_user: User = Depends(get_current_user)) -> UserOut:
     return UserOut(id=current_user.id, nickname=current_user.nickname, avatar_id=current_user.avatar_id)
 
 
-@router.post("/change-password")
+@router.post("/change-password", response_model=OkResponse)
 @limiter.limit(AUTH_LIMIT)
 async def change_password(
     request: Request,
     body: ChangePasswordRequest,
+    response: Response,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> dict:
-    """ Change password (requires current password) """
+) -> OkResponse:
+    """ Change password (requires current password); invalidates all sessions """
     if not auth.verify_password(body.old_password, current_user.password_hash):
         raise api_error(401, "INVALID_CREDENTIALS", "Current password is incorrect.")
 
     current_user.password_hash = auth.hash_password(body.new_password)
+
+    # Revoke all refresh tokens so every other session is forced to re-login.
+    tokens = await db.scalars(select(RefreshToken).where(RefreshToken.user_id == current_user.id))
+    for rt in tokens:
+        await db.delete(rt)
+
     await db.commit()
-    return {"ok": True}
+    _clear_refresh_cookie(response)
+    return OkResponse()
 
 
-@router.delete("/me")
+@router.delete("/me", response_model=OkResponse)
 @limiter.limit(AUTH_LIMIT)
 async def delete_account(
     request: Request,
@@ -238,9 +247,9 @@ async def delete_account(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
     wispi_refresh: str | None = Cookie(default=None),
-) -> dict:
+) -> OkResponse:
     """ Permanently delete the account (cascades to all tokens) """
     await db.delete(current_user)
     await db.commit()
     _clear_refresh_cookie(response)
-    return {"ok": True}
+    return OkResponse()
