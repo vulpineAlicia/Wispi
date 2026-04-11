@@ -13,6 +13,8 @@ AIR_HISTORY_LIMIT = "30/minute"
 TILE_LIMIT = "120/minute"
 # Auth endpoints limit
 AUTH_LIMIT = "10/minute"
+# Admin endpoints limit
+ADMIN_LIMIT = "20/minute"
 
 
 def _get_client_ip(request: Request) -> str:

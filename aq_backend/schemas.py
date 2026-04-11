@@ -2,7 +2,23 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from pydantic import BaseModel, Field
+
+
+class UserOut(BaseModel):
+    """ Public user info returned from auth endpoints """
+
+    id: str
+    nickname: str
+    avatar_id: int
+
+
+class UserAdminOut(UserOut):
+    """ User info with admin-only fields """
+
+    created_at: datetime
 
 
 class Location(BaseModel):
@@ -65,6 +81,12 @@ class FavoriteCityOut(BaseModel):
     country: str | None
     lat: float
     lon: float
+
+
+class OkResponse(BaseModel):
+    """ Generic success response for mutation endpoints """
+
+    ok: bool = True
 
 
 class AddFavoriteCityRequest(BaseModel):
