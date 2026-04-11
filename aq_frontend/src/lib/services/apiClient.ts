@@ -20,7 +20,7 @@ function getHeaderRequestId(res: Response): string | undefined {
 }
 
 export function invalidResponse(message: string, requestId?: string): ApiError {
-  return new ApiError(message, 200, "INVALID_RESPONSE", requestId);
+  return new ApiError(message, 0, "INVALID_RESPONSE", requestId);
 }
 
 export async function postJson<T>(path: string, body: unknown, init?: RequestInit): Promise<T> {

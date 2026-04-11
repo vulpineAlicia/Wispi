@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 import { useAuth } from "../hooks/useAuth";
+import { coordsMatch } from "../lib/locationSelection";
 import {
   getFavorites,
   addFavorite,
@@ -16,10 +17,12 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   const { user, getToken } = useAuth();
   const [favorites, setFavorites] = useState<FavoriteCity[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
       setFavorites([]);
+      setError(null);
       return;
     }
 
@@ -28,9 +31,12 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
     let cancelled = false;
     setLoading(true);
+    setError(null);
     getFavorites(token)
       .then((data) => { if (!cancelled) setFavorites(data); })
-      .catch(() => {})
+      .catch((err: unknown) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load favourites.");
+      })
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
@@ -38,17 +44,13 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   const isFavorite = useCallback(
     (lat: number, lon: number) =>
-      favorites.some(
-        (f) => Math.abs(f.lat - lat) < 0.001 && Math.abs(f.lon - lon) < 0.001
-      ),
+      favorites.some((f) => coordsMatch(f.lat, f.lon, lat, lon)),
     [favorites]
   );
 
   const getFavoriteId = useCallback(
     (lat: number, lon: number) =>
-      favorites.find(
-        (f) => Math.abs(f.lat - lat) < 0.001 && Math.abs(f.lon - lon) < 0.001
-      )?.id,
+      favorites.find((f) => coordsMatch(f.lat, f.lon, lat, lon))?.id,
     [favorites]
   );
 
@@ -77,6 +79,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       value={{
         favorites,
         loading,
+        error,
         canAdd: favorites.length < MAX_FAVORITES,
         isFavorite,
         getFavoriteId,
