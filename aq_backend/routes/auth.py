@@ -233,9 +233,9 @@ async def change_password(
     current_user.password_hash = auth.hash_password(body.new_password)
 
     # Revoke all refresh tokens so every other session is forced to re-login.
-    tokens = await db.scalars(select(RefreshToken).where(RefreshToken.user_id == current_user.id))
-    for rt in tokens:
-        await db.delete(rt)
+    await db.execute(
+        delete(RefreshToken).where(RefreshToken.user_id == current_user.id)
+    )
 
     await db.commit()
     _clear_refresh_cookie(response)
