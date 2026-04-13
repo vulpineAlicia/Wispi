@@ -18,7 +18,7 @@ logger = logging.getLogger("aq_backend.http")
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
-    """ Logging only for server-side failures (5xx) and unhandled exceptions """
+    """ Log warnings on 4xx, errors on 5xx, and unhandled exceptions """
 
     async def dispatch(
         self,
@@ -53,8 +53,11 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             logger.exception("Unhandled exception", extra=build_extra(500))
             raise
 
-        if response.status_code >= 500:
-            logger.error("Request failed", extra=build_extra(response.status_code))
+        status = response.status_code
+        if status >= 500:
+            logger.error("Request failed", extra=build_extra(status))
+        elif status >= 400:
+            logger.warning("Request failed", extra=build_extra(status))
 
         response.headers["x-request-id"] = request_id
         return response
