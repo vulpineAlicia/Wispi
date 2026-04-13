@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel, Field
@@ -50,19 +51,19 @@ async def list_users(
 @limiter.limit(ADMIN_LIMIT)
 async def set_user_password(
     request: Request,
-    user_id: str,
+    user_id: UUID,
     body: SetPasswordRequest,
     db: AsyncSession = Depends(get_db),
 ) -> OkResponse:
     """ Set a new password for a user without requiring the current one """
-    user = await db.get(User, user_id)
+    user = await db.get(User, str(user_id))
     if not user:
         raise api_error(404, "NOT_FOUND", "User not found.")
     user.password_hash = auth.hash_password(body.new_password)
     await db.commit()
     logger.warning(
         "Admin password reset",
-        extra={"target_user_id": user_id, "request_id": getattr(request.state, "request_id", "-")},
+        extra={"target_user_id": str(user_id), "request_id": getattr(request.state, "request_id", "-")},
     )
     return OkResponse()
 
@@ -71,11 +72,11 @@ async def set_user_password(
 @limiter.limit(ADMIN_LIMIT)
 async def delete_user(
     request: Request,
-    user_id: str,
+    user_id: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> OkResponse:
     """ Permanently delete a user account by ID (cascades to all tokens) """
-    user = await db.get(User, user_id)
+    user = await db.get(User, str(user_id))
     if not user:
         raise api_error(404, "NOT_FOUND", "User not found.")
     target_nickname = user.nickname
@@ -83,6 +84,6 @@ async def delete_user(
     await db.commit()
     logger.warning(
         "Admin user deletion",
-        extra={"target_user_id": user_id, "target_nickname": target_nickname, "request_id": getattr(request.state, "request_id", "-")},
+        extra={"target_user_id": str(user_id), "target_nickname": target_nickname, "request_id": getattr(request.state, "request_id", "-")},
     )
     return OkResponse()

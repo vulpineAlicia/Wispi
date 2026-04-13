@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -69,14 +71,14 @@ async def add_favorite(
 @limiter.limit(FAVORITES_LIMIT)
 async def remove_favorite(
     request: Request,
-    city_id: str,
+    city_id: UUID,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> OkResponse:
     """ Remove a saved city (must belong to the authenticated user) """
     city = await db.scalar(
         select(FavoriteCity).where(
-            FavoriteCity.id == city_id,
+            FavoriteCity.id == str(city_id),
             FavoriteCity.user_id == current_user.id,
         )
     )
