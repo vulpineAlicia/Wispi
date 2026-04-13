@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, TypeAlias, cast
+from typing import Any
 
 import httpx
 
@@ -12,9 +12,6 @@ from aq_backend.services.openweather.errors import (
 )
 from aq_backend.services.openweather.tiles_service import OpenWeatherTileService
 from aq_backend.services.openweather.transport import Endpoint, OpenWeatherTransport
-
-JsonDict: TypeAlias = dict[str, Any]
-JsonList: TypeAlias = list[dict[str, Any]]
 
 
 class OpenWeatherService:
@@ -102,7 +99,7 @@ class OpenWeatherService:
         self,
         q: str,
         limit: int,
-    ) -> tuple[JsonList, UpstreamMeta]:
+    ) -> tuple[Any, UpstreamMeta]:
         """ Accept a city name and return location matches from OpenWeather """
         params = {
             "q": q,
@@ -114,13 +111,13 @@ class OpenWeatherService:
             params=params,
             endpoint=Endpoint.GEOCODE,
         )
-        return cast(JsonList, data), meta
+        return data, meta
 
     async def air_current(
         self,
         lat: float,
         lon: float,
-    ) -> tuple[JsonDict, UpstreamMeta]:
+    ) -> tuple[Any, UpstreamMeta]:
         """ Accept lat/lon and return current air quality data """
         params = {
             "lat": lat,
@@ -132,7 +129,7 @@ class OpenWeatherService:
             params=params,
             endpoint=Endpoint.AIR_CURRENT,
         )
-        return cast(JsonDict, data), meta
+        return data, meta
 
     async def air_history(
         self,
@@ -140,7 +137,7 @@ class OpenWeatherService:
         lon: float,
         start_ts: int,
         end_ts: int,
-    ) -> tuple[JsonDict, UpstreamMeta]:
+    ) -> tuple[Any, UpstreamMeta]:
         """ Return historical air quality measurements for a given time range """
         params = {
             "lat": lat,
@@ -154,4 +151,4 @@ class OpenWeatherService:
             params=params,
             endpoint=Endpoint.AIR_HISTORY,
         )
-        return cast(JsonDict, data), meta
+        return data, meta
