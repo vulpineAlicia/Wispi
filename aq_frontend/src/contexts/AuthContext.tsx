@@ -42,36 +42,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ user: null, accessToken: null, isLoading: false });
   }, []);
 
-  const scheduleRefreshRef = useRef<(token: string) => void>(() => {});
+  // Ref to setAuth used inside the timer callback to avoid a circular dep
+  const setAuthRef = useRef<(token: string, user: AuthUser) => void>(() => {});
+
+  const scheduleRefresh = useCallback((token: string) => {
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    const expiry = getTokenExpiry(token);
+    if (!expiry) return;
+    // Fire 60 s before expiry so there's always a valid token in flight
+    const delay = expiry - Date.now() - 60_000;
+    const doRefresh = () => {
+      authApi.refreshTokens()
+        .then((res) => setAuthRef.current(res.access_token, res.user))
+        .catch(() => clearAuth());
+    };
+    if (delay <= 0) {
+      doRefresh();
+      return;
+    }
+    refreshTimerRef.current = setTimeout(doRefresh, delay);
+  }, [clearAuth]);
 
   const setAuth = useCallback((token: string, user: AuthUser) => {
     tokenRef.current = token;
     setState({ user, accessToken: token, isLoading: false });
-    scheduleRefreshRef.current(token);
-  }, []);
+    scheduleRefresh(token);
+  }, [scheduleRefresh]);
 
-  // Wire up scheduleRefresh
+  // Keep setAuthRef current so timer callbacks always invoke the latest setAuth.
   useEffect(() => {
-    scheduleRefreshRef.current = (token: string) => {
-      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-      const expiry = getTokenExpiry(token);
-      if (!expiry) return;
-      // Fire 60 s before expiry so there's always a valid token in flight.
-      const delay = expiry - Date.now() - 60_000;
-      if (delay <= 0) {
-        // Token already expired or about to — refresh immediately.
-        authApi.refreshTokens()
-          .then((res) => setAuth(res.access_token, res.user))
-          .catch(() => clearAuth());
-        return;
-      }
-      refreshTimerRef.current = setTimeout(() => {
-        authApi.refreshTokens()
-          .then((res) => setAuth(res.access_token, res.user))
-          .catch(() => clearAuth());
-      }, delay);
-    };
-  }, [setAuth, clearAuth]);
+    setAuthRef.current = setAuth;
+  }, [setAuth]);
 
   // Attempt silent refresh on mount
   useEffect(() => {
