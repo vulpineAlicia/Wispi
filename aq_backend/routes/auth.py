@@ -23,26 +23,27 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 _COOKIE_NAME = "wispi_refresh"
 _COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
-_SECURE_COOKIE = get_settings().app_env == "production"
 
 
 def _set_refresh_cookie(response: Response, token: str) -> None:
+    secure = get_settings().app_env == "production"
     response.set_cookie(
         key=_COOKIE_NAME,
         value=token,
         max_age=_COOKIE_MAX_AGE,
         httponly=True,
-        secure=_SECURE_COOKIE,
+        secure=secure,
         samesite="lax",
         path="/",
     )
 
 
 def _clear_refresh_cookie(response: Response) -> None:
+    secure = get_settings().app_env == "production"
     response.delete_cookie(
         key=_COOKIE_NAME,
         httponly=True,
-        secure=_SECURE_COOKIE,
+        secure=secure,
         samesite="lax",
         path="/",
     )
