@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Cookie, Depends, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from aq_backend import auth
@@ -76,21 +77,23 @@ async def register(
     db: AsyncSession = Depends(get_db),
 ) -> TokenResponse:
     """ Create a new account with a server-generated nickname """
+    password_hash = auth.hash_password(body.password)
+    avatar_id = auth.random_avatar_id()
+
     for _ in range(10):
-        nickname = auth.generate_nickname()
-        taken = await db.scalar(select(User).where(User.nickname == nickname))
-        if not taken:
+        user = User(
+            nickname=auth.generate_nickname(),
+            avatar_id=avatar_id,
+            password_hash=password_hash,
+        )
+        db.add(user)
+        try:
+            await db.flush()
             break
+        except IntegrityError:
+            await db.rollback()
     else:
         raise api_error(500, "SERVER_ERROR", "Could not generate a unique nickname. Try again.")
-
-    user = User(
-        nickname=nickname,
-        avatar_id=auth.random_avatar_id(),
-        password_hash=auth.hash_password(body.password),
-    )
-    db.add(user)
-    await db.flush()
 
     raw_token, expires_at = auth.create_refresh_token()
     db.add(RefreshToken(
