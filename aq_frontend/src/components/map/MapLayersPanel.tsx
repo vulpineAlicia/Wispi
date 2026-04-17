@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import { useTranslation } from "react-i18next";
 import { OVERLAY_OPTIONS, type OverlayMode } from "../../lib/mapOverlay";
 import Bubble from "../templates/Bubble";
 
@@ -15,12 +16,13 @@ export default function MapLayersPanel({
   setOverlay,
   className,
 }: Props) {
+  const { t } = useTranslation();
   const legend = OVERLAY_OPTIONS[overlay];
 
   return (
     <aside className={className ?? "absolute right-4 top-4 z-10 w-55"}>
       <Bubble tone="brand" className="p-4">
-        <div className="px-1 text-sm font-medium">Layers</div>
+        <div className="px-1 text-sm font-medium">{t('map.layers')}</div>
 
         <div className="mt-3 flex flex-col gap-2.5">
           {MODES.map((mode) => (
@@ -35,7 +37,7 @@ export default function MapLayersPanel({
                   : "border border-brand-200 bg-white text-brand-900")
               }
             >
-              {mode === "none" ? "None" : OVERLAY_OPTIONS[mode]!.label}
+              {mode === "none" ? t('map.none') : t(OVERLAY_OPTIONS[mode]!.label)}
             </button>
           ))}
         </div>
@@ -43,14 +45,14 @@ export default function MapLayersPanel({
         {legend && (
           <Bubble className="mt-4 rounded-2xl px-4 py-4">
             <div className="text-xs font-medium text-brand-900">
-              {legend.title} scale
+              {t('map.scale', { title: t(legend.title) })}
             </div>
             <div
               className={`mt-3 h-2 w-full rounded-full bg-linear-to-r ${legend.gradientClass}`}
             />
             <div className="mt-2 flex justify-between text-[11px] text-brand-700">
-              <span>Low</span>
-              <span>High</span>
+              <span>{t('map.low')}</span>
+              <span>{t('map.high')}</span>
             </div>
           </Bubble>
         )}

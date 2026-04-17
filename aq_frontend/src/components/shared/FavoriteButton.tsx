@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export default function FavoriteButton({ name, country, lat, lon, className = "" }: Props) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isFavorite, getFavoriteId, add, remove, canAdd } = useFavorites();
@@ -42,12 +44,12 @@ export default function FavoriteButton({ name, country, lat, lon, className = ""
   }
 
   const title = !user
-    ? "Sign in to save cities"
+    ? t('favorite.signInToSave')
     : favorited
-      ? "Remove from favourites"
+      ? t('favorite.remove')
       : !canAdd
-        ? "Favourites limit reached (10)"
-        : "Add to favourites";
+        ? t('favorite.limitReached')
+        : t('favorite.add');
 
   return (
     <button

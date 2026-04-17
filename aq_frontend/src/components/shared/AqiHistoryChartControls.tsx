@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import BaseButton from "../templates/BaseButton";
 
 type HistoryRange = {
@@ -36,6 +37,8 @@ export default function AqiHistoryChartControls({
   draftNumber,
   applyDraft,
 }: Props) {
+  const { t } = useTranslation();
+
   const applyDisabled =
     historyLoading || !canApply || draftNumber === historyDays;
 
@@ -46,7 +49,7 @@ export default function AqiHistoryChartControls({
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-5">
-        <div className="text-base font-semibold text-brand-900">History</div>
+        <div className="text-base font-semibold text-brand-900">{t('history.title')}</div>
 
         {showPresets && (
           <div className="flex items-center gap-4">
@@ -76,7 +79,7 @@ export default function AqiHistoryChartControls({
 
       {allowCustomDays && (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-brand-500">Days</span>
+          <span className="text-xs text-brand-500">{t('history.days')}</span>
 
           <input
             type="text"
@@ -110,7 +113,7 @@ export default function AqiHistoryChartControls({
             onClick={applyDraft}
             className="px-3 py-2 text-sm"
           >
-            Apply
+            {t('history.apply')}
           </BaseButton>
         </div>
       )}

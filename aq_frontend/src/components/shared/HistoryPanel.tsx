@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import { getUserMessage } from "../../lib/services/apiMessages";
@@ -7,12 +8,6 @@ import AqiHistoryChartControls from "./AqiHistoryChartControls";
 import Bubble from "../templates/Bubble";
 
 const AqiHistoryChart = lazy(() => import("./AqiHistoryChart"));
-
-const HISTORY_RANGES = [
-  { label: "7 days", days: 7 },
-  { label: "30 days", days: 30 },
-  { label: "90 days", days: 90 },
-] as const;
 
 export type HistoryDays = number;
 
@@ -83,6 +78,7 @@ export default function HistoryPanel({
   lon,
   name,
 }: Props) {
+  const { t } = useTranslation();
   const [daysDraft, setDaysDraft] = useState(() => String(historyDays));
 
   useEffect(() => {
@@ -102,6 +98,12 @@ export default function HistoryPanel({
   const canShowArchiveLink =
     showArchiveLink && lat != null && lon != null && name != null;
 
+  const historyRanges = [
+    { label: t('history.days7'), days: 7 },
+    { label: t('history.days30'), days: 30 },
+    { label: t('history.days90'), days: 90 },
+  ];
+
   return (
     <Bubble className="px-5 py-5 text-sm text-brand-700">
       <AqiHistoryChartControls
@@ -110,7 +112,7 @@ export default function HistoryPanel({
         historyLoading={historyLoading}
         showPresets={showPresets}
         allowCustomDays={allowCustomDays}
-        ranges={HISTORY_RANGES}
+        ranges={historyRanges}
         daysDraft={daysDraft}
         setDaysDraft={setDaysDraft}
         canApply={canApply}
@@ -120,14 +122,14 @@ export default function HistoryPanel({
 
       <div className="mt-4">
         {historyLoading ? (
-          <div className="text-sm text-brand-700">Loading history…</div>
+          <div className="text-sm text-brand-700">{t('history.loadingHistory')}</div>
         ) : historyError ? (
           <Bubble tone="error" className="px-3 py-2 text-sm">
             {getUserMessage(historyError)}
           </Bubble>
         ) : (
           <Suspense
-            fallback={<div className="text-sm text-brand-700">Loading chart…</div>}
+            fallback={<div className="text-sm text-brand-700">{t('history.loadingChart')}</div>}
           >
             <AqiHistoryChart
               data={chartData}
@@ -150,7 +152,7 @@ export default function HistoryPanel({
             })}
             className="text-sm text-brand-500 hover:text-brand-700"
           >
-            Open archive →
+            {t('history.openArchive')}
           </Link>
         </div>
       )}

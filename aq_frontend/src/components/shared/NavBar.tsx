@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Settings2 } from "lucide-react";
 
@@ -16,6 +17,7 @@ function navItemKey(item: NavLinkItem, prefix = "") {
 }
 
 function UserMenu() {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -38,7 +40,7 @@ function UserMenu() {
         onClick={() => navigate("/auth")}
         className="hidden rounded-3xl bg-brand-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-50 hover:text-brand-900 md:inline-flex"
       >
-        Register / Sign in
+        {t('nav.registerSignIn')}
       </button>
     );
   }
@@ -66,14 +68,14 @@ function UserMenu() {
             onClick={() => { navigate("/profile"); setOpen(false); }}
             className="w-full px-4 py-2.5 text-left text-sm text-brand-700 transition hover:bg-brand-50"
           >
-            Profile
+            {t('nav.profile')}
           </button>
           <button
             type="button"
             onClick={async () => { await signOut(); setOpen(false); navigate("/"); }}
             className="w-full px-4 py-2.5 text-left text-sm text-brand-700 transition hover:bg-brand-50"
           >
-            Sign out
+            {t('nav.signOut')}
           </button>
         </div>
       )}
@@ -82,6 +84,7 @@ function UserMenu() {
 }
 
 export default function NavBar() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -149,7 +152,7 @@ export default function NavBar() {
                 onClick={() => handleNavClick(item)}
                 className={desktopLinkClass}
               >
-                {item.label}
+                {t(item.label)}
               </button>
             ))}
           </nav>
@@ -162,7 +165,7 @@ export default function NavBar() {
               onClick={() => setOpen((value) => !value)}
               aria-expanded={open}
               aria-controls="mobile-nav"
-              aria-label="Toggle menu"
+              aria-label={t('nav.toggleMenu')}
               className="inline-flex items-center justify-center rounded-2xl border border-brand-200 bg-white/70 px-3 py-2 text-sm text-brand-900 transition hover:bg-brand-50 md:hidden"
             >
               ☰
@@ -180,7 +183,7 @@ export default function NavBar() {
                   onClick={() => handleNavClick(item)}
                   className={mobileLinkClass}
                 >
-                  {item.label}
+                  {t(item.label)}
                 </button>
               ))}
               <hr className="border-brand-200" />
@@ -191,14 +194,14 @@ export default function NavBar() {
                     onClick={() => { navigate("/profile"); closeMenu(); }}
                     className={mobileLinkClass}
                   >
-                    Profile
+                    {t('nav.profile')}
                   </button>
                   <button
                     type="button"
                     onClick={async () => { await signOut(); closeMenu(); navigate("/"); }}
                     className={mobileLinkClass}
                   >
-                    Sign out
+                    {t('nav.signOut')}
                   </button>
                 </>
               ) : (
@@ -207,7 +210,7 @@ export default function NavBar() {
                   onClick={() => { navigate("/auth"); closeMenu(); }}
                   className={mobileLinkClass}
                 >
-                  Register / Sign in
+                  {t('nav.registerSignIn')}
                 </button>
               )}
             </div>

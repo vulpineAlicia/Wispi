@@ -1,0 +1,220 @@
+{
+  "app": {
+    "loading": "Loading..."
+  },
+  "nav": {
+    "lookUpCity": "Look up your city",
+    "features": "Features",
+    "map": "Map",
+    "archive": "Archive",
+    "usefulInfo": "Useful info",
+    "favourites": "Favourites",
+    "contacts": "Contacts",
+    "home": "Home",
+    "profile": "Profile",
+    "signOut": "Sign out",
+    "registerSignIn": "Register / Sign in",
+    "toggleMenu": "Toggle menu"
+  },
+  "header": {
+    "logoAlt": "Air Quality Monitor logo",
+    "title": "Wispi",
+    "subtitle": "Track air quality worldwide"
+  },
+  "footer": {
+    "title": "Wispi - Air Quality Monitor",
+    "description": "A simple dashboard to look up air quality and make safer daily decisions.",
+    "resources": "Resources",
+    "contact": "Contact",
+    "copyright": "\u00a9 {{year}} Wispi - Air Quality Monitor"
+  },
+  "aqi": {
+    "good": "Good",
+    "fair": "Fair",
+    "moderate": "Moderate",
+    "poor": "Poor",
+    "veryPoor": "Very Poor",
+    "unknown": "Unknown",
+    "label": "AQI",
+    "advice": {
+      "1": "Air quality is excellent \u2014 enjoy outdoor activities.",
+      "2": "Air quality is fair \u2014 outdoor activities are generally OK.",
+      "3": "Air quality is moderate \u2014 consider reducing long outdoor exertion.",
+      "4": "Air quality is poor \u2014 limit outdoor activity.",
+      "5": "Air quality is very poor \u2014 stay indoors, if possible.",
+      "unknown": "Air quality info is unavailable right now."
+    }
+  },
+  "search": {
+    "placeholder": "e.g., Tbilisi",
+    "button": "Search",
+    "loading": "Loading\u2026",
+    "cityName": "City name",
+    "noMatches": "No matches found. Try a different spelling.",
+    "selectCity": "Select a city"
+  },
+  "cityResult": {
+    "loading": "Loading\u2026",
+    "noData": "No data.",
+    "pollutants": "Pollutants (\u00b5g/m\u00b3)",
+    "noPollutants": "No pollutant breakdown available for this day.",
+    "detailedInfo": "Detailed info \u2192"
+  },
+  "server": {
+    "online": "Server: Online",
+    "degraded": "Server: Degraded",
+    "offline": "Server: Offline"
+  },
+  "favorite": {
+    "signInToSave": "Sign in to save cities",
+    "remove": "Remove from favourites",
+    "limitReached": "Favourites limit reached (10)",
+    "add": "Add to favourites"
+  },
+  "favorites": {
+    "title": "Favourite cities",
+    "noSaved": "No saved cities yet.",
+    "citiesSaved": "{{total}} / 10 cities saved.",
+    "loading": "Loading\u2026",
+    "addHint": "Add cities from the home, map, or archive pages using the",
+    "viewOnMap": "View on map \u2192",
+    "noData": "No data"
+  },
+  "history": {
+    "title": "History",
+    "days7": "7 days",
+    "days30": "30 days",
+    "days90": "90 days",
+    "loadingHistory": "Loading history\u2026",
+    "loadingChart": "Loading chart\u2026",
+    "openArchive": "Open archive \u2192",
+    "days": "Days",
+    "apply": "Apply",
+    "noData": "No history data."
+  },
+  "archive": {
+    "title": "Archive",
+    "subtitle": "Explore air quality history for your city",
+    "subtitleLine2": "and inspect day by day changes.",
+    "selectedDay": "Selected day: {{date}}",
+    "prevHint": "Previous hint",
+    "nextHint": "Next hint",
+    "hints": [
+      "Search for a city to explore its air quality history.",
+      "Choose how many days to display and inspect changes over time.",
+      "Click a point on the chart to view AQI and pollutants for that day.",
+      "Use Archive to compare recent air quality patterns day by day."
+    ]
+  },
+  "map": {
+    "searchCity": "Search a city",
+    "layers": "Layers",
+    "none": "None",
+    "low": "Low",
+    "high": "High",
+    "temperature": "Temperature",
+    "precipitation": "Precipitation",
+    "scale": "{{title}} scale"
+  },
+  "home": {
+    "heroTitle": "Look up air quality in your city",
+    "heroSubtitle": "Enter a city name to get real-time air quality data and recommendations.",
+    "featuresTitle": "Features",
+    "featuresSubtitle": "Everything you need to track air quality and plan your day.",
+    "cityLookupTitle": "City AQI lookup",
+    "cityLookupDesc": "Search any city and get clear, readable air quality metrics.",
+    "healthImpactTitle": "Health impact",
+    "healthImpactDesc": "Quick recommendations based on the current air quality level.",
+    "archiveTitle": "Archive",
+    "archiveDesc": "Explore recent air quality changes for selected locations.",
+    "mapTitle": "Interactive map",
+    "mapDesc": "Open the map view and inspect conditions by location."
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "register": "Register",
+    "nickname": "Nickname",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "passwordsMismatch": "Passwords don't match.",
+    "passwordTooShort": "Password must be at least 8 characters.",
+    "somethingWentWrong": "Something went wrong. Try again.",
+    "nicknamePlaceholder": "fluffy-narwhal",
+    "passwordPlaceholder": "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",
+    "nicknameHint": "Your nickname will be generated automatically \u2014 save it after registration.",
+    "pleaseWait": "Please wait\u2026",
+    "createAccount": "Create account",
+    "successTitle": "Now you're in Wispi's friends list!",
+    "nicknameLabel": "Your nickname is:",
+    "saveHint": "Save this \u2014 you'll need it to sign in next time.",
+    "goHome": "Go to home"
+  },
+  "profile": {
+    "notSignedIn": "You are not signed in.",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "newPasswordsMismatch": "New passwords don't match.",
+    "newPasswordTooShort": "New password must be at least 8 characters.",
+    "somethingWentWrong": "Something went wrong.",
+    "passwordUpdated": "Password updated.",
+    "saving": "Saving\u2026",
+    "updatePassword": "Update password",
+    "forgotNickname": "Forgot your nickname or locked out?",
+    "contactSupport": "Contact support",
+    "deleteAccount": "Delete account",
+    "deleteConfirm": "This is permanent. Type your nickname to confirm.",
+    "deleting": "Deleting\u2026",
+    "deleteMyAccount": "Delete my account"
+  },
+  "errors": {
+    "invalidQuery": "Please enter a valid city name.",
+    "noAirData": "No air quality data for this location.",
+    "noHistoryData": "No history data for this location.",
+    "rateLimit": "Too many requests right now. Please try again in a minute.",
+    "upstreamTimeout": "The provider is taking too long to respond. Try again.",
+    "networkError": "Network error. Please check your connection and try again.",
+    "upstreamUnavailable": "The data provider is temporarily unavailable. Please try again later.",
+    "serverConfigError": "Server configuration error. Please try again later.",
+    "invalidResponse": "Server returned an invalid response. Please try again later.",
+    "notFound": "Not found.",
+    "networkErrorShort": "Network error. Please check your connection.",
+    "tooManyRequests": "Too many requests. Try again soon.",
+    "serverError": "Server error. Please try again later.",
+    "unexpected": "Unexpected error occurred."
+  },
+  "info": {
+    "title": "Useful info",
+    "subtitle": "FAQ about the air quality scale, data sources, and how we generate recommendations.",
+    "q1": "Who is Wispi?",
+    "a1": "Wispi is a friendly <bold>little wisp who loves helping people</bold>. Wispi keeps an eye on air quality and shares clear, useful information so you can make better decisions for your health and daily life.",
+    "q2": "Where does the air quality data come from?",
+    "a2": "From <bold>OpenWeather\u2019s Air Pollution API</bold>, based on coordinates for your selected location.",
+    "q3": "What is the OpenWeather AQI scale (1\u20135)?",
+    "a3": "OpenWeather uses a simple 1\u20135 Air Quality Index <bold>where 1 is the best and 5 is the worst</bold>. While this scale is specific to OpenWeather, it generally aligns with standard international categories for health-based reporting.",
+    "q4": "What does each AQI level mean?",
+    "a4_1": "<bold>1 \u2014 Good:</bold> air is clean, enjoy outdoor activities.",
+    "a4_2": "<bold>2 \u2014 Fair:</bold> acceptable, minor risk for very sensitive people.",
+    "a4_3": "<bold>3 \u2014 Moderate:</bold> risk for sensitive groups.",
+    "a4_4": "<bold>4 \u2014 Poor:</bold> high risk for sensitive groups, recommended to reduce outdoor activity for all people.",
+    "a4_5": "<bold>5 \u2014 Very Poor:</bold> avoid outdoor activity.",
+    "q5": "Where do the recommendations come from?",
+    "a5": "Recommendations are simple preset messages based on the <bold>United States Environmental Protection Agency</bold> and aligned with OpenWeather AQI scale.",
+    "q6": "Why is knowledge about current air quality important?",
+    "a6_1": "Almost all of the global population is exposed to air pollution levels that exceed the safe guidelines set by the World Health Organization (WHO). The highest levels of exposure are typically found in low- and middle-income countries.",
+    "a6_2": "<bold>Ambient (outdoor) air pollution</bold> comes from sources such as traffic, industry, and wildfires. <bold>Household air pollution</bold> is caused by the burning of fuels for cooking or heating indoors, and it can also contribute to outdoor pollution.",
+    "a6_3": "The combined effects of outdoor and household air pollution are linked to around <bold>7 million premature deaths every year</bold>, increasing the risk of stroke, heart disease, chronic obstructive pulmonary disease, lung cancer, and acute respiratory infections.",
+    "a6_4": "By staying informed about current air quality conditions, you can take simple but meaningful steps to protect yourself and your loved ones \u2014 such as limiting outdoor activity, improving ventilation, or planning exercise and travel more wisely. Awareness helps you make better daily decisions that can improve your overall quality of life.",
+    "q7": "Why can two nearby places show different results?",
+    "a7": "Air quality can vary with traffic, wind, humidity, and local sources. Provider grid resolution and update frequency can also affect values.",
+    "q8": "Are the health tips shown for different air quality levels medical advice?",
+    "a8": "<bold>No.</bold> Provided recommendations are for general informational purposes only and are not a substitute for professional medical advice. If you have a medical condition or feel unwell, always follow the medical professional guidance.",
+    "q9": "Is this service free to use?",
+    "a9": "<bold>Yes.</bold> The service is completely free of charge. All features are available without any fees or subscriptions.",
+    "q10": "How can I report a bug or get in touch?",
+    "a10": "If you notice a bug, have a suggestion, or want to share feedback, feel free to contact me through the <bold>Contacts section</bold>. Your input helps make the service better."
+  }
+}

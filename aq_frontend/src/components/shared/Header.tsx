@@ -1,10 +1,13 @@
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import logo from "../../assets/logo.svg";
 import { scrollTopSmooth } from "../../lib/siteNav";
+import LanguageSwitcher from "./LanguageSwitcher";
 import ServerStatusPill from "./ServerStatusPill";
 
 export default function Header() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,19 +30,22 @@ export default function Header() {
         >
           <img
             src={logo}
-            alt="Air Quality Monitor logo"
+            alt={t('header.logoAlt')}
             className="h-12 w-12 shrink-0 -mr-3"
           />
 
           <div className="leading-tight">
-            <div className="text-lg font-semibold text-brand-50">Wispi</div>
+            <div className="text-lg font-semibold text-brand-50">{t('header.title')}</div>
             <div className="text-sm text-brand-200">
-              Track air quality worldwide
+              {t('header.subtitle')}
             </div>
           </div>
         </button>
 
-        <ServerStatusPill />
+        <div className="flex items-center gap-3">
+          <LanguageSwitcher />
+          <ServerStatusPill />
+        </div>
       </div>
     </header>
   );

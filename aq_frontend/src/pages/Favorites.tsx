@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { useAuth } from "../hooks/useAuth";
 import { useFavorites } from "../hooks/useFavorites";
@@ -10,6 +11,7 @@ import FavoriteButton from "../components/shared/FavoriteButton";
 import Bubble from "../components/templates/Bubble";
 
 function FavoriteCityCard({ city }: { city: FavoriteCity }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [aqi, setAqi] = useState<number | null>(null);
   const [aqiLoading, setAqiLoading] = useState(true);
@@ -45,11 +47,11 @@ function FavoriteCityCard({ city }: { city: FavoriteCity }) {
 
       <div className="flex items-center gap-2">
         {aqiLoading ? (
-          <span className="text-sm text-brand-500">Loading…</span>
+          <span className="text-sm text-brand-500">{t('favorites.loading')}</span>
         ) : aqi != null ? (
           <AqiPill aqi={aqi} />
         ) : (
-          <span className="text-sm text-brand-500">No data</span>
+          <span className="text-sm text-brand-500">{t('favorites.noData')}</span>
         )}
       </div>
 
@@ -58,13 +60,14 @@ function FavoriteCityCard({ city }: { city: FavoriteCity }) {
         onClick={() => navigate(mapUrl)}
         className="mt-auto self-start rounded-2xl bg-brand-900 px-4 py-2 text-xs font-medium text-white transition hover:bg-brand-700"
       >
-        View on map →
+        {t('favorites.viewOnMap')}
       </button>
     </Bubble>
   );
 }
 
 export default function FavoritesPage() {
+  const { t } = useTranslation();
   const { user, isLoading: authLoading } = useAuth();
   const { favorites, loading } = useFavorites();
 
@@ -78,22 +81,22 @@ export default function FavoritesPage() {
         <div className="mb-6 flex items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-              Favourite cities
+              {t('favorites.title')}
             </h1>
             <p className="mt-2 text-base text-brand-700">
               {favorites.length === 0
-                ? "No saved cities yet."
-                : `${favorites.length} / 10 cities saved.`}
+                ? t('favorites.noSaved')
+                : t('favorites.citiesSaved', { total: favorites.length })}
             </p>
           </div>
         </div>
 
         {loading ? (
-          <div className="text-sm text-brand-700">Loading…</div>
+          <div className="text-sm text-brand-700">{t('favorites.loading')}</div>
         ) : favorites.length === 0 ? (
           <Bubble className="px-6 py-8 text-center text-sm text-brand-600">
-            Add cities from the home, map, or archive pages using the{" "}
-            <span className="text-rose-400">♥</span> button.
+            {t('favorites.addHint')}{" "}
+            <span className="text-rose-400">♥</span>
           </Bubble>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

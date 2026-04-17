@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
@@ -11,6 +12,7 @@ import Bubble from "../components/templates/Bubble";
 const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL as string | undefined;
 
 export default function Profile() {
+  const { t } = useTranslation();
   const { user, signOut, getToken } = useAuth();
   const navigate = useNavigate();
 
@@ -28,13 +30,13 @@ export default function Profile() {
   if (!user) {
     return (
       <main className="mx-auto max-w-md px-4 py-16 text-center text-brand-700">
-        You are not signed in.{" "}
+        {t('profile.notSignedIn')}{" "}
         <button
           type="button"
           onClick={() => navigate("/auth")}
           className="underline hover:text-brand-900"
         >
-          Sign in
+          {t('profile.signIn')}
         </button>
       </main>
     );
@@ -48,11 +50,11 @@ export default function Profile() {
     setPwSuccess(false);
 
     if (newPassword !== confirmPassword) {
-      setPwError("New passwords don't match.");
+      setPwError(t('profile.newPasswordsMismatch'));
       return;
     }
     if (newPassword.length < 8) {
-      setPwError("New password must be at least 8 characters.");
+      setPwError(t('profile.newPasswordTooShort'));
       return;
     }
 
@@ -67,7 +69,7 @@ export default function Profile() {
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
-      setPwError(err instanceof ApiError ? err.message : "Something went wrong.");
+      setPwError(err instanceof ApiError ? err.message : t('profile.somethingWentWrong'));
     } finally {
       setPwLoading(false);
     }
@@ -86,7 +88,7 @@ export default function Profile() {
       await signOut();
       navigate("/");
     } catch (err) {
-      setDeleteError(err instanceof ApiError ? err.message : "Something went wrong.");
+      setDeleteError(err instanceof ApiError ? err.message : t('profile.somethingWentWrong'));
       setDeleteLoading(false);
     }
   }
@@ -98,7 +100,6 @@ export default function Profile() {
 
   return (
     <main className="mx-auto max-w-lg px-4 py-10">
-      {/* Avatar + nickname */}
       <Bubble tone="brand" className="mb-6 flex items-center justify-between px-5 py-5">
         <div className="flex items-center gap-4">
           <div
@@ -109,13 +110,12 @@ export default function Profile() {
           <p className="text-lg font-semibold text-brand-900">{user.nickname}</p>
         </div>
         <BaseButton type="button" onClick={handleSignOut} className="px-5 py-3 text-sm">
-          Sign out
+          {t('profile.signOut')}
         </BaseButton>
       </Bubble>
 
-      {/* Change password */}
       <Bubble tone="brand" className="mb-6 p-6">
-        <h2 className="mb-4 text-base font-semibold text-brand-900">Change password</h2>
+        <h2 className="mb-4 text-base font-semibold text-brand-900">{t('profile.changePassword')}</h2>
         <form onSubmit={handleChangePassword} className="flex flex-col gap-3">
           <Bubble className="px-4 py-2.5">
             <input
@@ -124,7 +124,7 @@ export default function Profile() {
               onChange={(e) => setOldPassword(e.target.value)}
               required
               autoComplete="current-password"
-              placeholder="Current password"
+              placeholder={t('profile.currentPassword')}
               className="w-full bg-transparent text-sm text-brand-900/70 outline-none"
             />
           </Bubble>
@@ -135,7 +135,7 @@ export default function Profile() {
               onChange={(e) => setNewPassword(e.target.value)}
               required
               autoComplete="new-password"
-              placeholder="New password"
+              placeholder={t('profile.newPassword')}
               className="w-full bg-transparent text-sm text-brand-900/70 outline-none"
             />
           </Bubble>
@@ -146,7 +146,7 @@ export default function Profile() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               autoComplete="new-password"
-              placeholder="Confirm new password"
+              placeholder={t('profile.confirmNewPassword')}
               className="w-full bg-transparent text-sm text-brand-900/70 outline-none"
             />
           </Bubble>
@@ -155,7 +155,7 @@ export default function Profile() {
             <Bubble tone="error" className="px-4 py-2 text-sm">{pwError}</Bubble>
           )}
           {pwSuccess && (
-            <Bubble tone="brand" className="px-4 py-2 text-sm">Password updated.</Bubble>
+            <Bubble tone="brand" className="px-4 py-2 text-sm">{t('profile.passwordUpdated')}</Bubble>
           )}
 
           <BaseButton
@@ -163,28 +163,27 @@ export default function Profile() {
             disabled={pwLoading}
             className="w-full border border-transparent px-4 py-3 text-sm"
           >
-            {pwLoading ? "Saving…" : "Update password"}
+            {pwLoading ? t('profile.saving') : t('profile.updatePassword')}
           </BaseButton>
         </form>
 
         {CONTACT_EMAIL && (
           <p className="mt-5 px-2 text-xs text-brand-500">
-            Forgot your nickname or locked out?{" "}
+            {t('profile.forgotNickname')}{" "}
             <a
               href={`mailto:${CONTACT_EMAIL}`}
               className="hover:text-brand-700"
             >
-              Contact support
+              {t('profile.contactSupport')}
             </a>
           </p>
         )}
       </Bubble>
 
-      {/* Delete account */}
       <Bubble tone="error" className="p-6">
-        <h2 className="mb-2 text-base font-semibold">Delete account</h2>
+        <h2 className="mb-2 text-base font-semibold">{t('profile.deleteAccount')}</h2>
         <p className="mb-4 text-sm">
-          This is permanent. Type your nickname to confirm.
+          {t('profile.deleteConfirm')}
         </p>
         <Bubble tone="error" className="mb-3 px-4 py-2.5 bg-white">
           <input
@@ -206,7 +205,7 @@ export default function Profile() {
           disabled={deleteConfirm !== user.nickname || deleteLoading}
           className="rounded-3xl bg-rose-900 px-4 py-2.5 text-sm font-medium text-rose-50 transition hover:bg-rose-800"
         >
-          {deleteLoading ? "Deleting…" : "Delete my account"}
+          {deleteLoading ? t('profile.deleting') : t('profile.deleteMyAccount')}
         </button>
       </Bubble>
     </main>

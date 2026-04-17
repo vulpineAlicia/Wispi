@@ -1,4 +1,5 @@
 import { Suspense, lazy } from "react";
+import { useTranslation } from "react-i18next";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import Footer from "./components/shared/Footer";
@@ -27,6 +28,7 @@ function Background() {
 }
 
 function AppShell() {
+  const { t } = useTranslation();
   useNavScroll();
 
   return (
@@ -43,7 +45,7 @@ function AppShell() {
           <Suspense
             fallback={
               <main className="mx-auto max-w-6xl px-4 py-10 text-brand-700">
-                Loading...
+                {t('app.loading')}
               </main>
             }
           >

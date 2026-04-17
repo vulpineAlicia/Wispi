@@ -1,3 +1,4 @@
+import i18n from '../../i18n';
 import { ApiError } from "./apiError";
 
 export function getUserMessage(error: unknown): string {
@@ -6,63 +7,63 @@ export function getUserMessage(error: unknown): string {
       case "INVALID_QUERY":
       case "HTTP_400":
       case "HTTP_422":
-        return "Please enter a valid city name.";
+        return i18n.t('errors.invalidQuery');
 
       case "NO_AIR_DATA":
-        return "No air quality data for this location.";
+        return i18n.t('errors.noAirData');
 
       case "NO_HISTORY_DATA":
-        return "No history data for this location.";
+        return i18n.t('errors.noHistoryData');
 
       case "RATE_LIMIT":
       case "HTTP_429":
       case "UPSTREAM_RATE_LIMIT":
-        return "Too many requests right now. Please try again in a minute.";
+        return i18n.t('errors.rateLimit');
 
       case "UPSTREAM_TIMEOUT":
-        return "The provider is taking too long to respond. Try again.";
+        return i18n.t('errors.upstreamTimeout');
 
       case "UPSTREAM_NETWORK":
       case "NETWORK_ERROR":
-        return "Network error. Please check your connection and try again.";
+        return i18n.t('errors.networkError');
 
       case "UPSTREAM_5XX":
       case "UPSTREAM_ERROR":
       case "UPSTREAM_UNAVAILABLE":
-        return "The data provider is temporarily unavailable. Please try again later.";
+        return i18n.t('errors.upstreamUnavailable');
 
       case "UPSTREAM_AUTH":
-        return "Server configuration error. Please try again later.";
+        return i18n.t('errors.serverConfigError');
 
       case "INVALID_JSON":
       case "INVALID_RESPONSE":
       case "UPSTREAM_MALFORMED":
-        return "Server returned an invalid response. Please try again later.";
+        return i18n.t('errors.invalidResponse');
 
       case "NOT_FOUND":
       case "HTTP_404":
-        return "Not found.";
+        return i18n.t('errors.notFound');
 
       default:
         if (error.status === 0) {
-          return "Network error. Please check your connection.";
+          return i18n.t('errors.networkErrorShort');
         }
-        if (error.status === 404) return "Not found.";
-        if (error.status === 429) return "Too many requests. Try again soon.";
+        if (error.status === 404) return i18n.t('errors.notFound');
+        if (error.status === 429) return i18n.t('errors.tooManyRequests');
         if (error.status >= 500) {
-          return "Server error. Please try again later.";
+          return i18n.t('errors.serverError');
         }
-        return error.message || "Something went wrong.";
+        return error.message || i18n.t('errors.unexpected');
     }
   }
 
   if (error instanceof TypeError) {
-    return "Network error. Please check your connection.";
+    return i18n.t('errors.networkErrorShort');
   }
 
   if (error instanceof Error) {
-    return error.message || "Something went wrong.";
+    return error.message || i18n.t('errors.unexpected');
   }
 
-  return "Unexpected error occurred.";
+  return i18n.t('errors.unexpected');
 }

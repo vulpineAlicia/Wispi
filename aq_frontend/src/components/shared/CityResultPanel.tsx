@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import BaseButton from "../templates/BaseButton";
 import { getUserMessage } from "../../lib/services/apiMessages";
 import type { HistoryPanelData } from "../../lib/historyModel";
@@ -5,17 +6,13 @@ import AqiPill from "./AqiPill";
 import Bubble from "../templates/Bubble";
 import FavoriteButton from "./FavoriteButton";
 
-const AQI_ADVICE: Record<number, string> = {
-  1: "Air quality is excellent — enjoy outdoor activities.",
-  2: "Air quality is fair — outdoor activities are generally OK.",
-  3: "Air quality is moderate — consider reducing long outdoor exertion.",
-  4: "Air quality is poor — limit outdoor activity.",
-  5: "Air quality is very poor — stay indoors, if possible.",
+const adviceKeys: Record<number, string> = {
+  1: "aqi.advice.1",
+  2: "aqi.advice.2",
+  3: "aqi.advice.3",
+  4: "aqi.advice.4",
+  5: "aqi.advice.5",
 };
-
-function aqiAdvice(aqi: number) {
-  return AQI_ADVICE[aqi] ?? "Air quality info is unavailable right now.";
-}
 
 type Variant = "home" | "map";
 
@@ -53,6 +50,8 @@ export default function CityResultPanel({
   showAqi = true,
   showLocation = true,
 }: Props) {
+  const { t } = useTranslation();
+
   const showPollutants = variant === "map";
   const showCta = variant === "home";
 
@@ -87,7 +86,7 @@ export default function CityResultPanel({
       {showAqi && (
         <Bubble className={`${showLocation ? "mt-4" : ""} px-5 py-5`}>
           {loading ? (
-            <div className="text-sm text-brand-700">Loading…</div>
+            <div className="text-sm text-brand-700">{t('cityResult.loading')}</div>
           ) : error ? (
             <Bubble tone="error" className="px-3 py-2 text-sm">
               {getUserMessage(error)}
@@ -96,24 +95,24 @@ export default function CityResultPanel({
             <div className="text-sm text-brand-800">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="text-base font-semibold text-brand-900">
-                  AQI
+                  {t('aqi.label')}
                 </span>
                 <AqiPill aqi={panel.aqi} />
               </div>
 
               <p className="mt-2 text-sm leading-snug text-brand-700">
-                {aqiAdvice(panel.aqi)}
+                {t(adviceKeys[panel.aqi] ?? "aqi.advice.unknown")}
               </p>
 
               {showPollutants && (
                 <>
                   <div className="mt-4 text-sm font-semibold text-brand-900">
-                    Pollutants (µg/m³)
+                    {t('cityResult.pollutants')}
                   </div>
 
                   {!hasPollutants ? (
                     <div className="mt-2 text-sm text-brand-700">
-                      No pollutant breakdown available for this day.
+                      {t('cityResult.noPollutants')}
                     </div>
                   ) : (
                     <div className="mt-2 grid grid-cols-2 gap-x-10 gap-y-2">
@@ -136,13 +135,13 @@ export default function CityResultPanel({
                     to={dest}
                     className="inline-flex h-10 items-center px-5 text-sm"
                   >
-                    Detailed info →
+                    {t('cityResult.detailedInfo')}
                   </BaseButton>
                 </div>
               )}
             </div>
           ) : (
-            <div className="text-sm text-brand-700">No data.</div>
+            <div className="text-sm text-brand-700">{t('cityResult.noData')}</div>
           )}
         </Bubble>
       )}

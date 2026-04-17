@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
@@ -10,6 +11,7 @@ import Bubble from "../components/templates/Bubble";
 type Mode = "login" | "register";
 
 export default function Auth() {
+  const { t } = useTranslation();
   const { signIn, register } = useAuth();
   const navigate = useNavigate();
 
@@ -35,11 +37,11 @@ export default function Auth() {
 
     if (mode === "register") {
       if (password !== confirm) {
-        setError("Passwords don't match.");
+        setError(t('auth.passwordsMismatch'));
         return;
       }
       if (password.length < 8) {
-        setError("Password must be at least 8 characters.");
+        setError(t('auth.passwordTooShort'));
         return;
       }
     }
@@ -54,7 +56,7 @@ export default function Auth() {
         setNewUser({ nickname: user.nickname, avatarId: user.avatar_id });
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Something went wrong. Try again.");
+      setError(err instanceof ApiError ? err.message : t('auth.somethingWentWrong'));
     } finally {
       setLoading(false);
     }
@@ -70,14 +72,14 @@ export default function Auth() {
           >
             {avatar.emoji}
           </div>
-          <h1 className="mb-2 text-base text-brand-900">Now you're in Wispi's friends list!</h1>
-          <p className="mb-1 text-base text-brand-900">Your nickname is:</p>
+          <h1 className="mb-2 text-base text-brand-900">{t('auth.successTitle')}</h1>
+          <p className="mb-1 text-base text-brand-900">{t('auth.nicknameLabel')}</p>
           <p className="mb-6 text-2xl font-bold text-brand-900">{newUser.nickname}</p>
           <p className="mb-6 text-base text-brand-900">
-            Save this — you'll need it to sign in next time.
+            {t('auth.saveHint')}
           </p>
           <BaseButton to="/" className="block w-full px-4 py-2.5 text-sm text-center">
-            Go to home
+            {t('auth.goHome')}
           </BaseButton>
         </Bubble>
       </main>
@@ -87,7 +89,6 @@ export default function Auth() {
   return (
     <main className="mx-auto max-w-md px-4 py-16">
       <Bubble className="p-8">
-        {/* Tab switcher */}
         <div className="mb-6 flex rounded-3xl bg-brand-100 p-1.5">
           {(["login", "register"] as Mode[]).map((m) => (
             <button
@@ -100,7 +101,7 @@ export default function Auth() {
                   : "text-brand-600 hover:text-brand-900"
               }`}
             >
-              {m === "login" ? "Sign in" : "Register"}
+              {m === "login" ? t('auth.signIn') : t('auth.register')}
             </button>
           ))}
         </div>
@@ -109,7 +110,7 @@ export default function Auth() {
           {mode === "login" && (
             <div>
               <label className="mb-1 block text-sm font-medium text-brand-800">
-                Nickname
+                {t('auth.nickname')}
               </label>
               <input
                 type="text"
@@ -117,7 +118,7 @@ export default function Auth() {
                 onChange={(e) => setNickname(e.target.value)}
                 required
                 autoComplete="username"
-                placeholder="fluffy-narwhal"
+                placeholder={t('auth.nicknamePlaceholder')}
                 className="w-full rounded-3xl border border-brand-200 bg-white px-4 py-2.5 text-sm text-brand-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
@@ -125,7 +126,7 @@ export default function Auth() {
 
           <div>
             <label className="mb-1 block text-sm font-medium text-brand-800">
-              Password
+              {t('auth.password')}
             </label>
             <input
               type="password"
@@ -133,7 +134,7 @@ export default function Auth() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete={mode === "login" ? "current-password" : "new-password"}
-              placeholder="••••••••"
+              placeholder={t('auth.passwordPlaceholder')}
               className="w-full rounded-3xl border border-brand-200 bg-white px-4 py-2.5 text-sm text-brand-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
           </div>
@@ -141,7 +142,7 @@ export default function Auth() {
           {mode === "register" && (
             <div>
               <label className="mb-1 block text-sm font-medium text-brand-800">
-                Confirm password
+                {t('auth.confirmPassword')}
               </label>
               <input
                 type="password"
@@ -149,7 +150,7 @@ export default function Auth() {
                 onChange={(e) => setConfirm(e.target.value)}
                 required
                 autoComplete="new-password"
-                placeholder="••••••••"
+                placeholder={t('auth.passwordPlaceholder')}
                 className="w-full rounded-3xl border border-brand-200 bg-white px-4 py-2.5 text-sm text-brand-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
               />
             </div>
@@ -161,7 +162,7 @@ export default function Auth() {
 
           {mode === "register" && (
             <p className="text-xs text-brand-600">
-              Your nickname will be generated automatically — save it after registration.
+              {t('auth.nicknameHint')}
             </p>
           )}
 
@@ -170,7 +171,7 @@ export default function Auth() {
             disabled={loading}
             className="w-full px-4 py-2.5 text-sm disabled:opacity-80"
           >
-            {loading ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
+            {loading ? t('auth.pleaseWait') : mode === "login" ? t('auth.signIn') : t('auth.createAccount')}
           </BaseButton>
         </form>
       </Bubble>

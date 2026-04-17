@@ -1,10 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, Github } from "lucide-react";
 
 import { useAuth } from "../../hooks/useAuth";
 import { FOOTER_LINKS, type RoutePath, scrollTopSmooth } from "../../lib/siteNav";
-
-const year = new Date().getFullYear();
 
 const contactEmail =
   import.meta.env.VITE_CONTACT_EMAIL ?? "support@example.com";
@@ -16,9 +15,11 @@ const repoLabel =
   import.meta.env.VITE_REPO_LABEL ?? "vulpineAlicia/Wispi";
 
 export default function Footer() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const year = new Date().getFullYear();
 
   function goToRoute(path: RoutePath) {
     if (path === "/favorites" && !user) {
@@ -59,16 +60,15 @@ export default function Footer() {
         <div className="grid gap-10 md:grid-cols-[1.5fr_0.7fr_1fr] md:gap-16">
           <div>
             <div className="text-lg font-semibold text-brand-50">
-              Wispi - Air Quality Monitor
+              {t('footer.title')}
             </div>
             <p className="mt-3 max-w-sm text-sm text-brand-200">
-              A simple dashboard to look up air quality and make safer daily
-              decisions.
+              {t('footer.description')}
             </p>
           </div>
 
           <div>
-            <div className="text-sm font-semibold text-brand-50">Resources</div>
+            <div className="text-sm font-semibold text-brand-50">{t('footer.resources')}</div>
             <ul className="mt-3 space-y-2 text-sm">
               {FOOTER_LINKS.map((item) => (
                 <li key={item.to}>
@@ -77,7 +77,7 @@ export default function Footer() {
                     onClick={() => goToRoute(item.to)}
                     className={linkClass}
                   >
-                    {item.label}
+                    {t(item.label)}
                   </button>
                 </li>
               ))}
@@ -87,14 +87,14 @@ export default function Footer() {
                   onClick={goToProfile}
                   className={linkClass}
                 >
-                  Profile
+                  {t('nav.profile')}
                 </button>
               </li>
             </ul>
           </div>
 
           <div>
-            <div className="text-sm font-semibold text-brand-50">Contact</div>
+            <div className="text-sm font-semibold text-brand-50">{t('footer.contact')}</div>
             <div className="mt-3 space-y-3 text-sm text-brand-200">
               <a
                 href={`mailto:${contactEmail}`}
@@ -118,7 +118,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 border-t border-white/10 pt-6 text-xs text-brand-200">
-          © {year} Wispi - Air Quality Monitor
+          {t('footer.copyright', { year })}
         </div>
       </div>
     </footer>

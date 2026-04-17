@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import "leaflet/dist/leaflet.css";
@@ -20,6 +21,7 @@ import { getOverlayUrl, type OverlayMode } from "../lib/mapOverlay";
 const MT_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
 export default function MapPage() {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const navigate = useNavigate();
 
@@ -65,7 +67,7 @@ export default function MapPage() {
 
       {/* Mobile search panel — normal flow below map, no bubble */}
       <div className="px-4 py-5 text-brand-900 md:hidden">
-        <h1 className="text-lg font-semibold leading-tight">Search a city</h1>
+        <h1 className="text-lg font-semibold leading-tight">{t('map.searchCity')}</h1>
 
         <div className="mt-3">
           <CitySearchBox onSelect={handleSelectCity} />
@@ -114,7 +116,7 @@ export default function MapPage() {
           >
             <div className="px-1">
               <h1 className="px-1 text-lg font-semibold leading-tight">
-                Search a city
+                {t('map.searchCity')}
               </h1>
             </div>
 

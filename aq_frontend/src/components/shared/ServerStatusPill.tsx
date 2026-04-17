@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { checkHealth } from "../../lib/services/api";
 
 export type Status = "online" | "degraded" | "offline";
@@ -9,13 +10,8 @@ const dot: Record<Status, string> = {
   offline: "bg-rose-400"
 };
 
-const label: Record<Status, string> = {
-  online: "Server: Online",
-  degraded: "Server: Degraded",
-  offline: "Server: Offline",
-};
-
 export default function ServerStatus() {
+  const { t } = useTranslation();
   const [status, setStatus] = useState<Status>("degraded");
   const failures = useRef(0);
   const inFlight = useRef(false);
@@ -57,7 +53,7 @@ export default function ServerStatus() {
       <span
         className={`h-2 w-2 rounded-full ${dot[status]} shadow-[0_0_0_3px_rgba(255,255,255,0.12)]`}
       />
-      <span className="text-brand-50">{label[status]}</span>
+      <span className="text-brand-50">{t(`server.${status}`)}</span>
     </div>
   );
 }

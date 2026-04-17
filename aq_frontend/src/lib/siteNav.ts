@@ -10,21 +10,21 @@ export type NavLinkItem = {
 };
 
 export const HEADER_LINKS: NavLinkItem[] = [
-  { label: "Look up your city", to: "/" },
-  { label: "Features", to: "/#features" },
-  { label: "Map", to: "/map" },
-  { label: "Archive", to: "/archive" },
-  { label: "Useful info", to: "/info" },
-  { label: "Favourites", to: "/favorites" },
-  { label: "Contacts", to: "#contacts" },
+  { label: "nav.lookUpCity", to: "/" },
+  { label: "nav.features", to: "/#features" },
+  { label: "nav.map", to: "/map" },
+  { label: "nav.archive", to: "/archive" },
+  { label: "nav.usefulInfo", to: "/info" },
+  { label: "nav.favourites", to: "/favorites" },
+  { label: "nav.contacts", to: "#contacts" },
 ];
 
 export const FOOTER_LINKS: Array<{ label: string; to: RoutePath }> = [
-  { label: "Home", to: "/" },
-  { label: "Map", to: "/map" },
-  { label: "Archive", to: "/archive" },
-  { label: "Useful info", to: "/info" },
-  { label: "Favourites", to: "/favorites" },
+  { label: "nav.home", to: "/" },
+  { label: "nav.map", to: "/map" },
+  { label: "nav.archive", to: "/archive" },
+  { label: "nav.usefulInfo", to: "/info" },
+  { label: "nav.favourites", to: "/favorites" },
 ];
 
 export function scrollTopSmooth() {

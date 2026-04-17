@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import archiveBooks from "../assets/archive-books.svg";
 import ArchiveHintBubble from "../components/archive/ArchiveHintBubble";
 import Bubble from "../components/templates/Bubble";
@@ -10,6 +12,8 @@ import { useArchiveParams } from "../hooks/useArchiveParams";
 import type { GeoResult } from "../lib/services/api";
 
 export default function ArchivePage() {
+  const { t } = useTranslation();
+
   const {
     selection,
     historyDays,
@@ -50,13 +54,13 @@ export default function ArchivePage() {
             <div className="space-y-5">
               <div className="max-w-prose">
                 <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-                  Archive
+                  {t('archive.title')}
                 </h1>
 
                 <p className="mt-3 text-base leading-7 text-brand-700 md:text-lg">
-                  Explore air quality history for your city
+                  {t('archive.subtitle')}
                   <br />
-                  and inspect day by day changes.
+                  {t('archive.subtitleLine2')}
                 </p>
               </div>
 
@@ -147,7 +151,7 @@ export default function ArchivePage() {
                 tone="white"
                 className="h-16 mb-3 flex items-center justify-center px-4 py-3 text-center text-sm font-medium text-brand-800"
               >
-                Selected day: {history.model.selectedDay?.date ?? "—"}
+                {t('archive.selectedDay', { date: history.model.selectedDay?.date ?? "—" })}
               </Bubble>
 
               <CityResultPanel

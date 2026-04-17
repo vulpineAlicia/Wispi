@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import lookupBg from "../assets/lookup-bg.png";
 import CityResultPanel from "../components/shared/CityResultPanel";
@@ -8,29 +9,18 @@ import { useAirHistory } from "../hooks/useAirHistory";
 import type { GeoResult } from "../lib/services/api";
 import { buildMapUrl } from "../lib/locationSelection";
 
-const FEATURES = [
-  {
-    title: "City AQI lookup",
-    desc: "Search any city and get clear, readable air quality metrics.",
-  },
-  {
-    title: "Health impact",
-    desc: "Quick recommendations based on the current air quality level.",
-  },
-  {
-    title: "Archive",
-    desc: "Explore recent air quality changes for selected locations.",
-  },
-  {
-    title: "Interactive map",
-    desc: "Open the map view and inspect conditions by location.",
-  },
-];
-
 export default function Home() {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<GeoResult | null>(null);
 
   const history = useAirHistory(selected?.lat ?? null, selected?.lon ?? null, 1);
+
+  const features = [
+    { key: "cityLookup", title: t('home.cityLookupTitle'), desc: t('home.cityLookupDesc') },
+    { key: "healthImpact", title: t('home.healthImpactTitle'), desc: t('home.healthImpactDesc') },
+    { key: "archive", title: t('home.archiveTitle'), desc: t('home.archiveDesc') },
+    { key: "map", title: t('home.mapTitle'), desc: t('home.mapDesc') },
+  ];
 
   const detailsTo = selected
     ? buildMapUrl({
@@ -56,18 +46,15 @@ export default function Home() {
             <div className="max-w-2xl">
               <div className="flex flex-col gap-3">
                 <h1 className="text-3xl font-semibold tracking-tight text-brand-900 md:text-4xl">
-                  Look up air quality in your city
+                  {t('home.heroTitle')}
                 </h1>
                 <p className="text-base text-brand-700 md:text-lg">
-                  Enter a city name to get real-time air quality data and
-                  recommendations.
+                  {t('home.heroSubtitle')}
                 </p>
               </div>
 
               <div className="mt-5 w-full max-w-xl">
                 <CitySearchBox
-                  placeholder="e.g., Tbilisi"
-                  buttonText={history.loading ? "Loading…" : "Search"}
                   disabled={history.loading}
                   onSelect={setSelected}
                 />
@@ -96,17 +83,17 @@ export default function Home() {
       <section id="features" className="mb-14 mt-16 scroll-mt-24 md:scroll-mt-40">
         <div className="flex flex-col gap-2">
           <h2 className="text-xl font-semibold text-brand-900 md:text-2xl">
-            Features
+            {t('home.featuresTitle')}
           </h2>
           <p className="text-sm text-brand-700 md:text-base">
-            Everything you need to track air quality and plan your day.
+            {t('home.featuresSubtitle')}
           </p>
         </div>
 
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
-          {FEATURES.map((feature) => (
+          {features.map((feature) => (
             <FeatureCard
-              key={feature.title}
+              key={feature.key}
               title={feature.title}
               desc={feature.desc}
             />

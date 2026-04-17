@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { geocodeCity, type GeoResult } from "../../lib/services/api";
 import { getUserMessage } from "../../lib/services/apiMessages";
 import { useLatestRequest } from "../../hooks/useLatestRequest";
@@ -14,10 +15,11 @@ type Props = {
 
 export default function CitySearchBox({
   onSelect,
-  placeholder = "e.g., Tbilisi",
-  buttonText = "Search",
+  placeholder,
+  buttonText,
   disabled = false,
 }: Props) {
+  const { t } = useTranslation();
   const [city, setCity] = useState("");
   const [hint, setHint] = useState<string | null>(null);
 
@@ -37,18 +39,21 @@ export default function CitySearchBox({
 
     const result = await geo.execute((signal) => geocodeCity(q, signal));
     if (result && result.length === 0) {
-      setHint("No matches found. Try a different spelling.");
+      setHint(t('search.noMatches'));
     }
   }
 
   const errorMsg = geo.error ? getUserMessage(geo.error) : null;
   const hintMsg = !geo.error ? hint : null;
 
+  const resolvedPlaceholder = placeholder ?? t('search.placeholder');
+  const resolvedButtonText = buttonText ?? t('search.button');
+
   return (
     <>
       <Bubble className="p-2">
         <label className="sr-only" htmlFor="city-input">
-          City name
+          {t('search.cityName')}
         </label>
 
         <div className="flex items-center gap-2">
@@ -64,7 +69,7 @@ export default function CitySearchBox({
                 void onSearch();
               }
             }}
-            placeholder={placeholder}
+            placeholder={resolvedPlaceholder}
             disabled={isDisabled}
             className="h-12 w-full bg-transparent px-4 text-base outline-none placeholder:text-brand-900/50"
           />
@@ -77,7 +82,7 @@ export default function CitySearchBox({
             disabled={isDisabled}
             className="h-12 shrink-0 px-6 text-base"
           >
-            {isBusy ? "Loading…" : buttonText}
+            {isBusy ? t('search.loading') : resolvedButtonText}
           </BaseButton>
         </div>
       </Bubble>
@@ -97,7 +102,7 @@ export default function CitySearchBox({
       {results.length > 0 && (
         <Bubble className="mt-4 w-full p-3 backdrop-blur">
           <div className="px-2 pb-3 text-xs font-medium text-brand-700">
-            Select a city
+            {t('search.selectCity')}
           </div>
 
           <ul className="max-h-56 overflow-auto">

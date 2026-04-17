@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Bubble from "../templates/Bubble";
 
-const ARCHIVE_HINTS = [
-  "Search for a city to explore its air quality history.",
-  "Choose how many days to display and inspect changes over time.",
-  "Click a point on the chart to view AQI and pollutants for that day.",
-  "Use Archive to compare recent air quality patterns day by day.",
-];
-
 export default function ArchiveHintBubble() {
+  const { t } = useTranslation();
+  const hints = t('archive.hints', { returnObjects: true }) as string[];
+
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<"idle" | "leaving" | "entering">("idle");
   const [direction, setDirection] = useState<"left" | "right">("right");
@@ -31,14 +28,14 @@ export default function ArchiveHintBubble() {
     const leaveTimer = window.setTimeout(() => {
       setIndex((prev) =>
         direction === "right"
-          ? (prev + 1) % ARCHIVE_HINTS.length
-          : (prev - 1 + ARCHIVE_HINTS.length) % ARCHIVE_HINTS.length
+          ? (prev + 1) % hints.length
+          : (prev - 1 + hints.length) % hints.length
       );
       setPhase("entering");
     }, 180);
 
     return () => window.clearTimeout(leaveTimer);
-  }, [phase, direction]);
+  }, [phase, direction, hints.length]);
 
   useEffect(() => {
     if (phase !== "entering") return;
@@ -74,7 +71,7 @@ export default function ArchiveHintBubble() {
       <button
         type="button"
         onClick={showPrev}
-        aria-label="Previous hint"
+        aria-label={t('archive.prevHint')}
         className="shrink-0 text-lg font-medium text-brand-700 transition hover:text-brand-900 disabled:cursor-default disabled:opacity-60"
         disabled={phase !== "idle"}
       >
@@ -83,14 +80,14 @@ export default function ArchiveHintBubble() {
 
       <div className="min-w-0 flex-1 overflow-hidden text-center">
         <p className={`transition-all duration-200 ${getTextClassName()}`}>
-          {ARCHIVE_HINTS[index]}
+          {hints[index]}
         </p>
       </div>
 
       <button
         type="button"
         onClick={showNext}
-        aria-label="Next hint"
+        aria-label={t('archive.nextHint')}
         className="shrink-0 text-lg font-medium text-brand-700 transition hover:text-brand-900 disabled:cursor-default disabled:opacity-60"
         disabled={phase !== "idle"}
       >
