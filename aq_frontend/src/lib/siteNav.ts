@@ -65,5 +65,5 @@ export function useNavScroll() {
     }
 
     scrollTopSmooth();
-  }, [location.pathname, location.hash, location.state?.scrollTo]);
+  }, [location.pathname, location.hash, location.state?.scrollTo, navigate]);
 }

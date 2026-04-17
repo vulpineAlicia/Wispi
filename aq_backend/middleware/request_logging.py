@@ -8,11 +8,11 @@ import time
 import uuid
 from typing import Awaitable, Callable
 
-_REQUEST_ID_RE = re.compile(r"^[a-zA-Z0-9\-_]{1,64}$")
-
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
+
+_REQUEST_ID_RE = re.compile(r"^[a-zA-Z0-9\-_]{1,64}$")
 
 logger = logging.getLogger("aq_backend.http")
 

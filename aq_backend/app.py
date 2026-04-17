@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
 import httpx
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 
