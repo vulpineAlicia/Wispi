@@ -45,10 +45,10 @@ export default function Home() {
           <div className="relative w-full p-0 md:p-9">
             <div className="max-w-2xl">
               <div className="flex flex-col gap-3">
-                <h1 className="text-3xl font-semibold tracking-tight text-brand-900 md:text-4xl">
+                <h1 className="whitespace-pre-line text-3xl font-semibold tracking-tight text-brand-900 md:text-4xl">
                   {t('home.heroTitle')}
                 </h1>
-                <p className="text-base text-brand-700 md:text-lg">
+                <p className="whitespace-pre-line text-base text-brand-700 md:text-lg">
                   {t('home.heroSubtitle')}
                 </p>
               </div>
