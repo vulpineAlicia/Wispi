@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Any
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, ValidationInfo, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 GEOCODE_URL = "https://api.openweathermap.org/geo/1.0/direct"
@@ -56,22 +56,13 @@ class Settings(BaseSettings):
     air_url: str = AIR_URL
     history_url: str = HISTORY_URL
 
-    @field_validator("admin_key")
+    @field_validator("admin_key", "jwt_secret")
     @classmethod
-    def validate_admin_key(cls, value: str) -> str:
-        """ Ensure admin key is set and long enough """
+    def validate_min32_secret(cls, value: str, info: ValidationInfo) -> str:
+        """ Ensure secret fields are set and at least 32 characters """
         value = value.strip()
         if len(value) < 32:
-            raise ValueError("ADMIN_KEY must be at least 32 characters")
-        return value
-
-    @field_validator("jwt_secret")
-    @classmethod
-    def validate_jwt_secret(cls, value: str) -> str:
-        """ Ensure JWT secret is set and long enough """
-        value = value.strip()
-        if len(value) < 32:
-            raise ValueError("JWT_SECRET must be at least 32 characters")
+            raise ValueError(f"{info.field_name.upper()} must be at least 32 characters")
         return value
 
     @field_validator("openweather_api_key")
