@@ -54,7 +54,4 @@ async def geocode(
             )
         )
 
-        if len(results) >= limit:
-            break
-
     return GeocodeResponse(query=q, results=results)
