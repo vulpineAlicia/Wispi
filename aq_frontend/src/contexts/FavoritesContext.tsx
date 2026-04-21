@@ -11,6 +11,7 @@ import {
 } from "../lib/services/favoritesApi";
 import { FavoritesContext } from "./favoritesContextDef";
 
+// Must match MAX_FAVORITES in aq_backend/routes/favorites.py
 const MAX_FAVORITES = 10;
 
 type State = {

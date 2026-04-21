@@ -12,12 +12,12 @@ from aq_backend.database import get_db
 from aq_backend.dependencies import get_current_user
 from aq_backend.http_errors import api_error
 from aq_backend.models import FavoriteCity, User
-from aq_backend.ratelimit import limiter
+from aq_backend.ratelimit import FAVORITES_LIMIT, limiter
 from aq_backend.schemas import AddFavoriteCityRequest, FavoriteCityOut, OkResponse
 
 router = APIRouter(prefix="/favorites", tags=["favorites"])
 
-FAVORITES_LIMIT = "30/minute"
+# Mirrored as MAX_FAVORITES in aq_frontend/src/contexts/FavoritesContext.tsx (UI guard only)
 MAX_FAVORITES = 10
 
 
