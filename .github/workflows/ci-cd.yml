@@ -131,6 +131,8 @@ jobs:
           file: Dockerfile.web
           push: true
           tags: ghcr.io/vulpinealicia/wispi-web:latest
+          build-args: |
+            VITE_MAPTILER_KEY=${{ secrets.VITE_MAPTILER_KEY }}
 
       - name: Build & push backend image
         uses: docker/build-push-action@v6
