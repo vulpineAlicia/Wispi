@@ -158,31 +158,18 @@ class OpenWeatherTransport:
                 continue
 
             if response.is_error:
+                state.last_retry_after_s = (
+                    parse_retry_after_s(retry_after_hdr) if retry_after_hdr else None
+                )
                 raise OpenWeatherUpstreamError(
                     status_code=response.status_code,
                     message=message_for_status(response.status_code),
                     body=response.text[:2000],
                     retry_after=retry_after_hdr,
-                    meta=UpstreamMeta(
-                        endpoint=endpoint.value,
-                        attempts=state.attempts,
-                        total_ms=int(state.upstream_total_ms),
-                        last_status=response.status_code,
-                        retry_after_s=(
-                            parse_retry_after_s(retry_after_hdr)
-                            if retry_after_hdr
-                            else None
-                        ),
-                        error="http_error",
-                    ),
+                    meta=self._build_meta(endpoint=endpoint, state=state, error="http_error"),
                 )
 
-            return response, UpstreamMeta(
-                endpoint=endpoint.value,
-                attempts=state.attempts,
-                total_ms=int(state.upstream_total_ms),
-                last_status=response.status_code,
-            )
+            return response, self._build_meta(endpoint=endpoint, state=state)
 
         meta = self._build_meta(
             endpoint=endpoint,

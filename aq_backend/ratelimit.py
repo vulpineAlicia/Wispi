@@ -15,6 +15,8 @@ TILE_LIMIT = "120/minute"
 AUTH_LIMIT = "10/minute"
 # Admin endpoints limit
 ADMIN_LIMIT = "20/minute"
+# Favorites mutations limit
+FAVORITES_LIMIT = "30/minute"
 
 
 def _get_client_ip(request: Request) -> str:

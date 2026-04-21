@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class UserOut(BaseModel):
@@ -96,3 +96,8 @@ class AddFavoriteCityRequest(BaseModel):
     country: str | None = Field(default=None, max_length=64)
     lat: float = Field(ge=-90, le=90)
     lon: float = Field(ge=-180, le=180)
+
+    @field_validator("lat", "lon")
+    @classmethod
+    def round_coordinate(cls, v: float) -> float:
+        return round(v, 4)

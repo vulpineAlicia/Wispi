@@ -13,6 +13,7 @@ AIR_URL = "https://api.openweathermap.org/data/2.5/air_pollution"
 HISTORY_URL = "https://api.openweathermap.org/data/2.5/air_pollution/history"
 
 _DEV_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
+_DEV_ENVS = frozenset({"dev", "development", "local"})
 
 
 class Settings(BaseSettings):
@@ -139,7 +140,7 @@ class Settings(BaseSettings):
     def validate_cross_field_rules(self) -> Settings:
         """ Ensure frontend origins are valid and request timeout exceeds upstream budget """
         if not self.frontend_origins:
-            if self.app_env in {"dev", "development", "local"}:
+            if self.app_env in _DEV_ENVS:
                 self.frontend_origins = list(_DEV_ORIGINS)
             else:
                 raise ValueError(
