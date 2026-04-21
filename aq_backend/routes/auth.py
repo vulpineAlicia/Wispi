@@ -25,25 +25,27 @@ _COOKIE_NAME = "wispi_refresh"
 _COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
 
 
+def _cookie_secure() -> bool:
+    return get_settings().app_env == "production"
+
+
 def _set_refresh_cookie(response: Response, token: str) -> None:
-    secure = get_settings().app_env == "production"
     response.set_cookie(
         key=_COOKIE_NAME,
         value=token,
         max_age=_COOKIE_MAX_AGE,
         httponly=True,
-        secure=secure,
+        secure=_cookie_secure(),
         samesite="lax",
         path="/",
     )
 
 
 def _clear_refresh_cookie(response: Response) -> None:
-    secure = get_settings().app_env == "production"
     response.delete_cookie(
         key=_COOKIE_NAME,
         httponly=True,
-        secure=secure,
+        secure=_cookie_secure(),
         samesite="lax",
         path="/",
     )
@@ -53,6 +55,13 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserOut
+
+
+def _token_response(user: User) -> TokenResponse:
+    return TokenResponse(
+        access_token=auth.create_access_token(user.id, user.nickname, user.avatar_id),
+        user=UserOut(id=user.id, nickname=user.nickname, avatar_id=user.avatar_id),
+    )
 
 
 class RegisterRequest(BaseModel):
@@ -105,10 +114,7 @@ async def register(
     await db.commit()
 
     _set_refresh_cookie(response, raw_token)
-    return TokenResponse(
-        access_token=auth.create_access_token(user.id, user.nickname, user.avatar_id),
-        user=UserOut(id=user.id, nickname=user.nickname, avatar_id=user.avatar_id),
-    )
+    return _token_response(user)
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -142,10 +148,7 @@ async def login(
     await db.commit()
 
     _set_refresh_cookie(response, raw_token)
-    return TokenResponse(
-        access_token=auth.create_access_token(user.id, user.nickname, user.avatar_id),
-        user=UserOut(id=user.id, nickname=user.nickname, avatar_id=user.avatar_id),
-    )
+    return _token_response(user)
 
 
 @router.post("/refresh", response_model=TokenResponse)
@@ -185,10 +188,7 @@ async def refresh_token(
     await db.commit()
 
     _set_refresh_cookie(response, raw_token)
-    return TokenResponse(
-        access_token=auth.create_access_token(user.id, user.nickname, user.avatar_id),
-        user=UserOut(id=user.id, nickname=user.nickname, avatar_id=user.avatar_id),
-    )
+    return _token_response(user)
 
 
 @router.post("/logout", response_model=OkResponse)
