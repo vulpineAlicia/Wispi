@@ -63,7 +63,10 @@ async def set_user_password(
     await db.commit()
     logger.warning(
         "Admin password reset",
-        extra={"target_user_id": str(user_id), "request_id": getattr(request.state, "request_id", "-")},
+        extra={
+            "target_user_id": str(user_id),
+            "request_id": getattr(request.state, "request_id", "-"),
+        },
     )
     return OkResponse()
 
@@ -84,6 +87,10 @@ async def delete_user(
     await db.commit()
     logger.warning(
         "Admin user deletion",
-        extra={"target_user_id": str(user_id), "target_nickname": target_nickname, "request_id": getattr(request.state, "request_id", "-")},
+        extra={
+            "target_user_id": str(user_id),
+            "target_nickname": target_nickname,
+            "request_id": getattr(request.state, "request_id", "-"),
+        },
     )
     return OkResponse()
