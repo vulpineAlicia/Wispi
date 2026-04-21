@@ -12,11 +12,11 @@ export async function login(nickname: string, password: string): Promise<TokenRe
 }
 
 export async function refreshTokens(): Promise<TokenResponse> {
-  return postJson<TokenResponse>("/auth/refresh", {});
+  return postJson<TokenResponse>("/auth/refresh");
 }
 
 export async function logout(): Promise<void> {
-  await postJson<unknown>("/auth/logout", {});
+  await postJson<unknown>("/auth/logout");
 }
 
 export async function getMe(accessToken: string): Promise<AuthUser> {

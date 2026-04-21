@@ -12,24 +12,24 @@ async function safeReadJson(res: Response): Promise<unknown> {
 }
 
 function getHeaderRequestId(res: Response): string | undefined {
-  return (
-    res.headers.get("x-request-id") ??
-    res.headers.get("X-Request-Id") ??
-    undefined
-  );
+  return res.headers.get("x-request-id") ?? undefined;
 }
 
 export function invalidResponse(message: string, requestId?: string): ApiError {
   return new ApiError(message, 0, "INVALID_RESPONSE", requestId);
 }
 
-export async function postJson<T>(path: string, body: unknown, init?: RequestInit): Promise<T> {
+export async function postJson<T>(path: string, body?: unknown, init?: RequestInit): Promise<T> {
+  const hasBody = body !== undefined;
   return getJson<T>(path, {
     method: "POST",
-    body: JSON.stringify(body),
+    ...(hasBody ? { body: JSON.stringify(body) } : {}),
     credentials: "include",
     ...init,
-    headers: { "Content-Type": "application/json", ...init?.headers },
+    headers: {
+      ...(hasBody ? { "Content-Type": "application/json" } : {}),
+      ...init?.headers,
+    },
   });
 }
 
