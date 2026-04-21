@@ -10,14 +10,22 @@ from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from aq_backend import auth
+from aq_backend.auth.utils import (
+    create_access_token,
+    create_refresh_token,
+    generate_nickname,
+    hash_password,
+    hash_token,
+    random_avatar_id,
+    verify_password,
+)
 from aq_backend.config import get_settings
-from aq_backend.database import get_db
-from aq_backend.dependencies import get_current_user
+from aq_backend.db.database import get_db
+from aq_backend.auth.auth_deps import get_current_user
 from aq_backend.http_errors import api_error
-from aq_backend.models import RefreshToken, User
+from aq_backend.db.models import RefreshToken, User
 from aq_backend.ratelimit import AUTH_LIMIT, limiter
-from aq_backend.schemas import OkResponse, UserOut
+from aq_backend.db.schemas import OkResponse, UserOut
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -59,7 +67,7 @@ class TokenResponse(BaseModel):
 
 def _token_response(user: User) -> TokenResponse:
     return TokenResponse(
-        access_token=auth.create_access_token(user.id, user.nickname, user.avatar_id),
+        access_token=create_access_token(user.id, user.nickname, user.avatar_id),
         user=UserOut(id=user.id, nickname=user.nickname, avatar_id=user.avatar_id),
     )
 
@@ -87,12 +95,12 @@ async def register(
     db: AsyncSession = Depends(get_db),
 ) -> TokenResponse:
     """ Create a new account with a server-generated nickname """
-    password_hash = auth.hash_password(body.password)
-    avatar_id = auth.random_avatar_id()
+    password_hash = hash_password(body.password)
+    avatar_id = random_avatar_id()
 
     for _ in range(10):
         user = User(
-            nickname=auth.generate_nickname(),
+            nickname=generate_nickname(),
             avatar_id=avatar_id,
             password_hash=password_hash,
         )
@@ -105,10 +113,10 @@ async def register(
     else:
         raise api_error(500, "SERVER_ERROR", "Could not generate a unique nickname. Try again.")
 
-    raw_token, expires_at = auth.create_refresh_token()
+    raw_token, expires_at = create_refresh_token()
     db.add(RefreshToken(
         user_id=user.id,
-        token_hash=auth.hash_token(raw_token),
+        token_hash=hash_token(raw_token),
         expires_at=expires_at,
     ))
     await db.commit()
@@ -128,7 +136,7 @@ async def login(
     """ Sign in with nickname + password """
     user = await db.scalar(select(User).where(User.nickname == body.nickname))
 
-    if not user or not auth.verify_password(body.password, user.password_hash):
+    if not user or not verify_password(body.password, user.password_hash):
         raise api_error(401, "INVALID_CREDENTIALS", "Invalid nickname or password.")
 
     # Prune expired tokens for this user so sessions don't accumulate indefinitely.
@@ -139,10 +147,10 @@ async def login(
         )
     )
 
-    raw_token, expires_at = auth.create_refresh_token()
+    raw_token, expires_at = create_refresh_token()
     db.add(RefreshToken(
         user_id=user.id,
-        token_hash=auth.hash_token(raw_token),
+        token_hash=hash_token(raw_token),
         expires_at=expires_at,
     ))
     await db.commit()
@@ -161,7 +169,7 @@ async def refresh_token(
     if not wispi_refresh:
         raise api_error(401, "MISSING_TOKEN", "No refresh token provided.")
 
-    token_hash = auth.hash_token(wispi_refresh)
+    token_hash = hash_token(wispi_refresh)
     now = datetime.now(UTC)
 
     rt = await db.scalar(
@@ -179,10 +187,10 @@ async def refresh_token(
 
     # Rotate: delete old token, issue new one
     await db.delete(rt)
-    raw_token, expires_at = auth.create_refresh_token()
+    raw_token, expires_at = create_refresh_token()
     db.add(RefreshToken(
         user_id=user.id,
-        token_hash=auth.hash_token(raw_token),
+        token_hash=hash_token(raw_token),
         expires_at=expires_at,
     ))
     await db.commit()
@@ -202,7 +210,7 @@ async def logout(
     """ Invalidate the refresh token and clear the cookie """
     try:
         if wispi_refresh:
-            token_hash = auth.hash_token(wispi_refresh)
+            token_hash = hash_token(wispi_refresh)
             rt = await db.scalar(select(RefreshToken).where(RefreshToken.token_hash == token_hash))
             if rt:
                 await db.delete(rt)
@@ -228,10 +236,10 @@ async def change_password(
     current_user: User = Depends(get_current_user),
 ) -> OkResponse:
     """ Change password (requires current password); invalidates all sessions """
-    if not auth.verify_password(body.old_password, current_user.password_hash):
+    if not verify_password(body.old_password, current_user.password_hash):
         raise api_error(401, "INVALID_CREDENTIALS", "Current password is incorrect.")
 
-    current_user.password_hash = auth.hash_password(body.new_password)
+    current_user.password_hash = hash_password(body.new_password)
 
     # Revoke all refresh tokens so every other session is forced to re-login.
     await db.execute(

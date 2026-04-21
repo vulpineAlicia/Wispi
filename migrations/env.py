@@ -5,7 +5,7 @@ from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from aq_backend.config import get_settings
-from aq_backend.models import Base
+from aq_backend.db.models import Base
 
 config = context.config
 

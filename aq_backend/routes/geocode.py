@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 
 from aq_backend.dependencies import ow_service
 from aq_backend.ratelimit import GEOCODE_LIMIT, limiter
-from aq_backend.schemas import GeocodeResponse, GeocodeResult
+from aq_backend.db.schemas import GeocodeResponse, GeocodeResult
 from aq_backend.services.openweather import OpenWeatherService
 
 router = APIRouter(tags=["geocode"])

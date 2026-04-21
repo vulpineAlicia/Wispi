@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Annotated
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
+
+LatField = Annotated[float, Field(ge=-90, le=90)]
+LonField = Annotated[float, Field(ge=-180, le=180)]
 
 
 class UserOut(BaseModel):
@@ -24,8 +28,8 @@ class UserAdminOut(UserOut):
 class Location(BaseModel):
     """ Geographic coordinates """
 
-    lat: float = Field(ge=-90, le=90)
-    lon: float = Field(ge=-180, le=180)
+    lat: LatField
+    lon: LonField
 
 
 class GeocodeResult(BaseModel):
@@ -34,8 +38,8 @@ class GeocodeResult(BaseModel):
     name: str
     country: str
     state: str | None = None
-    lat: float = Field(ge=-90, le=90)
-    lon: float = Field(ge=-180, le=180)
+    lat: LatField
+    lon: LonField
 
 
 class GeocodeResponse(BaseModel):
@@ -79,8 +83,8 @@ class FavoriteCityOut(BaseModel):
     id: str
     name: str
     country: str | None
-    lat: float
-    lon: float
+    lat: LatField
+    lon: LonField
 
 
 class OkResponse(BaseModel):
@@ -94,10 +98,5 @@ class AddFavoriteCityRequest(BaseModel):
 
     name: str = Field(min_length=1, max_length=128)
     country: str | None = Field(default=None, max_length=64)
-    lat: float = Field(ge=-90, le=90)
-    lon: float = Field(ge=-180, le=180)
-
-    @field_validator("lat", "lon")
-    @classmethod
-    def round_coordinate(cls, v: float) -> float:
-        return round(v, 4)
+    lat: LatField
+    lon: LonField

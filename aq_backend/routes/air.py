@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from aq_backend.dependencies import ow_service
 from aq_backend.http_errors import api_error
 from aq_backend.ratelimit import AIR_CURRENT_LIMIT, AIR_HISTORY_LIMIT, limiter
-from aq_backend.schemas import (
+from aq_backend.db.schemas import (
     AirCurrentResponse,
     AirHistoryItem,
     AirHistoryResponse,

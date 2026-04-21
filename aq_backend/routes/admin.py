@@ -10,13 +10,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from aq_backend import auth
-from aq_backend.database import get_db
-from aq_backend.dependencies import require_admin
+from aq_backend.auth.utils import hash_password
+from aq_backend.db.database import get_db
+from aq_backend.auth.auth_deps import require_admin
 from aq_backend.http_errors import api_error
-from aq_backend.models import User
+from aq_backend.db.models import User
 from aq_backend.ratelimit import ADMIN_LIMIT, limiter
-from aq_backend.schemas import OkResponse, UserAdminOut
+from aq_backend.db.schemas import OkResponse, UserAdminOut
 
 logger = logging.getLogger("aq_backend.admin")
 
@@ -59,7 +59,7 @@ async def set_user_password(
     user = await db.get(User, str(user_id))
     if not user:
         raise api_error(404, "NOT_FOUND", "User not found.")
-    user.password_hash = auth.hash_password(body.new_password)
+    user.password_hash = hash_password(body.new_password)
     await db.commit()
     logger.warning(
         "Admin password reset",

@@ -8,12 +8,12 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from aq_backend.database import get_db
-from aq_backend.dependencies import get_current_user
+from aq_backend.db.database import get_db
+from aq_backend.auth.auth_deps import get_current_user
 from aq_backend.http_errors import api_error
-from aq_backend.models import FavoriteCity, User
+from aq_backend.db.models import FavoriteCity, User
 from aq_backend.ratelimit import FAVORITES_LIMIT, limiter
-from aq_backend.schemas import AddFavoriteCityRequest, FavoriteCityOut, OkResponse
+from aq_backend.db.schemas import AddFavoriteCityRequest, FavoriteCityOut, OkResponse
 
 router = APIRouter(prefix="/favorites", tags=["favorites"])
 

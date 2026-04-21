@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from aq_backend.database import get_db
+from aq_backend.db.database import get_db
 
 router = APIRouter(tags=["system"])
 logger = logging.getLogger("aq_backend.health")

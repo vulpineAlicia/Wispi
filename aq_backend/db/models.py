@@ -19,12 +19,14 @@ class Base(DeclarativeBase):
 type UUIDStr = str
 
 
+def _uuid_pk():
+    return mapped_column(sa.Uuid(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
+
+
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[UUIDStr] = mapped_column(
-        sa.Uuid(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
-    )
+    id: Mapped[UUIDStr] = _uuid_pk()
     nickname: Mapped[str] = mapped_column(sa.String(64), unique=True)
     avatar_id: Mapped[int] = mapped_column(Integer)
     password_hash: Mapped[str] = mapped_column(sa.String(128))
@@ -43,9 +45,7 @@ class User(Base):
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
 
-    id: Mapped[UUIDStr] = mapped_column(
-        sa.Uuid(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
-    )
+    id: Mapped[UUIDStr] = _uuid_pk()
     user_id: Mapped[UUIDStr] = mapped_column(
         sa.Uuid(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE")
     )
@@ -61,9 +61,7 @@ class RefreshToken(Base):
 class FavoriteCity(Base):
     __tablename__ = "favorite_cities"
 
-    id: Mapped[UUIDStr] = mapped_column(
-        sa.Uuid(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
-    )
+    id: Mapped[UUIDStr] = _uuid_pk()
     user_id: Mapped[UUIDStr] = mapped_column(
         sa.Uuid(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE")
     )

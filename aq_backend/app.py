@@ -23,8 +23,8 @@ from aq_backend.routes.auth import router as auth_router
 from aq_backend.routes.geocode import router as geocode_router
 from aq_backend.routes.health import router as health_router
 from aq_backend.routes.tiles import router as tiles_router
+from aq_backend.dependencies import AppState
 from aq_backend.services.openweather import OpenWeatherService
-from aq_backend.state import AppState
 
 
 def create_app() -> FastAPI:
