@@ -74,11 +74,14 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install ruff
-        run: pip install ruff
+      - name: Install ruff and pip-audit
+        run: pip install ruff pip-audit
 
       - name: Lint
         run: ruff check aq_backend/
+
+      - name: Audit dependencies for known vulnerabilities
+        run: pip-audit -r requirements.txt
 
   # ─────────────────────────────────────────
   # Backend: tests
