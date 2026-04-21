@@ -25,4 +25,4 @@ alembic==1.16.1
 sqlalchemy[asyncio]==2.0.36
 asyncpg==0.30.0
 bcrypt==4.2.1
-python-jose[cryptography]==3.3.0
+PyJWT==2.12.1
