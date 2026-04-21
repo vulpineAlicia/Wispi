@@ -13,7 +13,8 @@ const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL as string | undefined;
 
 export default function Profile() {
   const { t } = useTranslation();
-  const { user, signOut, getToken } = useAuth();
+  const { user: nullableUser, signOut, getToken } = useAuth();
+  const user = nullableUser!;
   const navigate = useNavigate();
 
   const [oldPassword, setOldPassword] = useState("");
@@ -26,21 +27,6 @@ export default function Profile() {
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-
-  if (!user) {
-    return (
-      <main className="mx-auto max-w-md px-4 py-16 text-center text-brand-700">
-        {t('profile.notSignedIn')}{" "}
-        <button
-          type="button"
-          onClick={() => navigate("/auth")}
-          className="underline hover:text-brand-900"
-        >
-          {t('profile.signIn')}
-        </button>
-      </main>
-    );
-  }
 
   const avatar = getAvatar(user.avatar_id);
 

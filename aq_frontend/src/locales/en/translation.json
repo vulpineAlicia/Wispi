@@ -150,8 +150,6 @@
     "goHome": "Go to home"
   },
   "profile": {
-    "notSignedIn": "You are not signed in.",
-    "signIn": "Sign in",
     "signOut": "Sign out",
     "changePassword": "Change password",
     "currentPassword": "Current password",

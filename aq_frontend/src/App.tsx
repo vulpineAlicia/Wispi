@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Footer from "./components/shared/Footer";
 import Header from "./components/shared/Header";
 import NavBar from "./components/shared/NavBar";
+import ProtectedRoute from "./components/shared/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import { FavoritesProvider } from "./contexts/FavoritesContext";
 import { useNavScroll } from "./lib/siteNav";
@@ -55,8 +56,10 @@ function AppShell() {
               <Route path="/info" element={<UsefulInfo />} />
               <Route path="/archive" element={<Archive />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/favorites" element={<Favorites />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/favorites" element={<Favorites />} />
+              </Route>
             </Routes>
           </Suspense>
         </div>

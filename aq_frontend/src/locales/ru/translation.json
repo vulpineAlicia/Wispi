@@ -150,8 +150,6 @@
     "goHome": "На главную"
   },
   "profile": {
-    "notSignedIn": "Вы не вошли в аккаунт.",
-    "signIn": "Войти",
     "signOut": "Выйти",
     "changePassword": "Изменить пароль",
     "currentPassword": "Текущий пароль",

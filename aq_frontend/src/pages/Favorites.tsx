@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-import { useAuth } from "../hooks/useAuth";
 import { useFavorites } from "../hooks/useFavorites";
 import { getAirCurrent } from "../lib/services/api";
 import type { FavoriteCity } from "../lib/services/favoritesApi";
@@ -68,12 +67,7 @@ function FavoriteCityCard({ city }: { city: FavoriteCity }) {
 
 export default function FavoritesPage() {
   const { t } = useTranslation();
-  const { user, isLoading: authLoading } = useAuth();
   const { favorites, loading } = useFavorites();
-
-  if (authLoading) return null;
-
-  if (!user) return <Navigate to="/auth" replace />;
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 text-brand-900">
