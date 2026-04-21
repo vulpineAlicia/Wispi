@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
@@ -22,6 +23,8 @@ from aq_backend.services.openweather.retry import (
     is_retryable_status,
     parse_retry_after_s,
 )
+
+logger = logging.getLogger("aq_backend.transport")
 
 
 class Endpoint(str, Enum):
@@ -93,6 +96,10 @@ class OpenWeatherTransport:
 
             remaining_s = deadline - time.monotonic()
             if remaining_s <= 0:
+                logger.warning(
+                    "OW %s budget exceeded after %d attempt(s)",
+                    endpoint.value, state.attempts,
+                )
                 raise OpenWeatherTimeout(
                     "Upstream budget exceeded",
                     meta=self._build_meta(
@@ -117,10 +124,12 @@ class OpenWeatherTransport:
                         meta=self._build_meta(endpoint=endpoint, state=state),
                     ) from exc
 
-                await self._sleep_with_budget(
-                    deadline,
-                    compute_backoff_s(attempt),
+                backoff_s = compute_backoff_s(attempt)
+                logger.debug(
+                    "OW %s timeout on attempt %d/%d, retrying in %.2fs",
+                    endpoint.value, attempt, self._max_attempts, backoff_s,
                 )
+                await self._sleep_with_budget(deadline, backoff_s)
                 continue
             except httpx.RequestError as exc:
                 state.last_exc = exc
@@ -132,10 +141,12 @@ class OpenWeatherTransport:
                         meta=self._build_meta(endpoint=endpoint, state=state),
                     ) from exc
 
-                await self._sleep_with_budget(
-                    deadline,
-                    compute_backoff_s(attempt),
+                backoff_s = compute_backoff_s(attempt)
+                logger.debug(
+                    "OW %s network error on attempt %d/%d (%s), retrying in %.2fs",
+                    endpoint.value, attempt, self._max_attempts, exc, backoff_s,
                 )
+                await self._sleep_with_budget(deadline, backoff_s)
                 continue
 
             retry_after_hdr = response.headers.get("Retry-After")
@@ -153,6 +164,10 @@ class OpenWeatherTransport:
                     retry_after_s
                     if retry_after_s is not None
                     else compute_backoff_s(attempt)
+                )
+                logger.debug(
+                    "OW %s got %d on attempt %d/%d, retrying in %.2fs",
+                    endpoint.value, response.status_code, attempt, self._max_attempts, wait_s,
                 )
                 await self._sleep_with_budget(deadline, wait_s)
                 continue
