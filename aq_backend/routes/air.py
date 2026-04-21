@@ -45,22 +45,22 @@ def _ensure_dict(value: Any, message: str) -> dict[str, Any]:
     return value
 
 
-def _extract_ts_aqi(entry: dict[str, Any], *, err_detail: str) -> tuple[int, int]:
+def _extract_ts_aqi(entry: dict[str, Any]) -> tuple[int, int] | None:
     ts = entry.get("dt")
     main = entry.get("main") or {}
     aqi = main.get("aqi")
 
     if ts is None or aqi is None:
-        raise api_error(502, "UPSTREAM_MALFORMED", err_detail)
+        return None
 
     try:
         ts_i = int(ts)
         aqi_i = int(aqi)
-    except (TypeError, ValueError) as exc:
-        raise api_error(502, "UPSTREAM_MALFORMED", err_detail) from exc
+    except (TypeError, ValueError):
+        return None
 
     if not (1 <= aqi_i <= 5):
-        raise api_error(502, "UPSTREAM_MALFORMED", "Upstream returned invalid AQI value")
+        return None
 
     return ts_i, aqi_i
 
@@ -85,10 +85,10 @@ async def air_current(
 
     entry = _ensure_dict(lst[0], "Upstream returned malformed air payload")
 
-    ts_i, aqi_i = _extract_ts_aqi(
-        entry,
-        err_detail="Upstream returned malformed air payload",
-    )
+    result = _extract_ts_aqi(entry)
+    if result is None:
+        raise api_error(502, "UPSTREAM_MALFORMED", "Upstream returned malformed air payload")
+    ts_i, aqi_i = result
 
     pollutants = _as_float_dict(entry.get("components"))
 
@@ -144,10 +144,10 @@ async def air_history(
         if not isinstance(entry, dict):
             continue
 
-        ts_i, aqi_i = _extract_ts_aqi(
-            entry,
-            err_detail="Upstream returned malformed history payload",
-        )
+        result = _extract_ts_aqi(entry)
+        if result is None:
+            continue
+        ts_i, aqi_i = result
 
         pollutants = _as_float_dict(entry.get("components"))
 
