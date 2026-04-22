@@ -19,7 +19,7 @@ export const HEADER_LINKS: NavLinkItem[] = [
   { label: "nav.contacts", to: "#contacts" },
 ];
 
-export const FOOTER_LINKS: Array<{ label: string; to: RoutePath }> = [
+export const FOOTER_LINKS: NavLinkItem[] = [
   { label: "nav.home", to: "/" },
   { label: "nav.map", to: "/map" },
   { label: "nav.archive", to: "/archive" },

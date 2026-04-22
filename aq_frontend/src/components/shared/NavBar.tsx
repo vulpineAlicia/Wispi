@@ -1,138 +1,29 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Settings2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
-import { getAvatar } from "../../lib/avatars";
-import {
-  HEADER_LINKS,
-  scrollToHash,
-  scrollTopSmooth,
-  type NavLinkItem,
-} from "../../lib/siteNav";
+import { useNavigation } from "../../hooks/useNavigation";
+import { HEADER_LINKS, type NavLinkItem } from "../../lib/siteNav";
+import UserMenu from "./UserMenu";
 
 function navItemKey(item: NavLinkItem, prefix = "") {
   return `${prefix}${item.to}`;
-}
-
-function UserMenu() {
-  const { t } = useTranslation();
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function onClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
-  }, []);
-
-  if (!user) {
-    return (
-      <button
-        type="button"
-        onClick={() => navigate("/auth")}
-        className="hidden rounded-3xl bg-brand-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-50 hover:text-brand-900 md:inline-flex"
-      >
-        {t('nav.registerSignIn')}
-      </button>
-    );
-  }
-
-  const avatar = getAvatar(user.avatar_id);
-
-  return (
-    <div ref={ref} className="relative hidden md:block">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 text-sm text-brand-100 transition hover:text-brand-50"
-      >
-        <span className={`flex h-7 w-7 items-center justify-center rounded-full text-base ${avatar.bg} ${avatar.ring}`}>
-          {avatar.emoji}
-        </span>
-        <span className="max-w-32 truncate font-medium">{user.nickname}</span>
-        <Settings2 size={16} className="text-brand-200" />
-      </button>
-
-      {open && (
-        <div className="absolute right-0 top-full mt-4 w-44 overflow-hidden rounded-3xl border border-brand-200 bg-white shadow-lg">
-          <button
-            type="button"
-            onClick={() => { navigate("/profile"); setOpen(false); }}
-            className="w-full px-4 py-2.5 text-left text-sm text-brand-700 transition hover:bg-brand-50"
-          >
-            {t('nav.profile')}
-          </button>
-          <button
-            type="button"
-            onClick={async () => { await signOut(); setOpen(false); navigate("/"); }}
-            className="w-full px-4 py-2.5 text-left text-sm text-brand-700 transition hover:bg-brand-50"
-          >
-            {t('nav.signOut')}
-          </button>
-        </div>
-      )}
-    </div>
-  );
 }
 
 export default function NavBar() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
   const { user, signOut } = useAuth();
+  const { navigateTo } = useNavigation();
 
   function closeMenu() {
     setOpen(false);
   }
 
   function handleNavClick(item: NavLinkItem) {
-    const target = item.to;
-
-    if (target === "/favorites" && !user) {
-      navigate("/auth");
-      closeMenu();
-      return;
-    }
-
-    if (target.startsWith("#")) {
-      if (!scrollToHash(target)) {
-        scrollTopSmooth();
-      }
-      closeMenu();
-      return;
-    }
-
-    const [pathname, hash = ""] = target.split("#");
-    const nextHash = hash ? `#${hash}` : "";
-
-    if (location.pathname === pathname) {
-      if (nextHash) {
-        if (!scrollToHash(nextHash)) {
-          scrollTopSmooth();
-        }
-      } else {
-        scrollTopSmooth();
-      }
-
-      closeMenu();
-      return;
-    }
-
-    if (nextHash) {
-      navigate(pathname, { state: { scrollTo: nextHash } });
-    } else {
-      navigate(pathname);
-    }
-
+    navigateTo(item.to);
     closeMenu();
   }
 

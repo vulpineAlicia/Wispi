@@ -1,52 +1,19 @@
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, Github } from "lucide-react";
 
-import { useAuth } from "../../hooks/useAuth";
-import { FOOTER_LINKS, type RoutePath, scrollTopSmooth } from "../../lib/siteNav";
+import { useNavigation } from "../../hooks/useNavigation";
+import { FOOTER_LINKS } from "../../lib/siteNav";
 
 const contactEmail =
   import.meta.env.VITE_CONTACT_EMAIL ?? "support@example.com";
 
-const repoUrl =
-  import.meta.env.VITE_REPO_URL ?? "https://github.com/vulpineAlicia/Wispi";
-
-const repoLabel =
-  import.meta.env.VITE_REPO_LABEL ?? "vulpineAlicia/Wispi";
+const repoUrl = "https://github.com/vulpineAlicia/Wispi";
+const repoLabel = "vulpineAlicia/Wispi";
 
 export default function Footer() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { user } = useAuth();
+  const { navigateTo, navigateToProfile } = useNavigation();
   const year = new Date().getFullYear();
-
-  function goToRoute(path: RoutePath) {
-    if (path === "/favorites" && !user) {
-      if (location.pathname === "/auth") {
-        scrollTopSmooth();
-      } else {
-        navigate("/auth");
-      }
-      return;
-    }
-
-    if (location.pathname === path) {
-      scrollTopSmooth();
-      return;
-    }
-
-    navigate(path);
-  }
-
-  function goToProfile() {
-    const target = user ? "/profile" : "/auth";
-    if (location.pathname === target) {
-      scrollTopSmooth();
-      return;
-    }
-    navigate(target);
-  }
 
   const linkClass = "text-brand-200 transition hover:text-brand-50";
   const contactLinkClass = "flex items-center gap-2 text-brand-200 transition hover:text-brand-50";
@@ -74,7 +41,7 @@ export default function Footer() {
                 <li key={item.to}>
                   <button
                     type="button"
-                    onClick={() => goToRoute(item.to)}
+                    onClick={() => navigateTo(item.to)}
                     className={linkClass}
                   >
                     {t(item.label)}
@@ -84,7 +51,7 @@ export default function Footer() {
               <li>
                 <button
                   type="button"
-                  onClick={goToProfile}
+                  onClick={navigateToProfile}
                   className={linkClass}
                 >
                   {t('nav.profile')}
