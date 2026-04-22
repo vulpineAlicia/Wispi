@@ -36,6 +36,9 @@ function fixLeafletIconsOnce() {
   });
 }
 
+const LAT_LIMIT = 85;
+const HUGE_LNG = 1e9;
+
 function createBaseLayer(mtKey: string) {
   return L.tileLayer(
     `https://api.maptiler.com/maps/base-v4/{z}/{x}/{y}.png?key=${mtKey}`,
@@ -72,8 +75,6 @@ export function useLeafletMap({ mtKey, lat, lon, overlayUrl }: Args) {
       createBaseLayer(mtKey).addTo(map);
     }
 
-    const LAT_LIMIT = 85;
-    const HUGE_LNG = 1e9;
     const bounds = L.latLngBounds(
       L.latLng(-LAT_LIMIT, -HUGE_LNG),
       L.latLng(LAT_LIMIT, HUGE_LNG),

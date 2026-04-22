@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import BaseButton from "../templates/BaseButton";
-import { getUserMessage } from "../../lib/services/apiMessages";
+import { getUserMessage } from "../../api/apiMessages";
+import { buildMapUrl } from "../../lib/locationSelection";
 import type { HistoryPanelData } from "../../lib/historyModel";
 import AqiPill from "./AqiPill";
 import Bubble from "../templates/Bubble";
@@ -58,8 +59,7 @@ export default function CityResultPanel({
   const pollutantsEntries = Object.entries(panel?.pollutants ?? {});
   const hasPollutants = pollutantsEntries.length > 0;
 
-  const dest =
-    detailsTo ?? `/map?lat=${lat}&lon=${lon}&name=${encodeURIComponent(name)}`;
+  const dest = detailsTo ?? buildMapUrl({ lat, lon, name });
 
   return (
     <>

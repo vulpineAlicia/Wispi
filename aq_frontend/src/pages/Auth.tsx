@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
 import { getAvatar } from "../lib/avatars";
-import { ApiError } from "../lib/services/apiError";
+import { ApiError } from "../api/apiError";
 import BaseButton from "../components/templates/BaseButton";
 import Bubble from "../components/templates/Bubble";
 
@@ -31,7 +31,7 @@ export default function Auth() {
     setConfirm("");
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
 

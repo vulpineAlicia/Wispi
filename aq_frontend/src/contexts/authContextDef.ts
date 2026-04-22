@@ -1,7 +1,7 @@
 import { createContext } from "react";
-import type { AuthUser } from "../lib/services/authApi";
+import type { AuthUser } from "../api/authApi";
 
-type AuthState = {
+export type AuthState = {
   user: AuthUser | null;
   accessToken: string | null;
   isLoading: boolean;

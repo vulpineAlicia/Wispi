@@ -1,6 +1,6 @@
-export type OverlayMode = "none" | "temp" | "precip";
+import { API_BASE } from "../api/apiClient";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "/api";
+export type OverlayMode = "none" | "temp" | "precip";
 
 export const OVERLAY_OPTIONS: Record<
   OverlayMode,

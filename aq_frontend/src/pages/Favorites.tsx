@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { useFavorites } from "../hooks/useFavorites";
-import { getAirCurrent } from "../lib/services/api";
-import type { FavoriteCity } from "../lib/services/favoritesApi";
+import { getAirCurrent } from "../api/api";
+import type { FavoriteCity } from "../api/favoritesApi";
+import { buildMapUrl } from "../lib/locationSelection";
 import AqiPill from "../components/shared/AqiPill";
 import FavoriteButton from "../components/shared/FavoriteButton";
 import Bubble from "../components/templates/Bubble";
@@ -24,7 +25,7 @@ function FavoriteCityCard({ city }: { city: FavoriteCity }) {
     return () => { cancelled = true; };
   }, [city.lat, city.lon]);
 
-  const mapUrl = `/map?lat=${city.lat}&lon=${city.lon}&name=${encodeURIComponent(city.name)}${city.country ? `&country=${encodeURIComponent(city.country)}` : ""}`;
+  const mapUrl = buildMapUrl({ lat: city.lat, lon: city.lon, name: city.name, country: city.country ?? undefined });
 
   return (
     <Bubble className="flex flex-col gap-3 p-5">

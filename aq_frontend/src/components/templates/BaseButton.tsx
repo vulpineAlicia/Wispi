@@ -22,9 +22,9 @@ function isLinkProps(props: Props): props is LinkButtonProps {
 export default function BaseButton(props: Props) {
   if (isLinkProps(props)) {
     const { className, ...rest } = props;
-    return <Link {...rest} className={`${BASE} ${className ?? ""}`.trim()} />;
+    return <Link {...rest} className={`${BASE} ${className ?? ""}`} />;
   }
 
   const { className, ...rest } = props;
-  return <button {...rest} className={`${BASE} ${className ?? ""}`.trim()} />;
+  return <button {...rest} className={`${BASE} ${className ?? ""}`} />;
 }

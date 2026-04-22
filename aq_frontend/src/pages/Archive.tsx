@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 import archiveBooks from "../assets/archive-books.svg";
 import ArchiveHintBubble from "../components/archive/ArchiveHintBubble";
@@ -8,21 +9,30 @@ import FavoriteButton from "../components/shared/FavoriteButton";
 import CitySearchBox from "../components/shared/CitySearchBox";
 import HistoryPanel from "../components/shared/HistoryPanel";
 import { useAirHistory } from "../hooks/useAirHistory";
-import { useArchiveParams } from "../hooks/useArchiveParams";
-import type { GeoResult } from "../lib/services/api";
+import { useArchiveParams, DEFAULT_DAYS, MAX_DAYS } from "../hooks/useArchiveParams";
+import type { GeoResult } from "../api/api";
+
+function buildArchiveSearch(
+  place: { lat: number; lon: number; name: string; country?: string | null },
+  days: number,
+  date?: string
+): string {
+  const next = new URLSearchParams({
+    lat: String(place.lat),
+    lon: String(place.lon),
+    name: place.name,
+    days: String(days),
+  });
+  if (place.country) next.set("country", place.country);
+  if (date) next.set("date", date);
+  return next.toString();
+}
 
 export default function ArchivePage() {
   const { t } = useTranslation();
 
-  const {
-    selection,
-    historyDays,
-    setHistoryDays,
-    navigate,
-    DEFAULT_DAYS,
-    MAX_DAYS,
-    selectedDate,
-  } = useArchiveParams();
+  const navigate = useNavigate();
+  const { selection, historyDays, setHistoryDays, selectedDate } = useArchiveParams();
 
   const history = useAirHistory(
     selection?.lat ?? null,
@@ -32,17 +42,7 @@ export default function ArchivePage() {
   );
 
   function handleSelectCity(place: GeoResult) {
-    const next = new URLSearchParams();
-    next.set("lat", String(place.lat));
-    next.set("lon", String(place.lon));
-    next.set("name", place.name);
-
-    if (place.country) {
-      next.set("country", place.country);
-    }
-
-    next.set("days", String(DEFAULT_DAYS));
-    navigate({ search: next.toString() });
+    navigate({ search: buildArchiveSearch(place, DEFAULT_DAYS) });
   }
 
   return (
@@ -127,19 +127,7 @@ export default function ArchivePage() {
                 maxDays={MAX_DAYS}
                 showArchiveLink={false}
                 onPickDay={(date) => {
-                  const next = new URLSearchParams();
-                  next.set("lat", String(selection.lat));
-                  next.set("lon", String(selection.lon));
-                  next.set("name", selection.name);
-
-                  if (selection.country) {
-                    next.set("country", selection.country);
-                  }
-
-                  next.set("days", String(historyDays));
-                  next.set("date", date);
-
-                  navigate({ search: next.toString() });
+                  navigate({ search: buildArchiveSearch(selection, historyDays, date) });
                 }}
                 lineWidth={3}
                 hitRadius={14}

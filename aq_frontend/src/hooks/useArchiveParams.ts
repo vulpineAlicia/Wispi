@@ -7,8 +7,8 @@ import {
   parseNumberOrNull,
 } from "../lib/locationSelection";
 
-const DEFAULT_DAYS = 30;
-const MAX_DAYS = 365;
+export const DEFAULT_DAYS = 30;
+export const MAX_DAYS = 365;
 
 function clampDays(value: number, min: number, max: number, fallback: number) {
   const n = Math.floor(value);
@@ -65,9 +65,6 @@ export function useArchiveParams() {
     selection,
     historyDays,
     setHistoryDays,
-    navigate,
-    DEFAULT_DAYS,
-    MAX_DAYS,
     selectedDate,
   };
 }

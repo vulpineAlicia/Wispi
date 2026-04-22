@@ -1,16 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
-import * as authApi from "../lib/services/authApi";
-import type { AuthUser } from "../lib/services/authApi";
+import * as authApi from "../api/authApi";
+import type { AuthUser } from "../api/authApi";
 import { AuthContext } from "./authContextDef";
-import type { AuthContextValue } from "./authContextDef";
-
-type AuthState = {
-  user: AuthUser | null;
-  accessToken: string | null;
-  isLoading: boolean;
-};
+import type { AuthContextValue, AuthState } from "./authContextDef";
 
 // decode the exp claim from a JWT without verifying the signature
 function getTokenExpiry(token: string): number | null {

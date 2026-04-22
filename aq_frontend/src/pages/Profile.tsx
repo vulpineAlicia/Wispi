@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
 import { getAvatar } from "../lib/avatars";
-import { changePassword, deleteAccount } from "../lib/services/authApi";
-import { ApiError } from "../lib/services/apiError";
+import { changePassword, deleteAccount } from "../api/authApi";
+import { ApiError } from "../api/apiError";
 import BaseButton from "../components/templates/BaseButton";
 import Bubble from "../components/templates/Bubble";
 
@@ -30,7 +30,7 @@ export default function Profile() {
 
   const avatar = getAvatar(user.avatar_id);
 
-  async function handleChangePassword(e: React.FormEvent) {
+  async function handleChangePassword(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setPwError(null);
     setPwSuccess(false);
@@ -62,7 +62,7 @@ export default function Profile() {
   }
 
   async function handleDeleteAccount() {
-    if (deleteConfirm !== user!.nickname) return;
+    if (deleteConfirm !== user.nickname) return;
 
     const token = getToken();
     if (!token) return;
