@@ -1,6 +1,3 @@
-import pytest
-
-
 # Async tests use asyncio by default.
 # When you add DB tests, add a fixture here that provides
 # an async test client and a rolled-back database session, e.g.:
