@@ -81,7 +81,7 @@ jobs:
         run: ruff check aq_backend/
 
       - name: Audit dependencies for known vulnerabilities
-        run: pip-audit -r requirements.txt
+        run: pip-audit -r aq_backend/requirements.txt
 
   # ─────────────────────────────────────────
   # Backend: tests
@@ -98,10 +98,10 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt pytest pytest-asyncio
+        run: pip install -r aq_backend/requirements.txt pytest pytest-asyncio
 
       - name: Run tests
-        run: pytest tests/ -v
+        run: pytest aq_backend/tests/ -v
 
   # ─────────────────────────────────────────
   # Build & push Docker images to GHCR
