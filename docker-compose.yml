@@ -3,7 +3,7 @@ services:
     image: postgres:16-alpine
     container_name: wispi-db
     env_file:
-      - .env
+      - aq_backend/.env
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-wispi}
       POSTGRES_USER: ${POSTGRES_USER:-wispi}
@@ -22,18 +22,18 @@ services:
     image: ghcr.io/vulpinealicia/wispi-backend:latest
     container_name: wispi-migrate
     env_file:
-      - .env
+      - aq_backend/.env
     depends_on:
       db:
         condition: service_healthy
-    command: alembic upgrade head
+    command: alembic -c aq_backend/alembic.ini upgrade head
     restart: "no"
 
   backend:
     image: ghcr.io/vulpinealicia/wispi-backend:latest
     container_name: wispi-backend
     env_file:
-      - .env
+      - aq_backend/.env
     dns:
       - 8.8.8.8
       - 8.8.4.4

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 from pydantic import Field, ValidationInfo, field_validator, model_validator
@@ -20,7 +21,7 @@ class Settings(BaseSettings):
     """ Immutable runtime config for the app """
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=Path(__file__).parent.parent / ".env",
         env_file_encoding="utf-8",
         extra="ignore",
         enable_decoding=False,
