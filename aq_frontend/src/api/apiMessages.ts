@@ -1,4 +1,4 @@
-import i18n from '../../i18n';
+import i18n from '../i18n';
 import { ApiError } from "./apiError";
 
 export function getUserMessage(error: unknown): string {

@@ -1,5 +1,5 @@
-import type { AirHistoryItem } from "./services/api";
-import { isFiniteNumber } from "./services/apiGuards";
+import type { AirHistoryItem } from "../api/api";
+import { isFiniteNumber } from "../api/apiGuards";
 
 export type PollutantsMap = Record<string, number>;
 
