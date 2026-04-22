@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
-import { getUserMessage } from "../../lib/services/apiMessages";
+import { getUserMessage } from "../../api/apiMessages";
 import type { HistoryChartPoint } from "../../lib/historyModel";
 import AqiHistoryChartControls from "./AqiHistoryChartControls";
 import Bubble from "../templates/Bubble";

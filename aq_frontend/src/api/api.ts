@@ -44,11 +44,7 @@ export async function geocodeCity(
     { signal }
   );
 
-  if (!isRecord(data) || !Array.isArray(data.results)) {
-    throw invalidResponse("Server returned an invalid geocoding response.");
-  }
-
-  if (!data.results.every(isGeoResult)) {
+  if (!isRecord(data) || !Array.isArray(data.results) || !data.results.every(isGeoResult)) {
     throw invalidResponse("Server returned an invalid geocoding response.");
   }
 

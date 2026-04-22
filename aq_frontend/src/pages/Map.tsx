@@ -11,7 +11,7 @@ import HistoryPanel, { type HistoryDays } from "../components/shared/HistoryPane
 import MapLayersPanel from "../components/map/MapLayersPanel";
 import { useAirHistory } from "../hooks/useAirHistory";
 import { useLeafletMap } from "../hooks/useLeafletMap";
-import type { GeoResult } from "../lib/services/api";
+import type { GeoResult } from "../api/api";
 import {
   buildMapUrl,
   getLocationSelectionFromParams,

@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { FavoriteCity } from "../lib/services/favoritesApi";
+import type { FavoriteCity } from "../api/favoritesApi";
 
 export type FavoritesContextValue = {
   favorites: FavoriteCity[];

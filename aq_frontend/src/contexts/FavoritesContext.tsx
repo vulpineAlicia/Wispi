@@ -8,7 +8,7 @@ import {
   addFavorite,
   removeFavorite,
   type FavoriteCity,
-} from "../lib/services/favoritesApi";
+} from "../api/favoritesApi";
 import { FavoritesContext } from "./favoritesContextDef";
 
 // Must match MAX_FAVORITES in aq_backend/routes/favorites.py

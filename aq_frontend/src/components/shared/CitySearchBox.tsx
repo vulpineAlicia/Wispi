@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { geocodeCity, type GeoResult } from "../../lib/services/api";
-import { getUserMessage } from "../../lib/services/apiMessages";
+import { geocodeCity, type GeoResult } from "../../api/api";
+import { getUserMessage } from "../../api/apiMessages";
 import { useLatestRequest } from "../../hooks/useLatestRequest";
 import Bubble from "../templates/Bubble";
 import BaseButton from "../templates/BaseButton";

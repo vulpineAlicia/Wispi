@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { checkHealth } from "../../lib/services/api";
+import { checkHealth } from "../../api/api";
 
 export type Status = "online" | "degraded" | "offline";
 

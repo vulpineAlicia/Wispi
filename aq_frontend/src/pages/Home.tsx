@@ -6,7 +6,7 @@ import CityResultPanel from "../components/shared/CityResultPanel";
 import CitySearchBox from "../components/shared/CitySearchBox";
 import FeatureCard from "../components/home/FeatureCard";
 import { useAirHistory } from "../hooks/useAirHistory";
-import type { GeoResult } from "../lib/services/api";
+import type { GeoResult } from "../api/api";
 import { buildMapUrl } from "../lib/locationSelection";
 
 export default function Home() {

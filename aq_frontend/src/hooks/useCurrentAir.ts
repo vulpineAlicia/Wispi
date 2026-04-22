@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { getAirCurrent, type AirData } from "../lib/services/api";
+import { getAirCurrent, type AirData } from "../api/api";
 import { useLatLonRequest } from "./useLatLonRequest";
 
 export function useCurrentAir(lat: number | null, lon: number | null) {
