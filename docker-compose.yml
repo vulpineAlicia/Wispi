@@ -4,10 +4,6 @@ services:
     container_name: wispi-db
     env_file:
       - aq_backend/.env
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-wispi}
-      POSTGRES_USER: ${POSTGRES_USER:-wispi}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pg_data:/var/lib/postgresql/data
     restart: unless-stopped
