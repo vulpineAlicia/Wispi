@@ -61,16 +61,20 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     return () => controller.abort();
   }, [user, getToken]);
 
-  const isFavorite = useCallback(
+  const findFavorite = useCallback(
     (lat: number, lon: number) =>
-      state.items.some((f) => coordsMatch(f.lat, f.lon, lat, lon)),
+      state.items.find((f) => coordsMatch(f.lat, f.lon, lat, lon)),
     [state.items]
   );
 
+  const isFavorite = useCallback(
+    (lat: number, lon: number) => !!findFavorite(lat, lon),
+    [findFavorite]
+  );
+
   const getFavoriteId = useCallback(
-    (lat: number, lon: number) =>
-      state.items.find((f) => coordsMatch(f.lat, f.lon, lat, lon))?.id,
-    [state.items]
+    (lat: number, lon: number) => findFavorite(lat, lon)?.id,
+    [findFavorite]
   );
 
   const add = useCallback(
