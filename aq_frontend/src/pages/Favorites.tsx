@@ -17,12 +17,12 @@ function FavoriteCityCard({ city }: { city: FavoriteCity }) {
   const [aqiLoading, setAqiLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-    getAirCurrent(city.lat, city.lon)
-      .then((data) => { if (!cancelled) setAqi(data.aqi_ow_1_5); })
-      .catch(() => { if (!cancelled) setAqi(null); })
-      .finally(() => { if (!cancelled) setAqiLoading(false); });
-    return () => { cancelled = true; };
+    const controller = new AbortController();
+    getAirCurrent(city.lat, city.lon, controller.signal)
+      .then((data) => setAqi(data.aqi_ow_1_5))
+      .catch(() => { if (!controller.signal.aborted) setAqi(null); })
+      .finally(() => { if (!controller.signal.aborted) setAqiLoading(false); });
+    return () => controller.abort();
   }, [city.lat, city.lon]);
 
   const mapUrl = buildMapUrl({ lat: city.lat, lon: city.lon, name: city.name, country: city.country ?? undefined });

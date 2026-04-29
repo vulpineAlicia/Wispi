@@ -47,18 +47,18 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     const token = getToken();
     if (!token) return;
 
-    let cancelled = false;
+    const controller = new AbortController();
     dispatch({ type: "loading" });
-    getFavorites(token)
-      .then((data) => { if (!cancelled) dispatch({ type: "loaded", items: data }); })
+    getFavorites(token, controller.signal)
+      .then((data) => dispatch({ type: "loaded", items: data }))
       .catch((err: unknown) => {
-        if (!cancelled) dispatch({
+        if (!controller.signal.aborted) dispatch({
           type: "error",
           message: err instanceof Error ? err.message : "Failed to load favourites.",
         });
       });
 
-    return () => { cancelled = true; };
+    return () => controller.abort();
   }, [user, getToken]);
 
   const isFavorite = useCallback(

@@ -8,9 +8,10 @@ export type FavoriteCity = {
   lon: number;
 };
 
-export async function getFavorites(token: string): Promise<FavoriteCity[]> {
+export async function getFavorites(token: string, signal?: AbortSignal): Promise<FavoriteCity[]> {
   return getJson<FavoriteCity[]>("/favorites", {
     headers: { Authorization: `Bearer ${token}` },
+    signal,
   });
 }
 

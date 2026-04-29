@@ -11,8 +11,8 @@ export async function login(nickname: string, password: string): Promise<TokenRe
   return postJson<TokenResponse>("/auth/login", { nickname, password });
 }
 
-export async function refreshTokens(): Promise<TokenResponse> {
-  return postJson<TokenResponse>("/auth/refresh");
+export async function refreshTokens(signal?: AbortSignal): Promise<TokenResponse> {
+  return postJson<TokenResponse>("/auth/refresh", undefined, { signal });
 }
 
 export async function logout(): Promise<void> {

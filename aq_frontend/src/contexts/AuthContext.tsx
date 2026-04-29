@@ -70,20 +70,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Attempt silent refresh on mount
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
 
     authApi
-      .refreshTokens()
-      .then((res) => {
-        if (!cancelled) setAuth(res.access_token, res.user);
-      })
-      .catch(() => {
-        if (!cancelled) clearAuth();
-      });
+      .refreshTokens(controller.signal)
+      .then((res) => setAuth(res.access_token, res.user))
+      .catch(() => { if (!controller.signal.aborted) clearAuth(); });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => controller.abort();
   }, [setAuth, clearAuth]);
 
   // Clean up the refresh timer on unmount
