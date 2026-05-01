@@ -1,8 +1,7 @@
-"""
-Placeholder tests — replace or expand as the test suite grows.
-"""
+from httpx import AsyncClient
 
 
-def test_placeholder():
-    """Keeps the CI test job green until real tests are added."""
-    assert True
+async def test_health_ok(client: AsyncClient):
+    resp = await client.get("/health")
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "ok"
