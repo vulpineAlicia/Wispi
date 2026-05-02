@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Cookie, Depends, Request, Response
@@ -28,6 +29,7 @@ from aq_backend.ratelimit import AUTH_LIMIT, limiter
 from aq_backend.db.schemas import OkResponse, UserOut
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+logger = logging.getLogger("aq_backend.auth")
 
 _COOKIE_NAME = "wispi_refresh"
 _COOKIE_MAX_AGE = 30 * 24 * 3600  # 30 days
@@ -78,7 +80,7 @@ class RegisterRequest(BaseModel):
 
 class LoginRequest(BaseModel):
     nickname: str
-    password: str = Field(min_length=1, max_length=128)
+    password: str = Field(min_length=8, max_length=128)
 
 
 class ChangePasswordRequest(BaseModel):
@@ -160,7 +162,9 @@ async def login(
 
 
 @router.post("/refresh", response_model=TokenResponse)
+@limiter.limit(AUTH_LIMIT)
 async def refresh_token(
+    request: Request,
     response: Response,
     db: AsyncSession = Depends(get_db),
     wispi_refresh: str | None = Cookie(default=None),
@@ -215,6 +219,8 @@ async def logout(
             if rt:
                 await db.delete(rt)
                 await db.commit()
+    except Exception:
+        logger.warning("Failed to delete refresh token during logout; cookie still cleared")
     finally:
         _clear_refresh_cookie(response)
     return OkResponse()
