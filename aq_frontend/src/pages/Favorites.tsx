@@ -6,12 +6,13 @@ import { useFavorites } from "../hooks/useFavorites";
 import { getAirCurrent } from "../api/api";
 import type { FavoriteCity } from "../api/favoritesApi";
 import { buildMapUrl } from "../lib/locationSelection";
+import { countryName } from "../lib/countryName";
 import AqiPill from "../components/shared/AqiPill";
 import FavoriteButton from "../components/shared/FavoriteButton";
 import Bubble from "../components/templates/Bubble";
 
 function FavoriteCityCard({ city }: { city: FavoriteCity }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [aqi, setAqi] = useState<number | null>(null);
   const [aqiLoading, setAqiLoading] = useState(true);
@@ -33,7 +34,7 @@ function FavoriteCityCard({ city }: { city: FavoriteCity }) {
         <div className="min-w-0">
           <div className="truncate text-base font-semibold text-brand-900">{city.name}</div>
           {city.country && (
-            <div className="mt-0.5 text-xs text-brand-500">{city.country}</div>
+            <div className="mt-0.5 text-xs text-brand-500">{countryName(city.country, i18n.language)}</div>
           )}
         </div>
         <FavoriteButton

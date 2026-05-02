@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { geocodeCity, type GeoResult } from "../../api/api";
+import { countryName } from "../../lib/countryName";
 import { getUserMessage } from "../../api/apiMessages";
 import { useLatestRequest } from "../../hooks/useLatestRequest";
 import Bubble from "../templates/Bubble";
@@ -119,8 +120,7 @@ export default function CitySearchBox({
                   className="w-full rounded-2xl px-3 py-3 text-left text-sm text-brand-900 transition hover:bg-brand-50"
                 >
                   <div className="font-medium">
-                    {r.name}
-                    {r.state ? `, ${r.state}` : ""} — {r.country}
+                    {r.name} — {countryName(r.country, i18n.language)}
                   </div>
                   <div className="mt-1 text-xs text-brand-700/80">
                     lat {r.lat}, lon {r.lon}
