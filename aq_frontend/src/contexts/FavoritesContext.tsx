@@ -11,18 +11,16 @@ import {
 } from "../api/favoritesApi";
 import { FavoritesContext } from "./favoritesContextDef";
 
-// Must match MAX_FAVORITES in aq_backend/routes/favorites.py
-const MAX_FAVORITES = 10;
-
 type State = {
   items: FavoriteCity[];
+  max: number;
   loading: boolean;
   error: string | null;
 };
 
 type Action =
   | { type: "loading" }
-  | { type: "loaded"; items: FavoriteCity[] }
+  | { type: "loaded"; items: FavoriteCity[]; max: number }
   | { type: "error"; message: string }
   | { type: "add"; item: FavoriteCity }
   | { type: "remove"; id: string };
@@ -30,7 +28,7 @@ type Action =
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "loading": return { ...state, loading: true, error: null };
-    case "loaded": return { items: action.items, loading: false, error: null };
+    case "loaded": return { items: action.items, max: action.max, loading: false, error: null };
     case "error": return { ...state, loading: false, error: action.message };
     case "add": return { ...state, items: [...state.items, action.item] };
     case "remove": return { ...state, items: state.items.filter((f) => f.id !== action.id) };
@@ -39,7 +37,7 @@ function reducer(state: State, action: Action): State {
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const { user, getToken } = useAuth();
-  const [state, dispatch] = useReducer(reducer, { items: [], loading: false, error: null });
+  const [state, dispatch] = useReducer(reducer, { items: [], max: 0, loading: false, error: null });
 
   useEffect(() => {
     if (!user) return;
@@ -50,7 +48,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     const controller = new AbortController();
     dispatch({ type: "loading" });
     getFavorites(token, controller.signal)
-      .then((data) => dispatch({ type: "loaded", items: data }))
+      .then((data) => dispatch({ type: "loaded", items: data.items, max: data.max }))
       .catch((err: unknown) => {
         if (!controller.signal.aborted) dispatch({
           type: "error",
@@ -103,7 +101,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         favorites: user ? state.items : [],
         loading: state.loading,
         error: user ? state.error : null,
-        canAdd: state.items.length < MAX_FAVORITES,
+        canAdd: state.max === 0 || state.items.length < state.max,
         isFavorite,
         getFavoriteId,
         add,

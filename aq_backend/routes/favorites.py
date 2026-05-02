@@ -13,7 +13,7 @@ from aq_backend.auth.auth_deps import get_current_user
 from aq_backend.http_errors import api_error
 from aq_backend.db.models import FavoriteCity, User
 from aq_backend.ratelimit import FAVORITES_LIMIT, limiter
-from aq_backend.db.schemas import AddFavoriteCityRequest, FavoriteCityOut, OkResponse
+from aq_backend.db.schemas import AddFavoriteCityRequest, FavoriteCityOut, FavoritesListResponse
 
 router = APIRouter(prefix="/favorites", tags=["favorites"])
 
@@ -21,21 +21,21 @@ router = APIRouter(prefix="/favorites", tags=["favorites"])
 MAX_FAVORITES = 10
 
 
-@router.get("", response_model=list[FavoriteCityOut])
+@router.get("", response_model=FavoritesListResponse)
 async def list_favorites(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> list[FavoriteCityOut]:
+) -> FavoritesListResponse:
     """ Return all saved cities for the authenticated user """
     rows = await db.scalars(
         select(FavoriteCity)
         .where(FavoriteCity.user_id == current_user.id)
         .order_by(FavoriteCity.created_at)
     )
-    return [
-        FavoriteCityOut(id=r.id, name=r.name, country=r.country, lat=r.lat, lon=r.lon)
-        for r in rows
-    ]
+    return FavoritesListResponse(
+        items=[FavoriteCityOut(id=r.id, name=r.name, country=r.country, lat=r.lat, lon=r.lon) for r in rows],
+        max=MAX_FAVORITES,
+    )
 
 
 @router.post("", response_model=FavoriteCityOut, status_code=201)
@@ -47,6 +47,9 @@ async def add_favorite(
     db: AsyncSession = Depends(get_db),
 ) -> FavoriteCityOut:
     """ Save a city to the user's favourites (max 10) """
+    # Lock the user row so concurrent requests from the same user queue up here
+    # rather than racing past the count check and exceeding the limit.
+    await db.execute(select(User).where(User.id == current_user.id).with_for_update())
     count = await db.scalar(
         select(func.count()).select_from(FavoriteCity).where(FavoriteCity.user_id == current_user.id)
     )
@@ -67,14 +70,14 @@ async def add_favorite(
     return FavoriteCityOut(id=city.id, name=city.name, country=city.country, lat=city.lat, lon=city.lon)
 
 
-@router.delete("/{city_id}", response_model=OkResponse, status_code=200)
+@router.delete("/{city_id}", status_code=204)
 @limiter.limit(FAVORITES_LIMIT)
 async def remove_favorite(
     request: Request,
     city_id: UUID,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> OkResponse:
+) -> None:
     """ Remove a saved city (must belong to the authenticated user) """
     city = await db.scalar(
         select(FavoriteCity).where(
@@ -87,4 +90,3 @@ async def remove_favorite(
 
     await db.delete(city)
     await db.commit()
-    return OkResponse()

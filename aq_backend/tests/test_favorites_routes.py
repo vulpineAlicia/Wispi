@@ -7,7 +7,9 @@ _PARIS = {"name": "Paris", "country": "FR", "lat": 48.8566, "lon": 2.3522}
 async def test_list_favorites_empty(client: AsyncClient, auth_headers):
     resp = await client.get("/favorites", headers=auth_headers)
     assert resp.status_code == 200
-    assert resp.json() == []
+    body = resp.json()
+    assert body["items"] == []
+    assert body["max"] == 10
 
 
 async def test_favorites_requires_auth(client: AsyncClient):
@@ -30,7 +32,7 @@ async def test_added_city_appears_in_list(client: AsyncClient, auth_headers):
     await client.post("/favorites", json=_LONDON, headers=auth_headers)
     resp = await client.get("/favorites", headers=auth_headers)
     assert resp.status_code == 200
-    cities = resp.json()
+    cities = resp.json()["items"]
     assert len(cities) == 1
     assert cities[0]["name"] == "London"
 
@@ -38,7 +40,7 @@ async def test_added_city_appears_in_list(client: AsyncClient, auth_headers):
 async def test_multiple_cities_ordered_by_creation(client: AsyncClient, auth_headers):
     await client.post("/favorites", json=_LONDON, headers=auth_headers)
     await client.post("/favorites", json=_PARIS, headers=auth_headers)
-    cities = (await client.get("/favorites", headers=auth_headers)).json()
+    cities = (await client.get("/favorites", headers=auth_headers)).json()["items"]
     assert len(cities) == 2
     assert cities[0]["name"] == "London"
     assert cities[1]["name"] == "Paris"
@@ -66,10 +68,9 @@ async def test_remove_favorite(client: AsyncClient, auth_headers):
     city_id = (await client.post("/favorites", json=_LONDON, headers=auth_headers)).json()["id"]
 
     resp = await client.delete(f"/favorites/{city_id}", headers=auth_headers)
-    assert resp.status_code == 200
-    assert resp.json()["ok"] is True
+    assert resp.status_code == 204
 
-    assert (await client.get("/favorites", headers=auth_headers)).json() == []
+    assert (await client.get("/favorites", headers=auth_headers)).json()["items"] == []
 
 
 async def test_remove_nonexistent_favorite_is_404(client: AsyncClient, auth_headers):

@@ -87,6 +87,13 @@ class FavoriteCityOut(BaseModel):
     lon: LonField
 
 
+class FavoritesListResponse(BaseModel):
+    """ Response for GET /favorites — includes the per-user cap so the frontend needn't hard-code it """
+
+    items: list[FavoriteCityOut]
+    max: int
+
+
 class OkResponse(BaseModel):
     """ Generic success response for mutation endpoints """
 

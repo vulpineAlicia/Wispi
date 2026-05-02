@@ -80,6 +80,10 @@ export async function getJson<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiError(message, res.status, code, requestId);
   }
 
+  if (res.status === 204 || res.headers.get("content-length") === "0") {
+    return undefined as T;
+  }
+
   try {
     return (await res.json()) as T;
   } catch {

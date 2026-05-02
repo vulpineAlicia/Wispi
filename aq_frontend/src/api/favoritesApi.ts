@@ -8,8 +8,13 @@ export type FavoriteCity = {
   lon: number;
 };
 
-export async function getFavorites(token: string, signal?: AbortSignal): Promise<FavoriteCity[]> {
-  return getJson<FavoriteCity[]>("/favorites", {
+export type FavoritesListResponse = {
+  items: FavoriteCity[];
+  max: number;
+};
+
+export async function getFavorites(token: string, signal?: AbortSignal): Promise<FavoritesListResponse> {
+  return getJson<FavoritesListResponse>("/favorites", {
     headers: { Authorization: `Bearer ${token}` },
     signal,
   });
