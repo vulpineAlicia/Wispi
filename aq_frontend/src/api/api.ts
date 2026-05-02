@@ -37,10 +37,11 @@ export async function checkHealth(): Promise<boolean> {
 
 export async function geocodeCity(
   q: string,
+  lang: string = "en",
   signal?: AbortSignal
 ): Promise<GeoResult[]> {
   const data = await getJson<unknown>(
-    `/geocode?q=${encodeURIComponent(q)}`,
+    `/geocode?q=${encodeURIComponent(q)}&lang=${encodeURIComponent(lang)}`,
     { signal }
   );
 

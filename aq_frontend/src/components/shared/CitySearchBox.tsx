@@ -19,7 +19,7 @@ export default function CitySearchBox({
   buttonText,
   disabled = false,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [city, setCity] = useState("");
   const [hint, setHint] = useState<string | null>(null);
 
@@ -37,7 +37,7 @@ export default function CitySearchBox({
 
     setHint(null);
 
-    const result = await geo.execute((signal) => geocodeCity(q, signal));
+    const result = await geo.execute((signal) => geocodeCity(q, i18n.language, signal));
     if (result && result.length === 0) {
       setHint(t('search.noMatches'));
     }

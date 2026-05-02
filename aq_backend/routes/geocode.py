@@ -16,6 +16,7 @@ async def geocode(
     request: Request,
     q: str = Query(..., min_length=1, description="City name to search for"),
     limit: int = Query(5, ge=1, le=10, description="Maximum number of matches"),
+    lang: str = Query("en", min_length=2, max_length=10, description="Language code for city names"),
     service: OpenWeatherService = Depends(ow_service),
 ) -> GeocodeResponse:
     """ Return geocoding matches for a city query """
@@ -27,7 +28,10 @@ async def geocode(
         if not isinstance(item, dict):
             continue
 
-        name = item.get("name")
+        default_name = item.get("name")
+        local_names = item.get("local_names")
+        localized = local_names.get(lang) if isinstance(local_names, dict) else None
+        name = localized if isinstance(localized, str) else default_name
         country = item.get("country")
         lat_v = item.get("lat")
         lon_v = item.get("lon")
