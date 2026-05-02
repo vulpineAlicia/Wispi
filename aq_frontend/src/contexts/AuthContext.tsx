@@ -6,7 +6,7 @@ import type { AuthUser } from "../api/authApi";
 import { AuthContext } from "./authContextDef";
 import type { AuthContextValue, AuthState } from "./authContextDef";
 
-// decode the exp claim from a JWT without verifying the signature
+// safe to decode without signature verification — backend validates the token on every request
 function getTokenExpiry(token: string): number | null {
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const doRefresh = () => {
       authApi.refreshTokens()
         .then((res) => setAuthRef.current(res.access_token, res.user))
-        .catch(() => clearAuth());
+        .catch((err) => { console.error("Scheduled token refresh failed:", err); clearAuth(); });
     };
     if (delay <= 0) {
       doRefresh();
@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authApi
       .refreshTokens(controller.signal)
       .then((res) => setAuth(res.access_token, res.user))
-      .catch(() => { if (!controller.signal.aborted) clearAuth(); });
+      .catch((err) => { if (!controller.signal.aborted) { console.error("Initial token refresh failed:", err); clearAuth(); } });
 
     return () => controller.abort();
   }, [setAuth, clearAuth]);
@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
-    await authApi.logout().catch(() => {});
+    await authApi.logout().catch((err) => console.error("Logout request failed:", err));
     clearAuth();
   }, [clearAuth]);
 

@@ -13,7 +13,6 @@ GEOCODE_URL = "https://api.openweathermap.org/geo/1.0/direct"
 AIR_URL = "https://api.openweathermap.org/data/2.5/air_pollution"
 HISTORY_URL = "https://api.openweathermap.org/data/2.5/air_pollution/history"
 
-_DEV_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
 _DEV_ENVS = frozenset({"dev", "development", "local"})
 
 
@@ -30,6 +29,13 @@ class Settings(BaseSettings):
     openweather_api_key: str = Field(..., alias="OPENWEATHER_API_KEY")
     app_env: str = Field("development", alias="APP_ENV")
     frontend_origins: list[str] = Field(default_factory=list, alias="FRONTEND_ORIGINS")
+    dev_origins: list[str] = Field(
+        default_factory=lambda: ["http://localhost:5173", "http://127.0.0.1:5173"],
+        alias="DEV_ORIGINS",
+    )
+    # IPs allowed to set X-Forwarded-For (e.g. 127.0.0.1 when Caddy runs on the same host).
+    # Leave empty in dev; set to your proxy IP(s) in production.
+    trusted_proxies: frozenset[str] = Field(default_factory=frozenset, alias="TRUSTED_PROXIES")
 
     # Database
     database_url: str = Field(..., alias="DATABASE_URL")
@@ -81,7 +87,18 @@ class Settings(BaseSettings):
         """ Normalize environment name: strip whitespace and convert to lowercase """
         return value.strip().lower()
 
-    @field_validator("frontend_origins", mode="before")
+    @field_validator("trusted_proxies", mode="before")
+    @classmethod
+    def parse_trusted_proxies(cls, value: Any) -> frozenset[str]:
+        if not value:
+            return frozenset()
+        if isinstance(value, str):
+            return frozenset(ip.strip() for ip in value.split(",") if ip.strip())
+        if isinstance(value, (list, set, frozenset)):
+            return frozenset(str(ip).strip() for ip in value if str(ip).strip())
+        raise ValueError("TRUSTED_PROXIES must be a comma-separated string of IP addresses")
+
+    @field_validator("frontend_origins", "dev_origins", mode="before")
     @classmethod
     def parse_frontend_origins(cls, value: Any) -> list[str]:
         """
@@ -133,7 +150,7 @@ class Settings(BaseSettings):
         """ Ensure frontend origins are valid and request timeout exceeds upstream budget """
         if not self.frontend_origins:
             if self.app_env in _DEV_ENVS:
-                self.frontend_origins = list(_DEV_ORIGINS)
+                self.frontend_origins = list(self.dev_origins)
             else:
                 raise ValueError(
                     "FRONTEND_ORIGINS is required in non-development env "
