@@ -1,5 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { buildHistoryModel } from '../../src/lib/historyModel'
 import type { AirHistoryItem } from '../../src/api/apiTypes'
 

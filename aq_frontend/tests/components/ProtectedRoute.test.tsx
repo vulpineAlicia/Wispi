@@ -47,7 +47,7 @@ describe('ProtectedRoute', () => {
   })
 
   it('renders the outlet when a user is logged in', () => {
-    const user = { id: '1', nickname: 'tester' }
+    const user = { id: '1', nickname: 'tester', avatar_id: 0 }
     renderRoute(makeAuth({ user, isLoading: false }))
     expect(screen.getByText('Protected Content')).toBeInTheDocument()
     expect(screen.queryByText('Auth Page')).not.toBeInTheDocument()

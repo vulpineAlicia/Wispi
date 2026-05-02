@@ -86,8 +86,7 @@ describe('isGeoResult', () => {
   })
 
   it('returns false when name is missing', () => {
-    const { name: _n, ...rest } = valid
-    expect(isGeoResult(rest)).toBe(false)
+    expect(isGeoResult({ country: 'GB', lat: 51.5, lon: -0.1 })).toBe(false)
   })
 
   it('returns false when lat is non-finite', () => {
@@ -117,8 +116,7 @@ describe('isAirData', () => {
   })
 
   it('returns false when timestamp_unix is missing', () => {
-    const { timestamp_unix: _t, ...rest } = valid
-    expect(isAirData(rest)).toBe(false)
+    expect(isAirData({ location: { lat: 51.5, lon: -0.1 }, aqi_ow_1_5: 2, pollutants: { pm2_5: 12.3 }, source: 'openweather' })).toBe(false)
   })
 
   it('returns false when pollutants contains a non-finite value', () => {
