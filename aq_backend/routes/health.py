@@ -6,6 +6,7 @@ import logging
 from fastapi import APIRouter, Depends, Response
 from pydantic import BaseModel
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from aq_backend.db.database import get_db
@@ -24,7 +25,7 @@ class HealthResponse(BaseModel):
 async def health(response: Response, db: AsyncSession = Depends(get_db)) -> HealthResponse:
     try:
         await asyncio.wait_for(db.execute(text("SELECT 1")), timeout=_DB_PROBE_TIMEOUT)
-    except Exception:
+    except (asyncio.TimeoutError, OSError, SQLAlchemyError):
         logger.exception("Health check: DB probe failed")
         response.status_code = 503
         return HealthResponse(status="db_unavailable")

@@ -37,13 +37,18 @@ async def list_users(
     db: AsyncSession = Depends(get_db),
 ) -> list[UserAdminOut]:
     """ Return registered users with optional nickname filter and pagination """
-    query = select(User).order_by(User.created_at).limit(limit).offset(offset)
+    query = (
+        select(User.id, User.nickname, User.avatar_id, User.created_at)
+        .order_by(User.created_at)
+        .limit(limit)
+        .offset(offset)
+    )
     if nickname:
         query = query.where(User.nickname.ilike(f"%{nickname}%"))
-    users = await db.scalars(query)
+    rows = (await db.execute(query)).all()
     return [
-        UserAdminOut(id=u.id, nickname=u.nickname, avatar_id=u.avatar_id, created_at=u.created_at)
-        for u in users
+        UserAdminOut(id=r.id, nickname=r.nickname, avatar_id=r.avatar_id, created_at=r.created_at)
+        for r in rows
     ]
 
 
