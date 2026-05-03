@@ -80,7 +80,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="features" className="mb-14 mt-16 scroll-mt-24 md:scroll-mt-40">
+      <section id="features" className="mb-14 mt-16 scroll-mt-44 md:scroll-mt-40">
         <div className="flex flex-col gap-2">
           <h2 className="text-xl font-semibold text-brand-900 md:text-2xl">
             {t('home.featuresTitle')}

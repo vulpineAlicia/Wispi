@@ -23,8 +23,8 @@ export default function NavBar() {
   }
 
   function handleNavClick(item: NavLinkItem) {
-    navigateTo(item.to);
     closeMenu();
+    requestAnimationFrame(() => navigateTo(item.to));
   }
 
   const desktopLinkClass = "text-brand-200 transition hover:text-brand-50";
@@ -98,7 +98,7 @@ export default function NavBar() {
               ) : (
                 <button
                   type="button"
-                  onClick={() => { navigate("/auth"); closeMenu(); }}
+                  onClick={() => { closeMenu(); requestAnimationFrame(() => navigateTo("/auth")); }}
                   className={mobileLinkClass}
                 >
                   {t('nav.registerSignIn')}
