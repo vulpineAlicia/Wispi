@@ -8,10 +8,10 @@ export default function FeatureCard({ title, desc }: Props) {
     <div
       className="
         group relative overflow-hidden rounded-3xl
-        bg-brand-50/70 p-6 md:p-7
+        bg-brand-50/80 p-6 md:p-7
         ring-1 ring-brand-300/50
         shadow-[0_20px_50px_-20px_rgba(15,58,87,0.35)]
-        backdrop-blur transition-all duration-300
+        transition-all duration-300
         hover:shadow-[0_30px_80px_-25px_rgba(15,58,87,0.65)]
       "
     >
