@@ -13,8 +13,8 @@ export type FavoritesListResponse = {
   max: number;
 };
 
-export async function getFavorites(token: string, signal?: AbortSignal): Promise<FavoritesListResponse> {
-  return getJson<FavoritesListResponse>("/favorites", {
+export async function getFavorites(token: string, lang: string = "en", signal?: AbortSignal): Promise<FavoritesListResponse> {
+  return getJson<FavoritesListResponse>(`/favorites?lang=${encodeURIComponent(lang)}`, {
     headers: { Authorization: `Bearer ${token}` },
     signal,
   });

@@ -31,6 +31,7 @@ class Endpoint(str, Enum):
     """ Known OpenWeather upstream endpoint kinds """
 
     GEOCODE = "geocode"
+    REVERSE_GEOCODE = "reverse_geocode"
     AIR_CURRENT = "air_current"
     AIR_HISTORY = "air_history"
     TILE = "tile"

@@ -51,6 +51,7 @@ def create_app() -> FastAPI:
                 client=client,
                 api_key=settings.openweather_api_key,
                 geocode_url=settings.geocode_url,
+                reverse_geocode_url=settings.reverse_geocode_url,
                 air_url=settings.air_url,
                 history_url=settings.history_url,
                 total_budget_s=settings.ow_total_budget_s,

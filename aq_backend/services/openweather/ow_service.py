@@ -22,6 +22,7 @@ class OpenWeatherService:
         client: httpx.AsyncClient,
         api_key: str,
         geocode_url: str,
+        reverse_geocode_url: str,
         air_url: str,
         history_url: str,
         *,
@@ -31,6 +32,7 @@ class OpenWeatherService:
         self._client = client
         self._api_key = api_key
         self._geocode_url = geocode_url
+        self._reverse_geocode_url = reverse_geocode_url
         self._air_url = air_url
         self._history_url = history_url
 
@@ -110,6 +112,25 @@ class OpenWeatherService:
             self._geocode_url,
             params=params,
             endpoint=Endpoint.GEOCODE,
+        )
+        return data, meta
+
+    async def reverse_geocode(
+        self,
+        lat: float,
+        lon: float,
+    ) -> tuple[Any, UpstreamMeta]:
+        """ Accept lat/lon and return location matches from OpenWeather reverse geocoding """
+        params = {
+            "lat": lat,
+            "lon": lon,
+            "limit": 1,
+            "appid": self._api_key,
+        }
+        data, meta = await self._get_json(
+            self._reverse_geocode_url,
+            params=params,
+            endpoint=Endpoint.REVERSE_GEOCODE,
         )
         return data, meta
 

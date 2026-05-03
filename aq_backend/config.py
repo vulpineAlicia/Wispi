@@ -10,6 +10,7 @@ from pydantic import Field, ValidationInfo, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 GEOCODE_URL = "https://api.openweathermap.org/geo/1.0/direct"
+REVERSE_GEOCODE_URL = "https://api.openweathermap.org/geo/1.0/reverse"
 AIR_URL = "https://api.openweathermap.org/data/2.5/air_pollution"
 HISTORY_URL = "https://api.openweathermap.org/data/2.5/air_pollution/history"
 
@@ -60,6 +61,7 @@ class Settings(BaseSettings):
     ow_max_attempts: int = Field(3, alias="OW_MAX_ATTEMPTS")
 
     geocode_url: str = GEOCODE_URL
+    reverse_geocode_url: str = REVERSE_GEOCODE_URL
     air_url: str = AIR_URL
     history_url: str = HISTORY_URL
 
