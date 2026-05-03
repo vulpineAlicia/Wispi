@@ -51,7 +51,7 @@ export default function ServerStatus() {
   return (
     <div className="inline-flex items-center gap-2 rounded-full bg-brand-700 px-3 py-1.5 text-xs font-medium text-white ring-1 ring-white/15 backdrop-blur">
       <span
-        className={`h-2 w-2 rounded-full ${dot[status]} shadow-[0_0_0_3px_rgba(255,255,255,0.12)]`}
+        className={`h-2 w-2 min-w-2 min-h-2 shrink-0 rounded-full ${dot[status]} shadow-[0_0_0_3px_rgba(255,255,255,0.12)]`}
       />
       <span className="text-brand-50">{t(`server.${status}`)}</span>
     </div>
