@@ -9,6 +9,7 @@ import CityResultPanel from "../components/shared/CityResultPanel";
 import CitySearchBox from "../components/shared/CitySearchBox";
 import HistoryPanel, { type HistoryDays } from "../components/shared/HistoryPanel";
 import MapLayersPanel from "../components/map/MapLayersPanel";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useAirHistory } from "../hooks/useAirHistory";
 import { useLeafletMap } from "../hooks/useLeafletMap";
 import type { GeoResult } from "../api/api";
@@ -47,6 +48,7 @@ export default function MapPage() {
   );
 
   function handleSelectCity(place: GeoResult) {
+    window.scrollTo(0, 0);
     navigate(
       buildMapUrl({
         lat: place.lat,
@@ -59,20 +61,31 @@ export default function MapPage() {
 
   return (
     <div className="flex flex-col md:relative md:h-[calc(100vh-143px)] md:w-full md:overflow-hidden">
-      {/* Map — 45vh on mobile, fills container on desktop */}
-      <div className="relative h-[45vh] md:absolute md:inset-0 md:h-auto">
+      {/* Map — 65vh on mobile, fills container on desktop */}
+      <div className="relative h-[75vh] md:absolute md:inset-0 md:h-auto">
         <div ref={mapDivRef} className="absolute inset-0 z-0" />
-        <MapLayersPanel overlay={overlay} setOverlay={setOverlay} />
-      </div>
+        <MapLayersPanel overlay={overlay} setOverlay={setOverlay} hasSelection={hasSelection} />
 
-      {/* Mobile search panel — normal flow below map, no bubble */}
-      <div className="px-4 py-5 text-brand-900 md:hidden">
-        <h1 className="text-lg font-semibold leading-tight">{t('map.searchCity')}</h1>
-
-        <div className="mt-3">
+        {/* Mobile: search overlaid on map, top-left */}
+        <div className="absolute left-4 right-4 top-4 z-10 md:hidden">
           <CitySearchBox onSelect={handleSelectCity} />
         </div>
 
+        {/* Mobile: scroll down to results — only when city selected */}
+        {hasSelection && (
+          <button
+            type="button"
+            onClick={() => document.getElementById('mobile-results')?.scrollIntoView({ behavior: 'smooth' })}
+            className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-3xl border border-brand-200 bg-white px-4 py-2 text-sm text-brand-900 shadow-sm md:hidden"
+          >
+            <ChevronDown size={15} />
+            Info
+          </button>
+        )}
+      </div>
+
+      {/* Mobile: results + history below map */}
+      <div id="mobile-results" className={`scroll-mt-20 text-brand-900 md:hidden ${hasSelection ? "px-4 py-5" : ""}`}>
         {selection && (
           <CityResultPanel
             variant="map"
@@ -85,20 +98,33 @@ export default function MapPage() {
             error={history.error}
           />
         )}
-
-        <div className="mt-4">
-          <HistoryPanel
-            hasSelection={hasSelection}
-            historyDays={historyDays}
-            setHistoryDays={setHistoryDays}
-            historyLoading={history.loading}
-            historyError={history.error}
-            chartData={history.model.chartData}
-            lat={selection?.lat}
-            lon={selection?.lon}
-            name={selection?.name}
-          />
-        </div>
+        {hasSelection && (
+          <div className="mt-4">
+            <HistoryPanel
+              hasSelection={hasSelection}
+              historyDays={historyDays}
+              setHistoryDays={setHistoryDays}
+              historyLoading={history.loading}
+              historyError={history.error}
+              chartData={history.model.chartData}
+              lat={selection?.lat}
+              lon={selection?.lon}
+              name={selection?.name}
+            />
+          </div>
+        )}
+        {hasSelection && (
+          <div className="mt-4 flex justify-end">
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="inline-flex items-center gap-1.5 rounded-3xl border border-brand-200 bg-brand-50 px-4 py-2 text-sm text-brand-700 shadow-sm"
+            >
+              <ChevronUp size={15} />
+              Back to map
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Desktop search panel — absolute overlay with bubble */}
