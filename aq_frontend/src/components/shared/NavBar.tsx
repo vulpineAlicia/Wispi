@@ -2,7 +2,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
+import { Compass } from "lucide-react";
+
 import { useAuth } from "../../hooks/useAuth";
+import Bubble from "../templates/Bubble";
 import { useNavigation } from "../../hooks/useNavigation";
 import { HEADER_LINKS, type NavLinkItem } from "../../lib/siteNav";
 import UserMenu from "./UserMenu";
@@ -29,7 +32,7 @@ export default function NavBar() {
 
   const desktopLinkClass = "text-brand-200 transition hover:text-brand-50";
   const mobileLinkClass =
-    "rounded-2xl px-3 py-2 text-left text-sm text-brand-900/80 transition hover:bg-brand-50 hover:text-brand-900";
+    "rounded-2xl px-3 py-2 text-left text-sm text-brand-700 transition hover:bg-brand-50";
 
   return (
     <div className="border-b border-white/10 bg-brand-700/95 text-brand-50 shadow-sm">
@@ -57,16 +60,17 @@ export default function NavBar() {
               aria-expanded={open}
               aria-controls="mobile-nav"
               aria-label={t('nav.toggleMenu')}
-              className="inline-flex items-center justify-center rounded-2xl border border-brand-200 bg-white/70 px-3 py-2 text-sm text-brand-900 transition hover:bg-brand-50 md:hidden"
+              className="inline-flex items-center gap-2 p-2 text-sm text-brand-50 md:hidden"
             >
-              ☰
+              <Compass size={16} />
+              <span>Navigation</span>
             </button>
           </div>
         </div>
 
         {open && (
           <div id="mobile-nav" className="pb-3 md:hidden">
-            <div className="flex flex-col gap-2 rounded-3xl border border-brand-200 bg-white/80 p-3 backdrop-blur">
+            <Bubble tone="brand" className="flex flex-col gap-2 p-3">
               {HEADER_LINKS.map((item) => (
                 <button
                   key={navItemKey(item, "m:")}
@@ -104,7 +108,7 @@ export default function NavBar() {
                   {t('nav.registerSignIn')}
                 </button>
               )}
-            </div>
+            </Bubble>
           </div>
         )}
       </div>
