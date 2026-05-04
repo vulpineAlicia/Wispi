@@ -32,9 +32,11 @@ export default function Home() {
     : "/map";
 
   return (
-    <main className="mx-auto max-w-6xl px-4 pb-14 pt-8">
-      <section id="lookup" className="mt-2 scroll-mt-35">
-        <div className="relative flex items-center md:min-h-[70vh] md:overflow-hidden md:rounded-3xl md:ring-1 md:ring-brand-300/50 md:shadow-[0_20px_50px_-20px_rgba(15,58,87,0.35)]">
+    <main className="mx-auto max-w-6xl px-4 pb-6 pt-0 md:pb-14 md:pt-8">
+      <section id="lookup" className="mt-0 scroll-mt-35 md:mt-2">
+        <div className="-mx-4 relative flex items-center overflow-hidden md:mx-0 md:min-h-[70vh] md:rounded-3xl md:ring-1 md:ring-brand-300/50 md:shadow-[0_20px_50px_-20px_rgba(15,58,87,0.35)]">
+          <div className="absolute inset-0 bg-linear-to-tr from-brand-200 via-brand-200 to-brand-300 md:hidden" />
+
           <div
             className="absolute inset-0 hidden bg-cover bg-center md:block"
             style={{ backgroundImage: `url(${lookupBg})` }}
@@ -42,7 +44,7 @@ export default function Home() {
           <div className="absolute inset-0 hidden bg-white/5 backdrop-blur-[3px] md:block" />
           <div className="absolute inset-0 hidden bg-linear-to-r from-white/70 via-white/40 to-transparent md:block" />
 
-          <div className="relative w-full p-0 md:p-9">
+          <div className="relative w-full px-4 py-14 md:p-9">
             <div className="max-w-2xl">
               <div className="flex flex-col gap-3">
                 <h1 className="whitespace-pre-line text-3xl font-semibold tracking-tight text-brand-900 md:text-4xl">
@@ -80,7 +82,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="features" className="mb-14 mt-16 scroll-mt-44 md:scroll-mt-40">
+      <section id="features" className="mb-6 mt-8 scroll-mt-44 md:mb-14 md:mt-16 md:scroll-mt-40">
         <div className="flex flex-col gap-2">
           <h2 className="text-xl font-semibold text-brand-900 md:text-2xl">
             {t('home.featuresTitle')}
