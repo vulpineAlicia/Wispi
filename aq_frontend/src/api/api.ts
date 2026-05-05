@@ -40,10 +40,8 @@ export async function geocodeCity(
   lang: string = "en",
   signal?: AbortSignal
 ): Promise<GeoResult[]> {
-  const data = await getJson<unknown>(
-    `/geocode?q=${encodeURIComponent(q)}&lang=${encodeURIComponent(lang)}`,
-    { signal }
-  );
+  const qs = new URLSearchParams({ q, lang });
+  const data = await getJson<unknown>(`/geocode?${qs.toString()}`, { signal });
 
   if (!isRecord(data) || !Array.isArray(data.results) || !data.results.every(isGeoResult)) {
     throw invalidResponse("Server returned an invalid geocoding response.");
@@ -57,7 +55,8 @@ export async function getAirCurrent(
   lon: number,
   signal?: AbortSignal
 ): Promise<AirData> {
-  const data = await getJson<unknown>(`/air/current?lat=${lat}&lon=${lon}`, {
+  const qs = new URLSearchParams({ lat: String(lat), lon: String(lon) });
+  const data = await getJson<unknown>(`/air/current?${qs.toString()}`, {
     signal,
   });
 

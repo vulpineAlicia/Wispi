@@ -1,4 +1,4 @@
-import { deleteJson, getJson, postJson } from "./apiClient";
+import { authHeader, deleteJson, getJson, postJson } from "./apiClient";
 import type { AuthUser, TokenResponse } from "./authTypes";
 
 export type { AuthUser, TokenResponse };
@@ -20,9 +20,7 @@ export async function logout(): Promise<void> {
 }
 
 export async function getMe(accessToken: string): Promise<AuthUser> {
-  return getJson<AuthUser>("/auth/me", {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  return getJson<AuthUser>("/auth/me", { headers: authHeader(accessToken) });
 }
 
 export async function changePassword(
@@ -33,12 +31,10 @@ export async function changePassword(
   await postJson<unknown>(
     "/auth/change-password",
     { old_password: oldPassword, new_password: newPassword },
-    { headers: { Authorization: `Bearer ${accessToken}` } }
+    { headers: authHeader(accessToken) }
   );
 }
 
 export async function deleteAccount(accessToken: string): Promise<void> {
-  await deleteJson<unknown>("/auth/me", {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  await deleteJson<unknown>("/auth/me", { headers: authHeader(accessToken) });
 }

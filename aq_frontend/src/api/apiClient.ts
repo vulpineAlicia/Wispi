@@ -3,6 +3,10 @@ import { isRecord } from "./apiGuards";
 
 export const API_BASE = import.meta.env.VITE_API_BASE ?? "/api";
 
+export function authHeader(token: string): { Authorization: string } {
+  return { Authorization: `Bearer ${token}` };
+}
+
 async function safeReadJson(res: Response): Promise<unknown> {
   try {
     return await res.json();
