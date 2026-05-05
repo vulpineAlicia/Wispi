@@ -74,6 +74,20 @@ def _token_response(user: User) -> TokenResponse:
     )
 
 
+async def _issue_refresh_token(
+    db: AsyncSession, response: Response, user_id: str
+) -> None:
+    """ Insert a new refresh token, commit, and set the cookie. """
+    raw_token, expires_at = create_refresh_token()
+    db.add(RefreshToken(
+        user_id=user_id,
+        token_hash=hash_token(raw_token),
+        expires_at=expires_at,
+    ))
+    await db.commit()
+    _set_refresh_cookie(response, raw_token)
+
+
 class RegisterRequest(BaseModel):
     password: str = Field(min_length=8, max_length=128)
 
@@ -100,9 +114,10 @@ async def register(
     password_hash = hash_password(body.password)
     avatar_id = random_avatar_id()
 
-    for _ in range(10):
+    for attempt in range(10):
+        candidate = generate_nickname()
         user = User(
-            nickname=generate_nickname(),
+            nickname=candidate,
             avatar_id=avatar_id,
             password_hash=password_hash,
         )
@@ -112,18 +127,12 @@ async def register(
             break
         except IntegrityError:
             await db.rollback()
+            logger.warning("nickname collision on register (attempt %d): %r", attempt + 1, candidate)
     else:
+        logger.error("register: exhausted 10 nickname-generation attempts; namespace may be saturated")
         raise api_error(500, "SERVER_ERROR", "Could not generate a unique nickname. Try again.")
 
-    raw_token, expires_at = create_refresh_token()
-    db.add(RefreshToken(
-        user_id=user.id,
-        token_hash=hash_token(raw_token),
-        expires_at=expires_at,
-    ))
-    await db.commit()
-
-    _set_refresh_cookie(response, raw_token)
+    await _issue_refresh_token(db, response, user.id)
     return _token_response(user)
 
 
@@ -149,15 +158,7 @@ async def login(
         )
     )
 
-    raw_token, expires_at = create_refresh_token()
-    db.add(RefreshToken(
-        user_id=user.id,
-        token_hash=hash_token(raw_token),
-        expires_at=expires_at,
-    ))
-    await db.commit()
-
-    _set_refresh_cookie(response, raw_token)
+    await _issue_refresh_token(db, response, user.id)
     return _token_response(user)
 
 
@@ -191,15 +192,7 @@ async def refresh_token(
 
     # Rotate: delete old token, issue new one
     await db.delete(rt)
-    raw_token, expires_at = create_refresh_token()
-    db.add(RefreshToken(
-        user_id=user.id,
-        token_hash=hash_token(raw_token),
-        expires_at=expires_at,
-    ))
-    await db.commit()
-
-    _set_refresh_cookie(response, raw_token)
+    await _issue_refresh_token(db, response, user.id)
     return _token_response(user)
 
 
@@ -220,7 +213,7 @@ async def logout(
                 await db.delete(rt)
                 await db.commit()
     except Exception:
-        logger.warning("Failed to delete refresh token during logout; cookie still cleared")
+        logger.exception("Failed to delete refresh token during logout; cookie still cleared")
     finally:
         _clear_refresh_cookie(response)
     return OkResponse()

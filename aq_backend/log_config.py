@@ -38,15 +38,15 @@ class _DefaultExtrasFilter(logging.Filter):
 
 def setup_logging() -> None:
     """ Configure colored logging for aq_backend logger """
-    level_name = os.getenv("LOG_LEVEL", "INFO").upper()
-    level = getattr(logging, level_name, logging.INFO)
-
     logger = logging.getLogger("aq_backend")
-    logger.setLevel(level)
-    logger.propagate = False
 
     if any(getattr(h, "name", None) == "aq_backend_handler" for h in logger.handlers):
         return
+
+    level_name = os.getenv("LOG_LEVEL", "INFO").upper()
+    level = getattr(logging, level_name, logging.INFO)
+    logger.setLevel(level)
+    logger.propagate = False
 
     handler = logging.StreamHandler(sys.stdout)
     handler.name = "aq_backend_handler"

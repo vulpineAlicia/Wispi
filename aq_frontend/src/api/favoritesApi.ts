@@ -1,4 +1,4 @@
-import { deleteJson, getJson, postJson } from "./apiClient";
+import { authHeader, deleteJson, getJson, postJson } from "./apiClient";
 
 export type FavoriteCity = {
   id: string;
@@ -14,8 +14,9 @@ export type FavoritesListResponse = {
 };
 
 export async function getFavorites(token: string, lang: string = "en", signal?: AbortSignal): Promise<FavoritesListResponse> {
-  return getJson<FavoritesListResponse>(`/favorites?lang=${encodeURIComponent(lang)}`, {
-    headers: { Authorization: `Bearer ${token}` },
+  const qs = new URLSearchParams({ lang });
+  return getJson<FavoritesListResponse>(`/favorites?${qs.toString()}`, {
+    headers: authHeader(token),
     signal,
   });
 }
@@ -25,12 +26,12 @@ export async function addFavorite(
   token: string
 ): Promise<FavoriteCity> {
   return postJson<FavoriteCity>("/favorites", city, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: authHeader(token),
   });
 }
 
 export async function removeFavorite(id: string, token: string): Promise<void> {
   await deleteJson<unknown>(`/favorites/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: authHeader(token),
   });
 }

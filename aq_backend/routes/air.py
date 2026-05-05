@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from typing import Any
 
@@ -19,6 +20,7 @@ from aq_backend.db.schemas import (
 from aq_backend.services.openweather import OpenWeatherService
 
 router = APIRouter(tags=["air"])
+logger = logging.getLogger("aq_backend.air")
 
 SECONDS_PER_DAY = 86_400
 MAX_HISTORY_DAYS = 365
@@ -34,6 +36,7 @@ def _as_float_dict(value: Any) -> dict[str, float]:
         try:
             out[str(k)] = float(v)
         except (TypeError, ValueError):
+            logger.debug("dropping non-float pollutant value: key=%r value=%r", k, v)
             continue
 
     return out
