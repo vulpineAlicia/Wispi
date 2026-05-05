@@ -33,6 +33,10 @@ function reducer(state: State, action: Action): State {
     case "error": return { ...state, loading: false, error: action.message };
     case "add": return { ...state, items: [...state.items, action.item] };
     case "remove": return { ...state, items: state.items.filter((f) => f.id !== action.id) };
+    default: {
+      const _exhaustive: never = action;
+      return _exhaustive;
+    }
   }
 }
 
