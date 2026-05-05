@@ -3,8 +3,17 @@ import type { ReactNode } from "react";
 
 import * as authApi from "../api/authApi";
 import type { AuthUser } from "../api/authApi";
+import { ApiError } from "../api/apiError";
 import { AuthContext } from "./authContextDef";
 import type { AuthContextValue, AuthState } from "./authContextDef";
+
+const REFRESH_RETRY_DELAY_MS = 30_000;
+
+// 401 means the refresh token is gone/invalid — only that should drop the session.
+// Network errors and 5xx are transient; we retry instead of logging the user out.
+function isAuthFailure(err: unknown): boolean {
+  return err instanceof ApiError && err.status === 401;
+}
 
 // safe to decode without signature verification — backend validates the token on every request
 function getTokenExpiry(token: string): number | null {
@@ -45,16 +54,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!expiry) return;
     // Fire 60 s before expiry so there's always a valid token in flight
     const delay = expiry - Date.now() - 60_000;
-    const doRefresh = () => {
+    const doRefresh = (isRetry = false) => {
       authApi.refreshTokens()
-        .then((res) => setAuthRef.current(res.access_token, res.user))
-        .catch((err) => { console.error("Scheduled token refresh failed:", err); clearAuth(); });
+        .then((res) => {
+          // signOut/clearAuth may have run while the request was in flight
+          if (tokenRef.current === null) return;
+          setAuthRef.current(res.access_token, res.user);
+        })
+        .catch((err) => {
+          if (tokenRef.current === null) return;
+          if (isAuthFailure(err)) {
+            console.error("Scheduled token refresh: refresh token invalid, signing out:", err);
+            clearAuth();
+            return;
+          }
+          if (isRetry) {
+            console.error("Scheduled token refresh failed twice, signing out:", err);
+            clearAuth();
+            return;
+          }
+          console.warn("Scheduled token refresh failed (transient), retrying:", err);
+          refreshTimerRef.current = setTimeout(() => doRefresh(true), REFRESH_RETRY_DELAY_MS);
+        });
     };
     if (delay <= 0) {
       doRefresh();
       return;
     }
-    refreshTimerRef.current = setTimeout(doRefresh, delay);
+    refreshTimerRef.current = setTimeout(() => doRefresh(), delay);
   }, [clearAuth]);
 
   const setAuth = useCallback((token: string, user: AuthUser) => {
