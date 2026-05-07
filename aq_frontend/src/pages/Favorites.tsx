@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { useFavorites } from "../hooks/useFavorites";
-import { getAirCurrent } from "../api/api";
+import { useAirHistory } from "../hooks/useAirHistory";
 import type { FavoriteCity } from "../api/favoritesApi";
 import { buildMapUrl } from "../lib/locationSelection";
 import { countryName } from "../lib/countryName";
@@ -14,17 +13,8 @@ import Bubble from "../components/templates/Bubble";
 function FavoriteCityCard({ city }: { city: FavoriteCity }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const [aqi, setAqi] = useState<number | null>(null);
-  const [aqiLoading, setAqiLoading] = useState(true);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    getAirCurrent(city.lat, city.lon, controller.signal)
-      .then((data) => setAqi(data.aqi_ow_1_5))
-      .catch(() => { if (!controller.signal.aborted) setAqi(null); })
-      .finally(() => { if (!controller.signal.aborted) setAqiLoading(false); });
-    return () => controller.abort();
-  }, [city.lat, city.lon]);
+  const history = useAirHistory(city.lat, city.lon, 1);
+  const aqi = history.model.latestPanel?.aqi ?? null;
 
   const mapUrl = buildMapUrl({ lat: city.lat, lon: city.lon, name: city.name, country: city.country ?? undefined });
 
@@ -47,7 +37,7 @@ function FavoriteCityCard({ city }: { city: FavoriteCity }) {
       </div>
 
       <div className="flex items-center gap-2">
-        {aqiLoading ? (
+        {history.loading ? (
           <span className="text-sm text-brand-500">{t('favorites.loading')}</span>
         ) : aqi != null ? (
           <AqiPill aqi={aqi} />
