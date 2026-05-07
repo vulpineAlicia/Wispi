@@ -80,10 +80,10 @@ export default function FavoritesPage() {
         {loading ? (
           <div className="text-sm text-brand-700">{t('favorites.loading')}</div>
         ) : favorites.length === 0 ? (
-          <Bubble className="px-6 py-8 text-center text-sm text-brand-600">
+          <p className="text-center text-xl text-brand-700">
             {t('favorites.addHint')}{" "}
             <span className="text-rose-400">♥</span>
-          </Bubble>
+          </p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {favorites.map((city) => (
