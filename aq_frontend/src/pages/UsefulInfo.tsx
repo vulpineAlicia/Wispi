@@ -5,7 +5,7 @@ export default function UsefulInfo() {
   const { t } = useTranslation();
 
   return (
-    <main className="mx-auto max-w-6xl px-4 pt-6 pb-16 text-brand-900">
+    <main className="mx-auto max-w-6xl px-4 pt-6 pb-8 text-brand-900">
       <div className="mt-6 md:rounded-3xl md:border md:border-brand-200 md:bg-brand-50 md:p-10 md:shadow-sm">
         <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
           {t('info.title')}
