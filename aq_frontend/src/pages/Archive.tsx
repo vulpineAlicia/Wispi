@@ -46,12 +46,12 @@ export default function ArchivePage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 text-brand-900">
+    <main className="mx-auto max-w-6xl px-4 pb-8 pt-6 text-brand-900">
       <div className="mt-6 p-0 md:rounded-3xl md:border md:border-brand-200 md:bg-brand-50 md:p-10 md:shadow-sm">
         <section className="flex flex-col gap-8 lg:flex-row">
           {/* Left column */}
           <div className="flex min-w-0 flex-col justify-between gap-5 lg:flex-3">
-            <div className="space-y-5">
+            <div>
               <div className="max-w-prose">
                 <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
                   {t('archive.title')}
@@ -64,7 +64,14 @@ export default function ArchivePage() {
                 </p>
               </div>
 
-              <div className="w-full sm:max-w-sm">
+              <img
+                src={archiveBooks}
+                alt=""
+                draggable={false}
+                className="mt-3 block h-auto w-full select-none lg:hidden"
+              />
+
+              <div className="mt-3 w-full sm:max-w-sm">
                 <CitySearchBox onSelect={handleSelectCity} />
               </div>
             </div>
@@ -92,10 +99,12 @@ export default function ArchivePage() {
                 />
               </Bubble>
             )}
+
+            {selection && <div className="lg:hidden"><ArchiveHintBubble /></div>}
           </div>
 
-          {/* Right column */}
-          <div className="flex min-w-0 flex-col justify-between gap-5 lg:flex-5">
+          {/* Right column — display:none on mobile, no gap created */}
+          <div className="hidden lg:flex min-w-0 flex-col justify-between gap-5 lg:flex-5">
             <div className="mx-auto mt-7 w-full max-w-2xl lg:mx-0 lg:ml-auto">
               <img
                 src={archiveBooks}
