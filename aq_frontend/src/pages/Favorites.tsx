@@ -62,36 +62,34 @@ export default function FavoritesPage() {
   const { favorites, loading } = useFavorites();
 
   return (
-    <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 text-brand-900">
-      <Bubble tone="brand" className="mt-6 p-6 md:p-10">
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-              {t('favorites.title')}
-            </h1>
-            <p className="mt-2 text-base text-brand-700">
-              {favorites.length === 0
-                ? t('favorites.noSaved')
-                : t('favorites.citiesSaved', { total: favorites.length })}
-            </p>
-          </div>
-        </div>
+    <main className="mx-auto max-w-6xl px-4 pb-8 pt-6 text-brand-900">
+      <div className="mt-6 md:rounded-3xl md:border md:border-brand-200 md:bg-brand-50 md:p-10 md:shadow-sm">
+        <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+          {t('favorites.title')}
+        </h1>
+        <p className="mt-2 text-base text-brand-700">
+          {favorites.length === 0
+            ? t('favorites.noSaved')
+            : t('favorites.citiesSaved', { total: favorites.length })}
+        </p>
 
-        {loading ? (
-          <div className="text-sm text-brand-700">{t('favorites.loading')}</div>
-        ) : favorites.length === 0 ? (
-          <p className="text-center text-xl text-brand-700">
-            {t('favorites.addHint')}{" "}
-            <span className="text-rose-400">♥</span>
-          </p>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {favorites.map((city) => (
-              <FavoriteCityCard key={city.id} city={city} />
-            ))}
-          </div>
-        )}
-      </Bubble>
+        <div className="mt-6">
+          {loading ? (
+            <div className="text-sm text-brand-700">{t('favorites.loading')}</div>
+          ) : favorites.length === 0 ? (
+            <p className="text-center text-xl text-brand-700">
+              {t('favorites.addHint')}{" "}
+              <span className="text-rose-400">♥</span>
+            </p>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {favorites.map((city) => (
+                <FavoriteCityCard key={city.id} city={city} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </main>
   );
 }
