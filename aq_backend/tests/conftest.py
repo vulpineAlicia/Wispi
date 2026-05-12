@@ -9,6 +9,7 @@ from sqlalchemy.pool import StaticPool
 
 # Set before any aq_backend import so get_settings() picks up test values
 os.environ["OPENWEATHER_API_KEY"] = "test-key"
+os.environ["MAPTILER_KEY"] = "test-key"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 os.environ["ADMIN_KEY"] = "a" * 32
 os.environ["JWT_SECRET"] = "s" * 32

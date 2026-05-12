@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     )
 
     openweather_api_key: str = Field(..., alias="OPENWEATHER_API_KEY")
+    maptiler_key: str = Field(..., alias="MAPTILER_KEY")
     app_env: str = Field("development", alias="APP_ENV")
     frontend_origins: list[str] = Field(default_factory=list, alias="FRONTEND_ORIGINS")
     dev_origins: list[str] = Field(
@@ -74,13 +75,13 @@ class Settings(BaseSettings):
             raise ValueError(f"{info.field_name.upper()} must be at least 32 characters")
         return value
 
-    @field_validator("openweather_api_key")
+    @field_validator("openweather_api_key", "maptiler_key")
     @classmethod
     def validate_api_key(cls, value: str) -> str:
-        """ Ensure OpenWeather API key is provided and not empty """
+        """ Ensure API keys are provided and not empty """
         value = value.strip()
         if not value:
-            raise ValueError("OPENWEATHER_API_KEY is required")
+            raise ValueError("API key is required and cannot be empty")
         return value
 
     @field_validator("app_env")

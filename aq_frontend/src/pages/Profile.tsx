@@ -9,7 +9,7 @@ import { ApiError } from "../api/apiError";
 import BaseButton from "../components/templates/BaseButton";
 import Bubble from "../components/templates/Bubble";
 
-const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL as string | undefined;
+const contactEmail = import.meta.env.VITE_CONTACT_EMAIL as string | undefined;
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -153,11 +153,11 @@ export default function Profile() {
           </BaseButton>
         </form>
 
-        {CONTACT_EMAIL && (
+        {contactEmail && (
           <p className="mt-5 px-2 text-xs text-brand-500">
             {t('profile.forgotNickname')}{" "}
             <a
-              href={`mailto:${CONTACT_EMAIL}`}
+              href={`mailto:${contactEmail}`}
               className="hover:text-brand-700"
             >
               {t('profile.contactSupport')}

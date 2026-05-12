@@ -132,7 +132,7 @@ jobs:
           push: true
           tags: ghcr.io/vulpinealicia/wispi-web:latest
           build-args: |
-            VITE_MAPTILER_KEY=${{ secrets.VITE_MAPTILER_KEY }}
+            VITE_CONTACT_EMAIL=${{ secrets.VITE_CONTACT_EMAIL }}
 
       - name: Build & push backend image
         uses: docker/build-push-action@v6

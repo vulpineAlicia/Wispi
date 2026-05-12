@@ -19,8 +19,6 @@ import {
 } from "../lib/locationSelection";
 import { getOverlayUrl, type OverlayMode } from "../lib/mapOverlay";
 
-const MT_KEY = import.meta.env.VITE_MAPTILER_KEY;
-
 export default function MapPage() {
   const { t } = useTranslation();
   const [params] = useSearchParams();
@@ -35,7 +33,6 @@ export default function MapPage() {
   const overlayUrl = getOverlayUrl(overlay);
 
   const { mapDivRef } = useLeafletMap({
-    mtKey: MT_KEY,
     lat: selection?.lat ?? null,
     lon: selection?.lon ?? null,
     overlayUrl,

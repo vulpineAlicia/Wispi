@@ -8,9 +8,9 @@ import L, {
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
 import shadowUrl from "leaflet/dist/images/marker-shadow.png";
+import { API_BASE } from "../api/apiClient";
 
 type Args = {
-  mtKey: string | undefined;
   lat: number | null;
   lon: number | null;
   overlayUrl: string | null;
@@ -39,9 +39,9 @@ function fixLeafletIconsOnce() {
 const LAT_LIMIT = 85;
 const HUGE_LNG = 1e9;
 
-function createBaseLayer(mtKey: string) {
+function createBaseLayer() {
   return L.tileLayer(
-    `https://api.maptiler.com/maps/base-v4/{z}/{x}/{y}.png?key=${mtKey}`,
+    `${API_BASE}/tiles/mt/{z}/{x}/{y}.png`,
     {
       tileSize: 512,
       zoomOffset: -1,
@@ -50,7 +50,7 @@ function createBaseLayer(mtKey: string) {
   );
 }
 
-export function useLeafletMap({ mtKey, lat, lon, overlayUrl }: Args) {
+export function useLeafletMap({ lat, lon, overlayUrl }: Args) {
   const mapDivRef = useRef<HTMLDivElement | null>(null);
 
   const mapRef = useRef<LeafletMap | null>(null);
@@ -71,9 +71,7 @@ export function useLeafletMap({ mtKey, lat, lon, overlayUrl }: Args) {
 
     map.attributionControl.setPrefix(false);
 
-    if (mtKey) {
-      createBaseLayer(mtKey).addTo(map);
-    }
+    createBaseLayer().addTo(map);
 
     const bounds = L.latLngBounds(
       L.latLng(-LAT_LIMIT, -HUGE_LNG),
@@ -107,7 +105,7 @@ export function useLeafletMap({ mtKey, lat, lon, overlayUrl }: Args) {
       markerRef.current = null;
       overlayRef.current = null;
     };
-  }, [mtKey]);
+  }, []);
 
   useEffect(() => {
     const map = mapRef.current;
