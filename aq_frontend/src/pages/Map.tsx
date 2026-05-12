@@ -72,7 +72,13 @@ export default function MapPage() {
         {hasSelection && (
           <button
             type="button"
-            onClick={() => document.getElementById('mobile-results')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => {
+              const el = document.getElementById('mobile-results');
+              if (!el) return;
+              const header = document.querySelector<HTMLElement>('.sticky');
+              const headerH = header?.offsetHeight ?? 0;
+              window.scrollTo({ top: window.scrollY + el.getBoundingClientRect().top - headerH, behavior: 'smooth' });
+            }}
             className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-3xl border border-brand-200 bg-white px-4 py-2 text-sm text-brand-900 shadow-sm md:hidden"
           >
             <ChevronDown size={15} />
@@ -82,7 +88,7 @@ export default function MapPage() {
       </div>
 
       {/* Mobile: results + history below map */}
-      <div id="mobile-results" className={`scroll-mt-20 text-brand-900 md:hidden ${hasSelection ? "px-4 py-5" : ""}`}>
+      <div id="mobile-results" className={`text-brand-900 md:hidden ${hasSelection ? "px-4 py-5" : ""}`}>
         {selection && (
           <CityResultPanel
             variant="map"
