@@ -9,7 +9,6 @@ import { ApiError } from "../api/apiError";
 import BaseButton from "../components/templates/BaseButton";
 import Bubble from "../components/templates/Bubble";
 
-const contactEmail = import.meta.env.VITE_CONTACT_EMAIL as string | undefined;
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -85,8 +84,8 @@ export default function Profile() {
   }
 
   return (
-    <main className="mx-auto max-w-lg px-4 py-10">
-      <Bubble tone="brand" className="mb-6 flex items-center justify-between px-5 py-5">
+    <main className="mx-auto max-w-lg px-4 pt-6 pb-8">
+      <Bubble tone="brand" className="mb-6 flex items-center justify-between p-6">
         <div className="flex items-center gap-4">
           <div
             className={`flex h-14 w-14 items-center justify-center rounded-full text-2xl ${avatar.bg} ${avatar.ring}`}
@@ -152,18 +151,6 @@ export default function Profile() {
             {pwLoading ? t('profile.saving') : t('profile.updatePassword')}
           </BaseButton>
         </form>
-
-        {contactEmail && (
-          <p className="mt-5 px-2 text-xs text-brand-500">
-            {t('profile.forgotNickname')}{" "}
-            <a
-              href={`mailto:${contactEmail}`}
-              className="hover:text-brand-700"
-            >
-              {t('profile.contactSupport')}
-            </a>
-          </p>
-        )}
       </Bubble>
 
       <Bubble tone="error" className="p-6">
