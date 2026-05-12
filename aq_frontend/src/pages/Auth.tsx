@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
 import { getAvatar } from "../lib/avatars";
-import { ApiError } from "../api/apiError";
+import { getUserMessage } from "../api/apiMessages";
 import BaseButton from "../components/templates/BaseButton";
 import Bubble from "../components/templates/Bubble";
 
@@ -56,7 +56,7 @@ export default function Auth() {
         setNewUser({ nickname: user.nickname, avatarId: user.avatar_id });
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('auth.somethingWentWrong'));
+      setError(getUserMessage(err));
     } finally {
       setLoading(false);
     }

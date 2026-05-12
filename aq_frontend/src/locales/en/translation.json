@@ -166,7 +166,8 @@
     "deleteAccount": "Delete account",
     "deleteConfirm": "This is permanent. Type your nickname to confirm.",
     "deleting": "Deleting\u2026",
-    "deleteMyAccount": "Delete my account"
+    "deleteMyAccount": "Delete my account",
+    "currentPasswordIncorrect": "Current password is incorrect."
   },
   "errors": {
     "invalidQuery": "Please enter a valid city name.",
@@ -182,7 +183,9 @@
     "networkErrorShort": "Network error. Please check your connection.",
     "tooManyRequests": "Too many requests. Try again soon.",
     "serverError": "Server error. Please try again later.",
-    "unexpected": "Unexpected error occurred."
+    "unexpected": "Unexpected error occurred.",
+    "invalidCredentials": "Invalid nickname or password.",
+    "favoritesLimit": "Favourites limit reached (10)."
   },
   "info": {
     "title": "Useful info",

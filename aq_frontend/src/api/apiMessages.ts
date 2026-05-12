@@ -44,6 +44,12 @@ export function getUserMessage(error: unknown): string {
       case "HTTP_404":
         return i18n.t('errors.notFound');
 
+      case "INVALID_CREDENTIALS":
+        return i18n.t('errors.invalidCredentials');
+
+      case "FAVORITES_LIMIT":
+        return i18n.t('errors.favoritesLimit');
+
       default:
         if (error.status === 0) {
           return i18n.t('errors.networkErrorShort');

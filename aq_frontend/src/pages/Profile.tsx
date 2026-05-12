@@ -6,6 +6,7 @@ import { useAuth } from "../hooks/useAuth";
 import { getAvatar } from "../lib/avatars";
 import { changePassword, deleteAccount } from "../api/authApi";
 import { ApiError } from "../api/apiError";
+import { getUserMessage } from "../api/apiMessages";
 import BaseButton from "../components/templates/BaseButton";
 import Bubble from "../components/templates/Bubble";
 
@@ -54,7 +55,7 @@ export default function Profile() {
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
-      setPwError(err instanceof ApiError ? err.message : t('profile.somethingWentWrong'));
+      setPwError(err instanceof ApiError && err.code === 'INVALID_CREDENTIALS' ? t('profile.currentPasswordIncorrect') : getUserMessage(err));
     } finally {
       setPwLoading(false);
     }
@@ -73,7 +74,7 @@ export default function Profile() {
       await signOut();
       navigate("/");
     } catch (err) {
-      setDeleteError(err instanceof ApiError ? err.message : t('profile.somethingWentWrong'));
+      setDeleteError(getUserMessage(err));
       setDeleteLoading(false);
     }
   }
