@@ -6,7 +6,10 @@ export default function LanguageSwitcher() {
 
   return (
     <div className="flex items-center gap-0.5 text-xs">
-      {(['en', 'ru'] as const).map((lang) => (
+      {([
+        ['en', 'EN'],
+        ['ru', 'РУ'],
+      ] as const).map(([lang, label]) => (
         <button
           key={lang}
           type="button"
@@ -17,7 +20,7 @@ export default function LanguageSwitcher() {
               : 'text-brand-300 hover:text-brand-50'
           }`}
         >
-          {lang.toUpperCase()}
+          {label}
         </button>
       ))}
     </div>
