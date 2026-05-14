@@ -22,10 +22,10 @@ function FavoriteCityCard({ city }: { city: FavoriteCity }) {
     <Bubble className="flex flex-col gap-3 p-5">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="truncate text-base font-semibold text-brand-900">{city.name}</div>
-          {city.country && (
-            <div className="mt-0.5 text-xs text-brand-500">{countryName(city.country, i18n.language)}</div>
-          )}
+          <div className="truncate text-base font-semibold text-brand-900">
+            {city.name}
+            {city.country ? `, ${countryName(city.country, i18n.language)}` : ""}
+          </div>
         </div>
         <FavoriteButton
           name={city.name}

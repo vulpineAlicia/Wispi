@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import BaseButton from "../templates/BaseButton";
 import { getUserMessage } from "../../api/apiMessages";
 import { buildMapUrl } from "../../lib/locationSelection";
+import { countryName } from "../../lib/countryName";
 import type { HistoryPanelData } from "../../lib/historyModel";
 import AqiPill from "./AqiPill";
 import Bubble from "../templates/Bubble";
@@ -51,7 +52,7 @@ export default function CityResultPanel({
   showAqi = true,
   showLocation = true,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const showPollutants = variant === "map";
   const showCta = variant === "home";
@@ -67,7 +68,10 @@ export default function CityResultPanel({
         <Bubble className="mt-4 px-5 py-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <div className="text-base font-semibold text-brand-900">{name}</div>
+              <div className="text-base font-semibold text-brand-900">
+                {name}
+                {country ? `, ${countryName(country, i18n.language)}` : ""}
+              </div>
               <div className="mt-1 text-xs text-brand-700/80">
                 {lat.toFixed(4)}, {lon.toFixed(4)}
               </div>

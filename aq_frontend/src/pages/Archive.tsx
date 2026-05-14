@@ -10,6 +10,7 @@ import CitySearchBox from "../components/shared/CitySearchBox";
 import HistoryPanel from "../components/shared/HistoryPanel";
 import { useAirHistory } from "../hooks/useAirHistory";
 import { useArchiveParams, DEFAULT_DAYS, MAX_DAYS } from "../hooks/useArchiveParams";
+import { countryName } from "../lib/countryName";
 import type { GeoResult } from "../api/api";
 
 function buildArchiveSearch(
@@ -29,7 +30,7 @@ function buildArchiveSearch(
 }
 
 export default function ArchivePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const navigate = useNavigate();
   const { selection, historyDays, setHistoryDays, selectedDate } = useArchiveParams();
@@ -84,7 +85,7 @@ export default function ArchivePage() {
                 <div className="flex flex-col gap-0.5">
                   <span className="text-base font-semibold text-brand-900">
                     {selection.name}
-                    {selection.country ? `, ${selection.country}` : ""}
+                    {selection.country ? `, ${countryName(selection.country, i18n.language)}` : ""}
                   </span>
                   <span className="text-xs tabular-nums text-brand-500">
                     {selection.lat.toFixed(3)}, {selection.lon.toFixed(3)}
