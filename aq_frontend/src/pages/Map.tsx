@@ -36,6 +36,9 @@ export default function MapPage() {
     lat: selection?.lat ?? null,
     lon: selection?.lon ?? null,
     overlayUrl,
+    onSelect: (lat, lon) => {
+      navigate(buildMapUrl({ lat, lon }));
+    },
   });
 
   const history = useAirHistory(

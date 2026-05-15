@@ -14,6 +14,7 @@ type Args = {
   lat: number | null;
   lon: number | null;
   overlayUrl: string | null;
+  onSelect?: (lat: number, lon: number) => void;
 };
 
 type LeafletIconDefaultPrototype = typeof L.Icon.Default.prototype & {
@@ -50,12 +51,16 @@ function createBaseLayer() {
   );
 }
 
-export function useLeafletMap({ lat, lon, overlayUrl }: Args) {
+export function useLeafletMap({ lat, lon, overlayUrl, onSelect }: Args) {
   const mapDivRef = useRef<HTMLDivElement | null>(null);
 
   const mapRef = useRef<LeafletMap | null>(null);
   const markerRef = useRef<LeafletMarker | null>(null);
   const overlayRef = useRef<TileLayer | null>(null);
+  const onSelectRef = useRef(onSelect);
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
 
   useEffect(() => {
     const el = mapDivRef.current;
@@ -81,6 +86,10 @@ export function useLeafletMap({ lat, lon, overlayUrl }: Args) {
     map.setMaxBounds(bounds);
     map.options.maxBoundsViscosity = 1.0;
     map.setView([20, 0], 2, { animate: false });
+
+    map.on("click", (e) => {
+      onSelectRef.current?.(e.latlng.lat, e.latlng.lng);
+    });
 
     mapRef.current = map;
 
