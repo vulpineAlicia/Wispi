@@ -36,6 +36,8 @@
     "useBody": "Wispi is provided for personal, non-commercial use to view publicly available air-quality data. You agree not to abuse the service, attempt to disrupt it, or use it for any unlawful purpose.",
     "dataTitle": "Data and accuracy",
     "dataBody": "Air-quality and geocoding data are supplied by third-party providers (OpenWeather, MapTiler) and may be incomplete, delayed, or inaccurate. Wispi does not guarantee the accuracy or availability of any information shown.",
+    "accountTitle": "Account and security",
+    "accountBody": "Creating an account requires only a password \u2014 your nickname is generated automatically and your avatar is picked at random. Your password is never stored in plain text: only a salted, one-way hash (bcrypt) is kept on the server, which cannot be reversed into the original password. Sessions rely on a small refresh-token cookie that is removed when you sign out, change your password, or delete your account; short-lived access tokens expire on their own shortly after. Deleting your account is permanent and removes your nickname, avatar, password hash, saved favourites, and all active sessions.",
     "liabilityTitle": "Limitation of liability",
     "liabilityBody": "Wispi is provided \u201cas is\u201d, without warranty of any kind. The authors are not liable for any decision made on the basis of information displayed by the service."
   },
@@ -227,6 +229,18 @@
     "q9": "Is this service free to use?",
     "a9": "<bold>Yes.</bold> The service is completely free of charge. All features are available without any fees or subscriptions.",
     "q10": "How can I report a bug or get in touch?",
-    "a10": "If you notice a bug, have a suggestion, or want to share feedback, feel free to contact me through the <bold>Contacts section</bold>. Your input helps make the service better."
+    "a10": "If you notice a bug, have a suggestion, or want to share feedback, feel free to contact me through the <bold>Contacts section</bold>. Your input helps make the service better.",
+    "q11": "Do I need an account to use Wispi?",
+    "a11": "<bold>No.</bold> Looking up cities, viewing the map and using the archive all work without signing in. An account is only required to save favourite cities so they persist across devices.",
+    "q12": "What do I need to sign up?",
+    "a12": "<bold>Only a password.</bold> Nothing from your personal data is needed - your nickname is generated automatically and your avatar is picked at random by the system. <bold>No email address or phone number is required</bold>.",
+    "q13": "What user data does Wispi store?",
+    "a13": "Only the data needed to run your account: your <bold>auto-generated nickname</bold>, your <bold>auto-assigned avatar</bold>, a <bold>hash of your password</bold>, the <bold>cities you save as favourites</bold>, and the <bold>account creation date</bold>. Wispi does not collect any personal data.",
+    "q14": "Can I change my password?",
+    "a14": "<bold>Yes.</bold> Open the <bold>Profile</bold> page and use the “Change password” section — you will be asked for your current password and a new one. If you are locked out or can't sign in, you can <support>email support</support> — in some cases we can help with password recovery.",
+    "q15": "How do I delete my account?",
+    "a15": "Open the <bold>Profile</bold> page, scroll to the “Delete account” section, type your nickname to confirm, and press the delete button. This is <bold>permanent</bold>: your account, your saved favourites, and your active sessions are removed and cannot be restored.",
+    "q16": "How is my password protected?",
+    "a16": "Your password is <bold>never stored</bold> — only a scrambled, one-way version of it, which even Wispi cannot read. When you sign in, the session is kept active by a small cookie that is destroyed the moment you sign out or delete your account. See the <terms>Terms and Conditions</terms> for the full details."
   }
 }

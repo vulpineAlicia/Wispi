@@ -1,5 +1,9 @@
 import { Trans, useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import FAQ from "../components/info/FAQ";
+
+const contactEmail =
+  import.meta.env.VITE_CONTACT_EMAIL ?? "support@example.com";
 
 export default function UsefulInfo() {
   const { t } = useTranslation();
@@ -104,6 +108,51 @@ export default function UsefulInfo() {
           <FAQ
             q={t('info.q10')}
             a={<Trans i18nKey="info.a10" components={{ bold: <b /> }} />}
+          />
+          <FAQ
+            q={t('info.q11')}
+            a={<Trans i18nKey="info.a11" components={{ bold: <b /> }} />}
+          />
+          <FAQ
+            q={t('info.q12')}
+            a={<Trans i18nKey="info.a12" components={{ bold: <b /> }} />}
+          />
+          <FAQ
+            q={t('info.q13')}
+            a={<Trans i18nKey="info.a13" components={{ bold: <b /> }} />}
+          />
+          <FAQ
+            q={t('info.q14')}
+            a={
+              <Trans
+                i18nKey="info.a14"
+                components={{
+                  bold: <b />,
+                  support: (
+                    <a
+                      href={`mailto:${contactEmail}`}
+                      className="text-brand-700 underline hover:text-brand-900"
+                    />
+                  ),
+                }}
+              />
+            }
+          />
+          <FAQ
+            q={t('info.q15')}
+            a={<Trans i18nKey="info.a15" components={{ bold: <b /> }} />}
+          />
+          <FAQ
+            q={t('info.q16')}
+            a={
+              <Trans
+                i18nKey="info.a16"
+                components={{
+                  bold: <b />,
+                  terms: <Link to="/terms" className="text-brand-700 underline hover:text-brand-900" />,
+                }}
+              />
+            }
           />
         </div>
       </div>

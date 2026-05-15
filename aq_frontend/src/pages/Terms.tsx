@@ -29,6 +29,13 @@ export default function Terms() {
           </section>
 
           <section>
+            <h2 className="text-xl font-semibold">{t('terms.accountTitle')}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-brand-700">
+              {t('terms.accountBody')}
+            </p>
+          </section>
+
+          <section>
             <h2 className="text-xl font-semibold">{t('terms.liabilityTitle')}</h2>
             <p className="mt-2 text-sm leading-relaxed text-brand-700">
               {t('terms.liabilityBody')}
