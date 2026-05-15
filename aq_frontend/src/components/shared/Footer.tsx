@@ -84,8 +84,15 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-white/10 pt-6 text-xs text-brand-200">
-          {t('footer.copyright', { year })}
+        <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-brand-200 sm:flex-row sm:items-center sm:justify-between">
+          <span>{t('footer.copyright', { year })}</span>
+          <button
+            type="button"
+            onClick={() => navigateTo("/terms")}
+            className={linkClass}
+          >
+            {t('footer.terms')}
+          </button>
         </div>
       </div>
     </footer>

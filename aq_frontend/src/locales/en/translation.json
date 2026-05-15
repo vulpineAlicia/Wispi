@@ -26,7 +26,18 @@
     "description": "A simple dashboard to look up air quality and make safer daily decisions.",
     "resources": "Resources",
     "contact": "Contact",
-    "copyright": "\u00a9 {{year}} Wispi - Air Quality Monitor"
+    "copyright": "\u00a9 {{year}} Wispi - Air Quality Monitor",
+    "terms": "Terms and Conditions"
+  },
+  "terms": {
+    "title": "Terms and Conditions",
+    "intro": "By using Wispi you agree to the terms below.",
+    "useTitle": "Use of the service",
+    "useBody": "Wispi is provided for personal, non-commercial use to view publicly available air-quality data. You agree not to abuse the service, attempt to disrupt it, or use it for any unlawful purpose.",
+    "dataTitle": "Data and accuracy",
+    "dataBody": "Air-quality and geocoding data are supplied by third-party providers (OpenWeather, MapTiler) and may be incomplete, delayed, or inaccurate. Wispi does not guarantee the accuracy or availability of any information shown.",
+    "liabilityTitle": "Limitation of liability",
+    "liabilityBody": "Wispi is provided \u201cas is\u201d, without warranty of any kind. The authors are not liable for any decision made on the basis of information displayed by the service."
   },
   "aqi": {
     "good": "Good",

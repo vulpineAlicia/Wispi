@@ -17,6 +17,7 @@ const Archive = lazy(() => import("./pages/Archive"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Favorites = lazy(() => import("./pages/Favorites"));
+const Terms = lazy(() => import("./pages/Terms"));
 
 function Background() {
   return (
@@ -56,6 +57,7 @@ function AppShell() {
               <Route path="/info" element={<UsefulInfo />} />
               <Route path="/archive" element={<Archive />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/terms" element={<Terms />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/favorites" element={<Favorites />} />
