@@ -10,6 +10,7 @@ import CitySearchBox from "../components/shared/CitySearchBox";
 import HistoryPanel from "../components/shared/HistoryPanel";
 import { useAirHistory } from "../hooks/useAirHistory";
 import { useArchiveParams, DEFAULT_DAYS, MAX_DAYS } from "../hooks/useArchiveParams";
+import { useLocalizedCityName } from "../hooks/useLocalizedCityName";
 import { countryName } from "../lib/countryName";
 import type { GeoResult } from "../api/api";
 
@@ -40,6 +41,12 @@ export default function ArchivePage() {
     selection?.lon ?? null,
     historyDays,
     selectedDate
+  );
+
+  const localizedName = useLocalizedCityName(
+    selection?.lat ?? null,
+    selection?.lon ?? null,
+    selection?.name ?? ""
   );
 
   function handleSelectCity(place: GeoResult) {
@@ -84,7 +91,7 @@ export default function ArchivePage() {
               >
                 <div className="flex flex-col gap-0.5">
                   <span className="text-base font-semibold text-brand-900">
-                    {selection.name}
+                    {localizedName}
                     {selection.country ? `, ${countryName(selection.country, i18n.language)}` : ""}
                   </span>
                   <span className="text-xs tabular-nums text-brand-500">

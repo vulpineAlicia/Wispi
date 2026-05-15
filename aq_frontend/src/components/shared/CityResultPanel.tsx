@@ -3,6 +3,7 @@ import BaseButton from "../templates/BaseButton";
 import { getUserMessage } from "../../api/apiMessages";
 import { buildMapUrl } from "../../lib/locationSelection";
 import { countryName } from "../../lib/countryName";
+import { useLocalizedCityName } from "../../hooks/useLocalizedCityName";
 import type { HistoryPanelData } from "../../lib/historyModel";
 import AqiPill from "./AqiPill";
 import Bubble from "../templates/Bubble";
@@ -53,6 +54,7 @@ export default function CityResultPanel({
   showLocation = true,
 }: Props) {
   const { t, i18n } = useTranslation();
+  const localizedName = useLocalizedCityName(lat, lon, name);
 
   const showPollutants = variant === "map";
   const showCta = variant === "home";
@@ -69,7 +71,7 @@ export default function CityResultPanel({
           <div className="flex items-center justify-between gap-3">
             <div>
               <div className="text-base font-semibold text-brand-900">
-                {name}
+                {localizedName}
                 {country ? `, ${countryName(country, i18n.language)}` : ""}
               </div>
               <div className="mt-1 text-xs text-brand-700/80">

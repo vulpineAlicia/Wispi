@@ -49,6 +49,13 @@ class GeocodeResponse(BaseModel):
     results: list[GeocodeResult]
 
 
+class ReverseGeocodeResponse(BaseModel):
+    """ Response for /reverse-geocode — localized name for a known coordinate """
+
+    name: str
+    country: str | None = None
+
+
 class AirHistoryItem(BaseModel):
     """ One air pollution measurement entry """
 

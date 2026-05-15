@@ -50,6 +50,25 @@ export async function geocodeCity(
   return data.results;
 }
 
+export type ReverseGeocodeResult = { name: string; country: string | null };
+
+export async function reverseGeocode(
+  lat: number,
+  lon: number,
+  lang: string = "en",
+  signal?: AbortSignal
+): Promise<ReverseGeocodeResult> {
+  const qs = new URLSearchParams({ lat: String(lat), lon: String(lon), lang });
+  const data = await getJson<unknown>(`/reverse-geocode?${qs.toString()}`, { signal });
+
+  if (!isRecord(data) || typeof data.name !== "string") {
+    throw invalidResponse("Server returned an invalid reverse-geocode response.");
+  }
+
+  const country = typeof data.country === "string" ? data.country : null;
+  return { name: data.name, country };
+}
+
 export async function getAirCurrent(
   lat: number,
   lon: number,

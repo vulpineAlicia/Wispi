@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useReducer } from "react";
 import type { ReactNode } from "react";
 
-import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { coordsMatch } from "../lib/locationSelection";
 import {
@@ -42,7 +41,6 @@ function reducer(state: State, action: Action): State {
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const { user, getToken } = useAuth();
-  const { i18n } = useTranslation();
   const [state, dispatch] = useReducer(reducer, { items: [], max: 0, loading: false, error: null });
 
   useEffect(() => {
@@ -53,7 +51,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
     const controller = new AbortController();
     dispatch({ type: "loading" });
-    getFavorites(token, i18n.language, controller.signal)
+    getFavorites(token, controller.signal)
       .then((data) => dispatch({ type: "loaded", items: data.items, max: data.max }))
       .catch((err: unknown) => {
         if (!controller.signal.aborted) dispatch({
@@ -63,7 +61,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       });
 
     return () => controller.abort();
-  }, [user, getToken, i18n.language]);
+  }, [user, getToken]);
 
   const findFavorite = useCallback(
     (lat: number, lon: number) =>

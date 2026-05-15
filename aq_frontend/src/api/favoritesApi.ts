@@ -13,9 +13,8 @@ export type FavoritesListResponse = {
   max: number;
 };
 
-export async function getFavorites(token: string, lang: string = "en", signal?: AbortSignal): Promise<FavoritesListResponse> {
-  const qs = new URLSearchParams({ lang });
-  return getJson<FavoritesListResponse>(`/favorites?${qs.toString()}`, {
+export async function getFavorites(token: string, signal?: AbortSignal): Promise<FavoritesListResponse> {
+  return getJson<FavoritesListResponse>("/favorites", {
     headers: authHeader(token),
     signal,
   });

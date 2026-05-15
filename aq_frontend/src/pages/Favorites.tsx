@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { useFavorites } from "../hooks/useFavorites";
 import { useAirHistory } from "../hooks/useAirHistory";
+import { useLocalizedCityName } from "../hooks/useLocalizedCityName";
 import type { FavoriteCity } from "../api/favoritesApi";
 import { buildMapUrl } from "../lib/locationSelection";
 import { countryName } from "../lib/countryName";
@@ -15,6 +16,7 @@ function FavoriteCityCard({ city }: { city: FavoriteCity }) {
   const navigate = useNavigate();
   const history = useAirHistory(city.lat, city.lon, 1);
   const aqi = history.model.latestPanel?.aqi ?? null;
+  const localizedName = useLocalizedCityName(city.lat, city.lon, city.name);
 
   const mapUrl = buildMapUrl({ lat: city.lat, lon: city.lon, name: city.name, country: city.country ?? undefined });
 
@@ -23,7 +25,7 @@ function FavoriteCityCard({ city }: { city: FavoriteCity }) {
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="truncate text-base font-semibold text-brand-900">
-            {city.name}
+            {localizedName}
             {city.country ? `, ${countryName(city.country, i18n.language)}` : ""}
           </div>
         </div>
