@@ -1,0 +1,18 @@
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: wispi-backend:dev
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: wispi-backend:dev
+    ports:
+      - "8000:8000"
+
+  web:
+    profiles:
+      - prod-like
