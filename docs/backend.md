@@ -35,7 +35,7 @@ uvicorn aq_backend.app:create_app --factory --host 0.0.0.0 --port 8000
 
 ### Setup — Docker Compose (local development)
 
-Local Compose builds the backend image from source and skips the Caddy/`web` service (which is hardcoded to the production domain and only useful in prod). The frontend is run separately with `npm run dev` — see [`frontend.md`](./frontend.md).
+Local Compose builds the backend image from source, runs the Vite dev server in its own container, and skips the production Caddy/`web` service (which is hardcoded to the `wispi.monster` domain and only useful in prod).
 
 From the project root:
 
@@ -48,7 +48,9 @@ cp aq_backend/.env.example aq_backend/.env
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-This starts Postgres, runs Alembic migrations, and serves the backend on `http://127.0.0.1:8000`. The `migrate` and `backend` services build from [`Dockerfile.backend`](../Dockerfile.backend); the `web` service is disabled via a `prod-like` profile and won't start.
+That single command brings up Postgres, runs Alembic migrations to completion, starts the FastAPI backend on `http://127.0.0.1:8000`, and starts the Vite dev server on `http://127.0.0.1:5173` with HMR. The frontend container proxies `/api/*` to the backend over the Docker network, so no CORS is involved. The production `web` service is gated behind a `prod-like` profile and won't start.
+
+The first run installs frontend dependencies into a named volume (`frontend_node_modules`); subsequent runs reuse it and start almost instantly.
 
 To stop and clean up:
 

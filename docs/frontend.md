@@ -31,32 +31,28 @@ A web app for tracking and visualizing air quality worldwide.
 - Node.js 22
 - The Wispi backend running (see [`backend.md`](./backend.md))
 
-### Setup
+### Setup — full stack via Docker (recommended)
+
+Run from the project root:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+This brings up Postgres, runs Alembic migrations, starts the FastAPI backend, and starts the Vite dev server (with HMR) in its own container. Open `http://localhost:5173`. See the local-development section in [`backend.md`](./backend.md) for the one-time `aq_backend/.env` setup. No `aq_frontend/.env` is required for this flow — the override sets `DEV_API_TARGET` directly, and the frontend proxies `/api/*` to the backend container over the Docker network.
+
+### Setup — bare metal
 
 Run from `aq_frontend/`:
 
 ```bash
 cp .env.example .env
-# Set VITE_API_BASE=http://127.0.0.1:8000 (the local backend)
+# Set VITE_API_BASE=http://127.0.0.1:8000 (or leave default and rely on the Vite proxy)
 npm ci
 npm run dev
 ```
 
-The dev server runs on `http://localhost:5173` and proxies `/api/*` to `DEV_API_TARGET` (default `http://127.0.0.1:8000`).
-
-### End-to-end local development
-
-To run the full stack locally:
-
-1. Start the backend + Postgres via Docker — see the "Local development" section in [`backend.md`](./backend.md). Backend will be on `http://127.0.0.1:8000`.
-2. In a separate terminal, start the frontend dev server:
-   ```bash
-   cd aq_frontend
-   npm run dev
-   ```
-3. Open `http://localhost:5173`.
-
-The backend's `DEV_ORIGINS` default already whitelists `http://localhost:5173`, so CORS works out of the box.
+The dev server runs on `http://localhost:5173` and proxies `/api/*` to `DEV_API_TARGET` (default `http://127.0.0.1:8000`). Requires the backend to be running separately.
 
 Scripts:
 
